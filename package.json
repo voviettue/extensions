@@ -1,0 +1,22 @@
+{
+  "name": "terminal-extensions",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run build --workspaces && node ./scripts/build.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "workspaces": [
+    "packages/displays/*",
+    "packages/endpoints/*",
+    "packages/hooks/*",
+    "packages/interfaces/*",
+    "packages/modules/*",
+    "packages/panels/*"
+  ],
+  "dependencies": {
+    "glob": "^7.2.0"
+  }
+}

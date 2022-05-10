@@ -1,0 +1,6 @@
+### Require environments
+
+```
+MIXPANEL_PROJECT_TOKEN
+TERMINAL_WORKSPACE_SLUG
+```
