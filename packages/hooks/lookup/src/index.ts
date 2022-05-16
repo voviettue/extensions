@@ -131,7 +131,8 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 							.first();
 						if (item) {
 							const fieldSchema = fieldSchemas.find((schema: any) => schema.field === option.field);
-							payload[option.field] = cast(item?.[option.lookupField], fieldSchema);
+							payload[option.field] = cast(item?.[option.lookupField], fieldSchema)
+								?? fieldSchema?.schema?.default_value;
 						}
 					}
 				}
