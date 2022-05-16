@@ -15,7 +15,7 @@
 		</template>
 
 		<div v-if="collection" class="fields padding-box">
-			<form>
+			<div>
 				<div class="export-label type-label">Export content</div>
 				<div style="margin-bottom: 20px;">
 					<v-select
@@ -60,7 +60,7 @@
 					@group-toggle="loadFieldRelations($event.value)"
 				/>
 				<v-button :disabled="!canExport" :loading="isSubmit" @click="submit()">Export</v-button>
-			</form>
+			</div>
 
 			<br />
 

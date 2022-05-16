@@ -25,8 +25,8 @@
             :is="'interface-file'"
             :value="file ? file.id : null"
             :folder="folder.id"
-            :collection="collectionName"
-            :field="'file'"
+            collection="directus_settings"
+            field="project_logo"
             @input="onUpload"
             :disabled="isSubmit"
             @update:model-value="onUpload($event)"
@@ -237,6 +237,7 @@ export default {
       maxRows: 10000,
       limit: 50,
       page: 1,
+      fileContent: null,
     };
   },
   computed: {
@@ -301,14 +302,12 @@ export default {
     submit() {
       this.isSubmit = true;
       const collection = this.collection.collection;
+      const formData = new FormData();
+      formData.append('file', new Blob([this.fileContent], { type: 'text/csv' }));
       this.api
-        .post(`/items/${collection}`, this.payload)
-        .then((res) => {
-          this.isSucceed = true;
-        })
-        .catch((err) => {
-          this.error = err;
-        })
+        .post(`/data-management/import/${collection}`, formData)
+        .then(res => this.isSucceed = true)
+        .catch(err => this.error = err)
         .finally(() => (this.isSubmit = false));
     },
     fetchFields() {
@@ -345,6 +344,7 @@ export default {
         this.api
           .get(`/assets/${this.file.id}`, { responseType: "arraybuffer" })
           .then((res) => {
+            this.fileContent = res.request.response
             const data = new Uint8Array(res.request.response);
             const workbook = XLSX.read(data, {
               type: "array",
@@ -360,7 +360,7 @@ export default {
             if (this.totalRows > this.maxRows) {
               this.error = {
                 code: this.file.filename_download,
-                message: "Only import maximum 1000 items at once",
+                message: `Only import maximum ${this.maxRows} items at once`,
               };
               this.resetState();
             }
@@ -414,7 +414,7 @@ export default {
           if (item[key] === "") {
             item[key] = null;
           }
-
+      
           switch (field.type) {
             case "csv":
             case "alias":
