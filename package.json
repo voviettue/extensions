@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "npm run build --workspaces && node ./scripts/build.js"
+    "build": "npm run build --workspaces && node ./scripts/build.js",
+    "pack": "node ./scripts/pack.js"
   },
   "author": "",
   "license": "ISC",
