@@ -22,11 +22,11 @@ export default defineComponent({
 			type: [String, Number],
 			default: null,
 		},
-		o2mCollection: {
+		relationField: {
 			type: String,
 			required: true,
 		},
-		o2mField: {
+		rollupField: {
 			type: String,
 			required: true,
 		},
@@ -66,21 +66,18 @@ export default defineComponent({
 		const relationsStore = useRelationsStore();
 		const values = inject('values', ref<Record<string, any>>({}));
 
-		const [relatedCollection, oneField] = props.o2mCollection.split('-');
-
 		const currentField = fieldsStore.getFieldsForCollection(props.collection)
 			.find((e) => e.field === props.field);
 
+		const collectionRelation = relationsStore.getRelationsForCollection(props.collection)
+			.find((relation: any) => relation?.meta?.one_field == props.relationField);
+		const relatedCollection = collectionRelation?.collection;
+		const relatedCollectionFK = collectionRelation?.field;
+
 		const relatedCollectionPK = fieldsStore.getPrimaryKeyFieldForCollection(relatedCollection)?.field;
-		const manyCollectionField = relationsStore.getRelationsForCollection(props.collection)
-			.find((relation: any) =>
-					relation.meta?.one_collection === props.collection
-					&& relation.meta?.many_collection === relatedCollection
-					&& relation.meta?.one_field == oneField
-			)?.field;
 
 		watch(
-			() => cloneDeep(values.value[oneField]),
+			() => cloneDeep(values.value[props.relationField]),
 			async (newValue, oldValue) => {
 				if (newValue == null && oldValue == null) return;
 
@@ -100,16 +97,16 @@ export default defineComponent({
 		function calculate(input: Array<any>, func: string) {
 			switch (func) {
 				case 'counta': // Count all including empty or null values
-					input = input.map((el: any) => el[props.o2mField]);
+					input = input.map((el: any) => el[props.rollupField]);
 					break;
 
 				case 'countd': // Count unique values
-					input = input.map((el: any) => el[props.o2mField])
+					input = input.map((el: any) => el[props.rollupField])
 						.filter((el: any, index: number, self: any[]) => (el != null && el != '') && self.indexOf(el) === index);
 					break;
 
 				case 'countn': // Count empty and null values
-					input = input.map((el: any) => el[props.o2mField]).filter((el: any) => el == null || el == '');
+					input = input.map((el: any) => el[props.rollupField]).filter((el: any) => el == null || el == '');
 					break;
 
 				case 'count': // Count non-empty and not null values
@@ -117,7 +114,7 @@ export default defineComponent({
 				case 'avg':
 				case 'min':
 				case 'max':
-					input = input.map((el: any) => el[props.o2mField]).filter((el: any) => el != null && el != '');
+					input = input.map((el: any) => el[props.rollupField]).filter((el: any) => el != null && el != '');
 					break;
 			}
 
@@ -143,10 +140,10 @@ export default defineComponent({
 					return max(input);
 
 				case 'first':
-					return first(orderBy(input, [props.sortBy], 'asc'))?.[props.o2mField];
+					return first(orderBy(input, [props.sortBy], 'asc'))?.[props.rollupField];
 
 				case 'last':
-					return first(orderBy(input, [props.sortBy], 'desc'))?.[props.o2mField];
+					return first(orderBy(input, [props.sortBy], 'desc'))?.[props.rollupField];
 			}
 		}
 
@@ -167,12 +164,12 @@ export default defineComponent({
 								[relatedCollectionPK]: { '_in': items.update.map((item: any) => item[relatedCollectionPK]) }
 							},
 							{
-								[manyCollectionField]: { '_eq': props.primaryKey }
+								[relatedCollectionFK]: { '_eq': props.primaryKey }
 							}
 						]
 					};
 				} else {
-					return { [manyCollectionField]: { '_eq': props.primaryKey } };
+					return { [relatedCollectionFK]: { '_eq': props.primaryKey } };
 				}
 			}
 		}
@@ -212,7 +209,7 @@ export default defineComponent({
 					? relatedCollection.replace('directus_', '')
 					: `items/${relatedCollection}`;
 				const filter = buildFilter(items) ? merge(buildFilter(items), props.filter) : null;
-				const fields = [relatedCollectionPK, props.o2mField, props.sortBy].filter((val: any) => val).join(',');
+				const fields = [relatedCollectionPK, props.rollupField, props.sortBy].filter((val: any) => val).join(',');
 
 				if (relatedCollection && filter) {
 					const res = await api.get(url, { params: { filter, fields, limit: -1 } });
