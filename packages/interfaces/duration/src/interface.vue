@@ -40,6 +40,8 @@ export default defineComponent({
 						const timeArr = newValue.split(':');
 						localValue.value = `${timeArr[0]}:${timeArr[1]}`;
 					}
+				} else {
+					localValue.value = null;
 				}
 			},
 			{ immediate: true }
