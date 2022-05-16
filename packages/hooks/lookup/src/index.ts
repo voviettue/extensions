@@ -12,7 +12,7 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 				.where('interface', '=', 'input-lookup');
 		}
 
-		return _lookupFields.filter((field: any) => field.collection === collection)
+		return _lookupFields.filter((field: any) => field.collection === collection);
 	}
 
 	const getSchemaFields = async (collection: string) => {
@@ -24,15 +24,11 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 	}
 
 	const cast = (value: any, fieldSchema: any) => {
-		if (typeof value == 'object') {
-			value = JSON.stringify(value);
-		}
+		if (value === null) return null;
+		if (typeof value == 'object') value = JSON.stringify(value);
+		if (typeof value == 'undefined') return null;
 
-		if (typeof value == 'undefined' || value == 'null') {
-			return null;
-		}
-
-		switch (fieldSchema?.type) {
+		switch (fieldSchema?.schema?.data_type) {
 			case 'decimal':
 			case 'float':
 				return value === 0 ? 0 : round(value, fieldSchema?.schema?.numeric_scale || 2);
@@ -71,83 +67,89 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 	}
 
 	const getMappingFields = (collection: string, lookupFields: any[], schema: any) => {
-		const mapper: any = []
-		const relations = schema.relations.filter((relation: any) => relation?.meta?.many_collection == collection)
+		const mapper: any = [];
+		const relations = schema.relations.filter((relation: any) => relation?.meta?.many_collection == collection);
 
 		for (var i in lookupFields) {
-			const field = lookupFields[i]
-			const { relatedCollection, relatedCollectionField } = JSON.parse(field?.options) || {}
-			const relation = relations.find((relation: any) => relation?.meta?.one_collection == relatedCollection)
+			const field = lookupFields[i];
 
-			if (!relatedCollection || !relatedCollectionField) {
-				logger.warn(`LOOKUP: Invalid option: ${collection}.${field.field}`)
-				return
+			const { relationField, lookupField } = JSON.parse(field?.options) || {};
+			const relation = relations.find((relation: any) => relation.field == relationField);
+			const relatedCollection = relation?.related_collection;
+
+			if (!relationField || !lookupField) {
+				logger.warn(`LOOKUP: Invalid option: ${collection}.${field.field}`);
+				continue;
 			}
 
 			if (!relation) {
-				logger.warn(`LOOKUP: Not found relation: ${collection}.${field.field}`)
-				return
+				logger.warn(`LOOKUP: Not found relation: ${collection}.${field.field}`);
+				continue;
 			}
 
 			mapper.push({
 				field: field.field,
-				relationField: relation?.meta?.many_field,
+				relationField: relationField,
 				lookupCollection: relatedCollection,
 				lookupCollectionPK: schema.collections[collection].primary,
-				lookupField: relatedCollectionField,
-			})
+				lookupField: lookupField,
+			});
 		}
+
 		return mapper;
 	}
 
 	const execute = async (obj: any, ctx: any) => {
-		const lookupFields = await getLookupFields(obj.collection)
+		const lookupFields = await getLookupFields(obj.collection);
 
-		if (lookupFields.length === 0) return
+		if (lookupFields.length === 0) return;
 
 		try {
 			const keys = obj?.key ? [obj.key] : obj.keys;
-			const collection = obj.collection
+			const collection = obj.collection;
 			const pk = ctx.schema.collections[collection].primary;
-			const record = obj.payload
 			const schema = await getSchema();
-			const fieldSchemas = await getSchemaFields(collection)
-			const mapper = getMappingFields(collection, lookupFields, schema)
+			const fieldSchemas = await getSchemaFields(collection);
+			const mapper = getMappingFields(collection, lookupFields, schema);
 
-			for (var key in keys) {
-				const payload: any = {}
+			for (var i in keys) {
+				const key = keys[i];
+				const payload: any = {};
+				const record = await database(collection).where(pk, key).first();
+
+				if (!record) continue;
+
 				for (var i in mapper) {
-					const option = mapper[i]
+					const option = mapper[i];
+					payload[option.field] = null;
 
 					if (record?.[option.relationField]) {
 						const item = await database
 							.select(option.lookupField)
 							.from(option.lookupCollection)
 							.where(option.lookupCollectionPK, record[option.relationField])
-							.first()
+							.first();
 						if (item) {
-							const fieldSchema = fieldSchemas.find((schema: any) => schema.field === option.field)
-							payload[option.field] = cast(item?.[option.lookupField], fieldSchema)
+							const fieldSchema = fieldSchemas.find((schema: any) => schema.field === option.field);
+							payload[option.field] = cast(item?.[option.lookupField], fieldSchema);
 						}
 					}
 				}
 
 				if (Object.keys(payload).length > 0) {
-					logger.info(`LOOKUP: UPDATE ${collection}:${pk} - ${JSON.stringify(payload)} `);
 					await database(collection)
 						.update(payload)
-						.where(pk, '=', key);
+						.where(pk, key);
+					logger.info(`LOOKUP: UPDATE ${collection}:${key} - ${JSON.stringify(payload)}`);
 				}
 			}
-		} catch (error) {
-			logger.error('LOOKUP: Execution failed')
-			logger.error(error);
+		} catch (error: any) {
+			logger.error(`LOOKUP: ${error.toString()}`);
 		}
 	}
 
 	action('items.create', async (obj: any, ctx: any) => {
 		await execute(obj, ctx);
-
 	});
 
 	action('items.update', async (obj: any, ctx: any) => {

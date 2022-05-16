@@ -34,7 +34,19 @@ export default defineInterface({
 		const relationsStore = useRelationsStore();
 		const fieldsStore = useFieldsStore();
 		const relatedCollections = relationsStore.getRelationsForCollection(collection)
-			.filter((relation: any) => relation?.meta?.junction_field === null);
+			.filter((relation: any) => relation?.meta?.junction_field === null && relation?.related_collection != collection);
+
+		const relatedCollectionOptions = relatedCollections.map((el: any) => {
+			const collectionName = el.related_collection == collection
+				? el.collection : el.related_collection;
+			const relationField = el.related_collection == collection
+				? el.meta?.one_field : el.field;
+
+			const text = `${formatTitle(collectionName.replace('directus_', 'system_'))} (${relationField})`;
+			const value = `${relationField}`;
+
+			return { text, value }
+		});
 
 		watch(
 			() => field.type,
@@ -47,9 +59,11 @@ export default defineInterface({
 		);
 
 		const relatedCollectionFields = computed(() => {
-			const selectedRelatedCollection = field.meta?.options?.relatedCollection;
+			const selectedRelationField = field.meta?.options?.relationField;
 
-			if (selectedRelatedCollection) {
+			if (selectedRelationField) {
+				const selectedRelatedCollection = relationsStore.getRelationsForCollection(collection)
+					.find((relation: any) => relation?.field == selectedRelationField)?.related_collection;
 				return fieldsStore.getFieldsForCollection(selectedRelatedCollection).map((el: any) => {
 					let isDisabled = true;
 
@@ -86,31 +100,28 @@ export default defineInterface({
 
 		return [
 			{
-				field: 'relatedCollection',
+				field: 'relationField',
 				type: 'string',
 				name: 'Related Collection',
 				meta: {
 					width: 'half',
 					interface: 'select-dropdown',
 					options: {
-						choices: relatedCollections.map((el: any) => ({
-							text: formatTitle(el.related_collection == collection ? el.collection : el.related_collection),
-							value: el.related_collection == collection ? el.collection : el.related_collection,
-						})),
-						placeholder: 'Select a related field in this collection',
+						choices: relatedCollectionOptions,
+						placeholder: 'Select related collection',
 						allowNone: false,
 					},
 				},
 			},
 			{
-				field: 'relatedCollectionField',
+				field: 'lookupField',
 				type: 'string',
 				name: 'Related Collection Field',
 				meta: {
 					interface: 'select-dropdown',
 					options: {
 						choices: relatedCollectionFields.value,
-						placeholder: `Choose ${collection} collection field that you'd like to lookup`,
+						placeholder: 'Select related field',
 						allowNone: false,
 					},
 					width: 'half',

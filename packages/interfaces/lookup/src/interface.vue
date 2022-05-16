@@ -1,14 +1,44 @@
 <template>
-	<v-input :model-value="localValue" :disabled="true" :readonly="true" @update:model-value="emitValue">
-		<template #append><v-progress-circular v-if="loading" indeterminate /></template>
-	</v-input>
+	<div class="interface">
+		<v-skeleton-loader v-if="loading" />
+
+		<v-notice v-if="!lookupFieldObj || !relationField || !lookupField" type="warning">
+			<template v-if="!relationField || !lookupField">
+				{{ `Invalid interface options.` }}
+			</template>
+			<template v-else>
+				{{ `Interface "${lookupFieldObj?.meta?.interface}" not found.` }}
+			</template>
+		</v-notice>
+
+		<component
+			v-else
+			:is="
+				lookupFieldObj.meta?.interface
+					? `interface-${lookupFieldObj.meta.interface}`
+					: `interface-${getDefaultInterfaceForType(lookupFieldObj.type)}`
+			"
+			v-bind="lookupFieldObj.meta?.options || {}"
+			:width="lookupFieldObj.meta?.width || 'full'"
+			:type="lookupFieldObj.type"
+			:collection="lookupFieldObj.collection"
+			:field="lookupFieldObj.field"
+			:field-data="lookupFieldObj"
+			:value="localValue === undefined ? lookupFieldObj.schema?.default_value : localValue"
+			:loading="loading"
+			disabled
+			@update:model-value="emitValue"
+		/>
+
+
+	</div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, watch, inject } from 'vue';
 import { useApi, useStores } from '@directus/extensions-sdk';
-import { isEqual, round } from 'lodash';
-import { parse, parseISO, isValid } from 'date-fns';
+import { isEqual, round, cloneDeep } from 'lodash';
+import { getDefaultInterfaceForType } from './get-default-interface-for-type';
 
 export default defineComponent({
 	props: {
@@ -16,11 +46,11 @@ export default defineComponent({
 			type: [String, Number],
 			default: null,
 		},
-		relatedCollection: {
+		relationField: {
 			type: String,
 			required: true,
 		},
-		relatedCollectionField: {
+		lookupField: {
 			type: String,
 			required: true,
 		},
@@ -32,130 +62,106 @@ export default defineComponent({
 			type: String,
 			required: true,
 		},
+		disabled: {
+			type: Boolean,
+			default: true,
+		},
 	},
 	emits: ['input'],
 	setup(props, { emit }) {
-		const localValue = ref<string | number>(props.value);
+		const localValue = ref<string | number | object>(props.value);
 		const loading = ref<boolean>(false);
 
 		const api = useApi();
-		const { useRelationsStore, useFieldsStore } = useStores();
-		const relationsStore = useRelationsStore();
+		const { useFieldsStore, useRelationsStore } = useStores();
 		const fieldsStore = useFieldsStore();
+		const relationsStore = useRelationsStore();
 		const values = inject('values', ref<Record<string, any>>({}));
 
-		const currentField = fieldsStore.getFieldsForCollection(props.collection)
-			.find((e) => e.field === props.field);
-		const relatedCollectionPK = fieldsStore.getPrimaryKeyFieldForCollection(props.relatedCollection)?.field;
+		const currentFieldObj = fieldsStore.getFieldsForCollection(props.collection)
+			.find((e: any) => e.field === props.field);
 
-		const collectionRelations = relationsStore.getRelationsForCollection(props.relatedCollection);
-
-		// O2M
-		const manyField = collectionRelations
-			.find(
-				(el: any) =>
-					el.collection === props.relatedCollection
-					&& el.meta?.one_collection === props.collection
-			)?.meta?.one_field;
-
-		// M2O
-		const oneField = collectionRelations
-			.find(
-				(el: any) =>
-					el.collection === props.collection
-					&& el.related_collection === props.relatedCollection
-			)?.field;
-
-		const watchField = manyField || oneField;
+		const relatedCollection = relationsStore.getRelationsForCollection(props.collection)
+			.find((relation: any) => relation?.field == props.relationField)?.related_collection;
+		const lookupFieldObj = fieldsStore.getFieldsForCollection(relatedCollection)
+			.find((e: any) => e.field === props.lookupField);
+		const relatedCollectionPK = fieldsStore.getPrimaryKeyFieldForCollection(relatedCollection)?.field;
 
 		watch(
-			() => values.value[watchField],
-			(newValue, oldValue) => {
+			() => cloneDeep(values.value[props.relationField]),
+			async (newValue, oldValue) => {
 				if (newValue == null && oldValue == null) return;
 
 				if (!isEqual(newValue, oldValue)) {
-					fetchItemValues(values.value[watchField]);
+					await lookupItems(newValue);
 				}
-			},
-			{ deep: true }
+			}
 		);
 
-		if (props.value !== null) fetchItemValues(values.value[watchField]);
-
-		return { emitValue, loading, localValue };
+		return { emitValue, loading, localValue, lookupFieldObj, getDefaultInterfaceForType };
 
 		function emitValue(value: any): void {
 			localValue.value = cast(value);
 
+			switch (lookupFieldObj?.meta?.interface) {
+				case 'list':
+				case 'select-multiple-checkbox':
+				case 'select-multiple-checkbox-tree':
+				case 'select-multiple-dropdown':
+				case 'tags':
+					localValue.value = value ? JSON.parse(value) : undefined;
+					break;
+
+				case 'input-formula':
+					lookupFieldObj?.meta?.interface = 'input';
+					break;
+			}
+
 			emit('input', localValue.value);
 		}
 
-		async function fetchItemValues(items: Array<Object | number>) {
-			if (!items || items?.length === 0) {
-				emitValue(currentField.schema?.default_value ?? undefined);
-				return;
-			}
+		function buildFilter(item: any) {
+			if (!item) return null;
 
+			if (item.hasOwnProperty(relatedCollectionPK)) {
+				return { [relatedCollectionPK]: { '_eq': item[relatedCollectionPK] } }
+			} else {
+				if (['number', 'string'].includes(typeof item)) {
+					return { [relatedCollectionPK]: { '_eq': item } };
+				} else {
+					return null;
+				}
+			}
+		}
+
+		async function lookupItems(items: any) {
 			loading.value = true;
 
 			try {
 				let itemValues = [];
-				let itemArray = Array.isArray(items) ? items : [items];
-				const ids = itemArray.map((el: any) => {
-					if (typeof el === 'number') return el;
 
-					if (
-						typeof el === 'object'
-						&& el.hasOwnProperty(relatedCollectionPK)
-					) return el[relatedCollectionPK];
-				});
+				const url = relatedCollection.startsWith('directus_') === true
+					? relatedCollection.replace('directus_', '')
+					: `items/${relatedCollection}`;
+				const filter = buildFilter(items);
+				const fields = `${relatedCollectionPK},${props.lookupField}`;
 
-				if (ids?.length > 0 && props.relatedCollection) {
-					const filter = { [relatedCollectionPK]: { '_in': ids } };
-					const fields = `${relatedCollectionPK},${props.relatedCollectionField}`;
-
-					const res = await api.get(`items/${props.relatedCollection}`, {
-						params: {
-							filter,
-							fields,
-						}
-					});
-
-					itemValues = res.data.data
-						.filter((el: any) =>
-							el.hasOwnProperty(props.relatedCollectionField)
-							&& !['null', '', '[]', '{}'].includes(JSON.stringify(el[props.relatedCollectionField]))
-						)
+				if (relatedCollection && filter) {
+					const res = await api.get(url, { params: { filter, fields, limit: -1 } });
+					itemValues = res.data.data;
 				}
 
-				itemArray.forEach((el: any) => {
-					// Check if change related item form data (did not submitted yet)
-					if (el.hasOwnProperty(props.relatedCollectionField) && el.hasOwnProperty(relatedCollectionPK)) {
-						// Edit related field in case the item has inserted
-						// Check if existed in the itemValues, change the value of the field
-						if (itemValues.find((elValue: any) => elValue[relatedCollectionPK] === el[relatedCollectionPK])) {
-							itemValues = itemValues.map((elValue: any) => {
-								return elValue[relatedCollectionPK] == el[relatedCollectionPK]
-								? {
-										...elValue,
-										[props.relatedCollectionField]: cast(el[props.relatedCollectionField])
-									}
-								: elValue;
-							});
-						} else {
-							// Push new item in case the item was not existed in the itemValues
-							itemValues.push({
-								[relatedCollectionPK]: el[relatedCollectionPK],
-								[props.relatedCollectionField]: cast(el[props.relatedCollectionField])
-							});
-						}
-					} else if (el.hasOwnProperty(props.relatedCollectionField)) {
-						itemValues.push({ [props.relatedCollectionField]: cast(el[props.relatedCollectionField]) });
-					}
-				});
+				itemValues = [Object.assign({}, itemValues[0], items)];
 
-				const emitValues = itemValues.map((el: any) => cast(el[props.relatedCollectionField]));
-				emitValue(emitValues.length > 1 ? emitValues.join(', ') : emitValues[0]);
+				if (itemValues?.length > 0) {
+					const emitValues = itemValues
+						.map((el: any) => cast(el[props.lookupField]))
+						.filter((el: any) => el != null);
+
+					emitValue(emitValues[0]);
+				} else {
+					emitValue(currentFieldObj.schema?.default_value ?? undefined);
+				}
 			} catch (err) {
 				console.log(err);
 			} finally {
@@ -164,15 +170,11 @@ export default defineComponent({
 		}
 
 		function cast(value: any) {
-			if (typeof value == 'object') {
-				value = JSON.stringify(value);
-			}
+			if (value === null) return undefined;
+			if (typeof value == 'object') value = JSON.stringify(value);
+			if (typeof value == 'undefined') return undefined;
 
-			if (typeof value == 'undefined' || value == 'null') {
-				return undefined;
-			}
-
-			const schema = currentField.schema;
+			const schema = currentFieldObj.schema;
 
 			switch (schema.data_type) {
 				case 'decimal':
@@ -198,19 +200,6 @@ export default defineComponent({
 				case 'char':
 					return value.toString().substring(0, schema.max_length || undefined);
 
-				case 'datetime':
-					const parsedDatetime = parse(value, "yyyy-MM-dd'T'HH:mm:ss", new Date());
-					return isValid(parsedDatetime) ? value : undefined;
-				case 'date':
-					const parsedDate = parse(value, 'yyyy-MM-dd', new Date());
-				return isValid(parsedDate) ? value : undefined;
-				case 'time':
-					const parsedTime = parse(value, 'HH:mm:ss', new Date());
-					return isValid(parsedTime) ? value : undefined;
-				case 'timestamp':
-					const parsedTimestamp = parseISO(value);
-					return isValid(parsedTimestamp) ? value : undefined;
-
 				default:
 					return value;
 			}
@@ -218,3 +207,17 @@ export default defineComponent({
 	},
 });
 </script>
+<style lang="scss" scoped>
+.interface {
+	position: relative;
+
+	.v-skeleton-loader {
+		position: absolute;
+		top: 0;
+		left: 0;
+		z-index: 2;
+		width: 100%;
+		height: 100%;
+	}
+}
+</style>

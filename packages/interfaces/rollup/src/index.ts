@@ -41,12 +41,19 @@ export default defineInterface({
 			{ deep: true }
 		);
 
+		const o2mCollections = relationsStore.getRelationsForCollection(collection)
+			.filter((relation: any) =>
+				relation.related_collection === collection
+				&& relation?.meta?.junction_field === null
+				&& relation?.meta?.one_field !== null
+			);
+		const selectedO2MCollection = computed(() => field.meta?.options?.o2mCollection?.split('-')[0])
+
 		const relatedCollectionFields = computed(() => {
-			const selectedRelatedCollection = field.meta?.options?.o2mCollection;
 			const selectedFunction = field.meta?.options?.function;
 
-			if (selectedRelatedCollection) {
-				return fieldsStore.getFieldsForCollection(selectedRelatedCollection).map((el: any) => {
+			if (selectedO2MCollection.value) {
+				return fieldsStore.getFieldsForCollection(selectedO2MCollection.value).map((el: any) => {
 					let isDisabled = true;
 
 					switch (field.type) {
@@ -72,7 +79,7 @@ export default defineInterface({
 					return {
 						text: el.name,
 						value: el.field,
-						disabled: selectedFunction == 'count' ? false : isDisabled,
+						disabled: ['count', 'counta', 'countd', 'countn'].includes(selectedFunction) ? false : isDisabled,
 					}
 				});
 			} else {
@@ -80,15 +87,19 @@ export default defineInterface({
 			}
 		});
 
+		const sortFields = computed(() => {
+			return fieldsStore.getFieldsForCollection(selectedO2MCollection.value)
+				.map((el: any) => {
+					return {
+						text: el.name,
+						value: el.field,
+					}
+				});
+		});
+
 		const supportNumberCalculation = computed(() =>
 			field.type ? ['integer', 'bigInteger', 'float', 'decimal'].includes(field.type) : false
 		);
-
-		const o2mCollections = relationsStore.getRelationsForCollection(collection)
-			.filter((relation :any) =>
-				relation.related_collection === collection
-				&& relation?.meta?.junction_field === null
-			);
 
 		return [
 			{
@@ -100,10 +111,10 @@ export default defineInterface({
 					interface: 'select-dropdown',
 					options: {
 						choices: o2mCollections.map((el: any) => ({
-							text: formatTitle(el.collection),
-							value: el.collection,
+							text: `${formatTitle(el.collection)} (${el.meta?.one_field ?? 'undefined'})`,
+							value: `${el.collection}-${el.meta?.one_field}`,
 						})),
-						placeholder: 'Select collection that links to the records you want to summarize',
+						placeholder: 'Select related collection',
 						allowNone: false,
 					},
 				},
@@ -116,7 +127,7 @@ export default defineInterface({
 					interface: 'select-dropdown',
 					options: {
 						choices: relatedCollectionFields.value,
-						placeholder: `Choose ${collection} collection field that you'd like to aggregate`,
+						placeholder: 'Select related field',
 						allowNone: false,
 					},
 					width: 'half',
@@ -131,14 +142,18 @@ export default defineInterface({
 					interface: 'select-dropdown',
 					options: {
 						choices: [
-							{ text: 'FIRST', value: 'first', disabled: false },
-							{ text: 'LAST', value: 'last', disabled: false },
+							{ text: 'FIRST — Returns the first value, according to sorting', value: 'first', disabled: false },
+							{ text: 'LAST — Returns the last value, according to sorting', value: 'last', disabled: false },
 							{ divider: true },
-							{ text: 'COUNT', value: 'count', disabled: !supportNumberCalculation.value },
-							{ text: 'SUM', value: 'sum', disabled: !supportNumberCalculation.value },
-							{ text: 'AVERAGE', value: 'avg', disabled: !supportNumberCalculation.value },
-							{ text: 'MINIMUM', value: 'min', disabled: !supportNumberCalculation.value },
-							{ text: 'MAXIMUM', value: 'max', disabled: !supportNumberCalculation.value },
+							{ text: 'COUNT — Count only non-empty values', value: 'count', disabled: !supportNumberCalculation.value },
+							{ text: 'COUNTA — Count all number of items including blank values', value: 'counta', disabled: !supportNumberCalculation.value },
+							{ text: 'COUNTD — Count unique values (except empty values)', value: 'countd', disabled: !supportNumberCalculation.value },
+							{ text: 'COUNTN — Count the number of empty values', value: 'countn', disabled: !supportNumberCalculation.value },
+							{ divider: true },
+							{ text: 'SUM — Sum together the values', value: 'sum', disabled: !supportNumberCalculation.value },
+							{ text: 'AVERAGE — Arithmetic mean of the values', value: 'avg', disabled: !supportNumberCalculation.value },
+							{ text: 'MINIMUM — Returns the smallest value, ignoring empty fields', value: 'min', disabled: !supportNumberCalculation.value },
+							{ text: 'MAXIMUM — Returns the largest value, ignoring empty fields', value: 'max', disabled: !supportNumberCalculation.value },
 						],
 						placeholder: 'Select function',
 						allowNone: false,
@@ -150,10 +165,10 @@ export default defineInterface({
 				type: 'string',
 				name: 'Sort Field',
 				meta: {
-					interface: 'system-field',
+					interface: 'select-dropdown',
 					options: {
-						collectionField: 'o2mCollection',
-						allowPrimaryKey: true,
+						choices: sortFields.value,
+						placeholder: 'Select sort field',
 						allowNone: false,
 					},
 					width: 'half',
@@ -166,7 +181,7 @@ export default defineInterface({
 				meta: {
 					interface: 'system-filter',
 					options: {
-						collectionField: 'o2mCollection',
+						collectionName: selectedO2MCollection.value,
 					},
 				},
 			},

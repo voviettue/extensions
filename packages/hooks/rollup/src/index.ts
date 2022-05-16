@@ -9,34 +9,36 @@ import first from 'lodash/first';
 import orderBy from 'lodash/orderBy';
 import { parse, isValid } from 'date-fns';
 
-export default defineHook(({ action }, { services, database, getSchema, logger }) => {
-	const getRollupFields = (collection: string) => {
-		return database.from('directus_fields')
+export default defineHook(({ action }, { services, getSchema, logger }) => {
+	const getRollupFields = (ctx: any, collection: string) => {
+		return ctx.database.from('directus_fields')
 			.where('collection', '=', collection)
 			.andWhere('interface', '=', 'input-rollup');
 	}
 
 	const rollupQuery = async (obj: any, ctx: any, fieldSchema: any, key :Number) => {
-		const fieldOptions = fieldSchema.meta?.options || '';
+		const fieldOptions = fieldSchema.meta?.options;
 
-		const o2mCollection = fieldOptions.o2mCollection;
-		const o2mField = fieldOptions.o2mField;
-		const relatedFilter = fieldOptions.filter;
-		const sortBy = fieldOptions.sortBy;
-		const rollupFunction = fieldOptions.function;
+		const [o2mCollection, oneField] = fieldOptions?.o2mCollection?.split('-');
+		const o2mField = fieldOptions?.o2mField;
+		const relatedFilter = fieldOptions?.filter;
+		const sortBy = fieldOptions?.sortBy;
+		const rollupFunction = fieldOptions?.function;
 
-		if (!o2mCollection || !o2mField || !rollupFunction) {
+		if (!o2mCollection || !oneField || !o2mField || !rollupFunction) {
 			logger.error(`ROLLUP: [${obj.collection}: ${key}] with [${fieldSchema.field}: Invalid relatedCollection or relatedCollectionField or rollupFunction`);
 			return null;
 		}
 
-		const schema = await getSchema();
-		const itemsService = new services.ItemsService(o2mCollection, { knex: ctx.database, schema });
+		const itemsService = new services.ItemsService(
+			o2mCollection, { knex: ctx.database, schema: ctx.schema }
+		);
 
 		const relation = ctx.schema.relations.find(
 			(relation: any) =>
-				relation.collection === o2mCollection
-				&& relation.related_collection === obj.collection
+				relation.collection == o2mCollection
+				&& relation.related_collection == obj.collection
+				&& relation?.meta?.one_field == oneField
 		);
 
 		const filter = { [relation.field]: { '_eq': key } };
@@ -52,31 +54,19 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 					limit: -1
 				});
 
-				return calculate(
-					result.filter((el: any) =>
-						el.hasOwnProperty(o2mField)
-						&& !['null', '', '[]', '{}'].includes(JSON.stringify(el[o2mField]))
-					),
-					rollupFunction,
-					o2mField,
-					sortBy
-				);
+				return calculate(result, rollupFunction, o2mField, sortBy);
 			}
-		} catch (error) {
-			logger.error(error);
+		} catch (error: any) {
+			logger.error(`ROLLUP: ${error.toString()}`);
 
 			return undefined;
 		}
 	}
 
 	const cast = async (value: any, fieldSchema: any) => {
-		if (typeof value == 'object') {
-			value = JSON.stringify(value);
-		}
-
-		if (typeof value == 'undefined' || value == 'null') {
-			return null;
-		}
+		if (value === null) return null;
+		if (typeof value == 'object') value = JSON.stringify(value);
+		if (typeof value == 'undefined') return null;
 
 		switch (fieldSchema?.schema?.data_type) {
 			case 'decimal':
@@ -117,27 +107,49 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 	}
 
 	function calculate(input: Array<any>, func: string, o2mField: string, sortBy: string) {
-		if (func != 'count' && input.length == 0) return;
+		switch (func) {
+			case 'counta': // Count all including empty or null values
+				input = input.map((el: any) => el[o2mField]);
+				break;
 
-		if (['count', 'sum', 'avg', 'min', 'max'].includes(func)) {
-			input = input.map((el: any) => el[o2mField]);
+			case 'countd': // Count unique values
+				input = input.map((el: any) => el[o2mField])
+					.filter((el: any, index: number, self: any[]) => (el != null && el != '') && self.indexOf(el) === index);
+				break;
+
+			case 'countn': // Count empty and null values
+				input = input.map((el: any) => el[o2mField]).filter((el: any) => el == null || el == '');
+				break;
+
+			case 'count': // Count non-empty and not null values
+			case 'sum':
+			case 'avg':
+			case 'min':
+			case 'max':
+				input = input.map((el: any) => el[o2mField]).filter((el: any) => el != null && el != '');
+				break;
 		}
+
+		if (!['count', 'counta', 'countd', 'countn'].includes(func) && input.length == 0) return undefined;
 
 		switch (func) {
 			case 'count':
+			case 'counta':
+			case 'countd':
+			case 'countn':
 				return input.length;
 
 			case 'sum':
-				return sum(input) || 0;
+				return sum(input);
 
 			case 'avg':
-				return mean(input) || 0;
+				return mean(input);
 
 			case 'min':
-				return min(input) || 0;
+				return min(input);
 
 			case 'max':
-				return max(input) || 0;
+				return max(input);
 
 			case 'first':
 				return first(orderBy(input, [sortBy], 'asc'))?.[o2mField];
@@ -153,31 +165,30 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 			const keys = type == 'create' ? [obj.key] : obj.keys;
 			keys?.forEach(async (key: Number) => {
 				const pk = ctx.schema.collections[collection].primary;
-				const rollupFields = await getRollupFields(obj.collection);
+				const rollupFields = await getRollupFields(ctx, obj.collection);
 
 				if (rollupFields.length === 0) return;
 
-				rollupFields.forEach(async field => {
-					const fieldsService = new services.FieldsService({ schema: await getSchema() });
-					const fieldSchema = await fieldsService.readOne(field.collection, field.field);
-
-					const queryResult = await rollupQuery(obj, ctx, fieldSchema, key);
-					const updateValue = await cast(queryResult, fieldSchema);
-
-					logger.info(`ROLLUP: ${type.toUpperCase()} [${collection}: ${key}] with [${field.field}: ${updateValue}]`);
-
+				rollupFields.forEach(async (field: any) => {
 					try {
+						const fieldsService = new services.FieldsService({ knex: ctx.database, schema: ctx.schema });
+						const fieldSchema = await fieldsService.readOne(field.collection, field.field);
+
+						const queryResult = await rollupQuery(obj, ctx, fieldSchema, key);
+						const updateValue = await cast(queryResult, fieldSchema);
+
+						logger.info(`ROLLUP: ${type.toUpperCase()} [${collection}: ${key}] with [${field.field}: ${updateValue}]`);
+
 						await ctx.database(obj.collection)
 							.update({ [field.field]: updateValue })
 							.where(pk, '=', key);
-					} catch (error) {
-						logger.error(error);
+					} catch (error: any) {
+						logger.error(`ROLLUP: ${error.toString()}`);
 					}
 				});
 			});
-		} catch (error) {
-			logger.error('ROLLUP: Execution failed')
-			logger.error(error);
+		} catch (error: any) {
+			logger.error(`ROLLUP: ${error.toString()}`);
 		}
 	}
 
