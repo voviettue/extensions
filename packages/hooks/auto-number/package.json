@@ -1,0 +1,28 @@
+{
+	"name": "directus-extension-hook-auto-number",
+	"version": "1.0.0",
+	"keywords": [
+		"directus",
+		"directus-extension",
+		"directus-custom-hook"
+	],
+	"directus:extension": {
+		"type": "hook",
+		"path": "dist/index.js",
+		"source": "src/index.ts",
+		"host": "^9.10.0"
+	},
+	"scripts": {
+		"build": "directus-extension build",
+		"test": "jest"
+	},
+	"devDependencies": {
+		"@directus/extensions-sdk": "9.10.0",
+		"@types/jest": "^27.5.1",
+		"@types/node": "^17.0.32",
+		"jest": "^28.1.0",
+		"mockdate": "^3.0.5",
+		"ts-jest": "^28.0.2",
+		"typescript": "^4.6.4"
+	}
+}
