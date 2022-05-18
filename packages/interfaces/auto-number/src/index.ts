@@ -47,6 +47,9 @@ export default defineInterface({
 						width: 'half',
 						interface: 'input',
 						required: true,
+						options: {
+							min: 1,
+						},
 					},
 					schema: {
 						default_value: 1
@@ -60,19 +63,14 @@ export default defineInterface({
 						width: 'full',
 						interface: 'input',
 						required: true,
+						options: {
+							min: 1,
+						},
 					},
 					schema: {
 						default_value: 1
 					}
 				},
-				{
-					field: 'counter',
-					name: 'Counter',
-					meta: {
-						hidden: true,
-						readonly: true,
-					},
-				}
 			],
 			advanced: [],
 		}
