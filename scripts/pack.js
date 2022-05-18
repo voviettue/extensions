@@ -10,10 +10,18 @@ if (!existsSync('dist')) {
 
 rootPackageJson.workspaces.forEach(workspaceDir => {
   glob(workspaceDir, null, function (err, files) {
+    if (err) {
+      throw err
+    }
+
     files.forEach(packagePath => {
       const packageLocation = path.resolve(__dirname, '..', packagePath)
-      execSync(`npm pack ${packageLocation}`, { cwd: path.resolve(__dirname, '..', 'dist') })
-    });
+      try {
+        execSync(`npm pack ${packageLocation}`, { cwd: path.resolve(__dirname, '..', 'dist') })
+      } catch(err) {
+        console.error(err)
+      }
+    })
   })
 })
 
