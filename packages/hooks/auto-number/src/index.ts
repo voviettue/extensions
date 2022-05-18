@@ -11,7 +11,7 @@ interface AutoNumberHookOptions {
 	prefix: string
 }
 
-export default defineHook(({ filter }) => {
+export default defineHook(({ filter }, { logger }) => {
 	const state: AutoNumberHookState = {
 		fields: null
 	}
@@ -25,10 +25,23 @@ export default defineHook(({ filter }) => {
 			const latestNumber = await getLatestNumber(ctx, meta, field.field, parsedPrefix)
 			const nextNumber = getNextNumber(latestNumber, options.startNumber)
 			input[field.field] = generateAutoNumber(parsedPrefix, nextNumber, options.minNumberOfDigits)
+			logger.info(`[AUTO_NUMBER] Generated number for ${field.field}: ${input[field.field]}`)
 		}
 
 		return input
 	});
+
+	filter('fields.create', () => {
+		resetState()
+	})
+
+	filter('fields.update', () => {
+		resetState()
+	})
+
+	filter('fields.delete', () => {
+		resetState()
+	})
 
 	async function getLatestNumber(ctx: any, collection: string, field: string, prefix: string): Promise<null | number> {
 		const data = await ctx.database
@@ -63,5 +76,9 @@ export default defineHook(({ filter }) => {
 		options.prefix = options.prefix || ''
 
 		return options
+	}
+
+	function resetState() {
+		state.fields = null
 	}
 });
