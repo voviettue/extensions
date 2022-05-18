@@ -28,6 +28,10 @@ describe('test parse placeholder', () => {
 })
 
 describe('test generate auto number', () => {
+  it('should return 1', () => {
+    expect(generateAutoNumber('', 1, 1)).toBe('1')
+  })
+
   it('should return CATEX-00001', () => {
     expect(generateAutoNumber('CATEX-', 1, 5)).toBe('CATEX-00001')
   })
