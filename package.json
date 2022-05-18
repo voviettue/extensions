@@ -15,7 +15,8 @@
     "packages/hooks/*",
     "packages/interfaces/*",
     "packages/modules/*",
-    "packages/panels/*"
+    "packages/panels/*",
+    "packages/layouts/*"
   ],
   "dependencies": {
     "glob": "^7.2.0"
