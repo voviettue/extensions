@@ -69,7 +69,6 @@ export default defineEndpoint(async (router, { services, exceptions, database })
 				stream.pipe(csv())
 					.on('data', (value: Record<string,string>) => {
 						value = convertData(value, fields)
-						console.log(value)
 						saveQueue.push(value)
 					})
 					.on('error', (err) => {
