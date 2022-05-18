@@ -309,8 +309,7 @@ export default defineComponent({
 		display: flex;
 		flex-direction: column;
 		padding: 8px 0;
-		// background-color: var(--background-normal);
-		background-color: #f7fafc;
+		background-color: var(--background-normal);
 		border: var(--border-width) solid var(--border-normal);
 		border-radius: var(--border-radius);
 		margin-right: 20px;
