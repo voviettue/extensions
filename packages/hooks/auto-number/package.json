@@ -16,6 +16,9 @@
 		"build": "directus-extension build",
 		"test": "jest"
 	},
+	"files": [
+		"dist"
+	],
 	"devDependencies": {
 		"@directus/extensions-sdk": "9.10.0",
 		"@types/jest": "^27.5.1",
