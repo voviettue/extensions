@@ -1,6 +1,6 @@
 {
 	"name": "directus-extension-interface-lookup",
-	"version": "1.1.1",
+	"version": "1.2.0",
 	"keywords": [
 		"directus",
 		"directus-extension",
@@ -22,6 +22,10 @@
 		"vue": "^3.2.31"
 	},
 	"dependencies": {
+		"@directus/format-title": "^9.10.0",
 		"date-fns": "^2.28.0"
-	}
+	},
+	"files": [
+		"dist"
+	]
 }

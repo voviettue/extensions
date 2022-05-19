@@ -207,17 +207,17 @@ export default defineComponent({
 	},
 });
 </script>
-<style lang="scss" scoped>
+<style scoped>
 .interface {
 	position: relative;
+}
 
-	.v-skeleton-loader {
-		position: absolute;
-		top: 0;
-		left: 0;
-		z-index: 2;
-		width: 100%;
-		height: 100%;
-	}
+.v-skeleton-loader {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 2;
+	width: 100%;
+	height: 100%;
 }
 </style>
