@@ -410,18 +410,19 @@ export default defineComponent({
       this.isOnHover = false;
     },
     getItemStyles(item) {
-      let left = 0;
+      let left = 1;
       let right = this.dates.length + 1;
       this.dates.forEach((date) => {
         if (
           item[this.startDateField] &&
-          new Date(item[this.startDateField]).getTime() >= date.getTime()
+          differenceInCalendarDays(new Date(item[this.startDateField]), date) >
+            0
         ) {
           left++;
         }
         if (
           item[this.endDateField] &&
-          new Date(item[this.endDateField]).getTime() < date.getTime()
+          differenceInCalendarDays(new Date(item[this.endDateField]), date) < 0
         ) {
           right--;
         }

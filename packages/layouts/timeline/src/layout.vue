@@ -166,7 +166,7 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .wrap-layout {
   padding: 0px var(--content-padding);
 }
@@ -178,13 +178,6 @@ export default defineComponent({
   border-top: 1px solid #f0f4f9;
   border-bottom: 1px solid #f0f4f9;
 }
-// #timeline-layout {
-// 	position: relative;
-// 	overflow: auto;
-// 	width: 100%;
-// 	// min-height:
-// 	height: calc(100vh - 180px);
-// }
 .mr-2 {
   margin-right: 8px;
 }

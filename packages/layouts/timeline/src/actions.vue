@@ -24,7 +24,7 @@ export default defineComponent({
 });
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .item-count {
 	position: relative;
 	display: none;
