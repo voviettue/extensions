@@ -42,8 +42,7 @@ export const convertJson = (value: string | undefined) => {
 
 	try {
 		return JSON.parse(value)
-	}
-	catch (err) {
+	} catch (err) {
 		return value
 	}
 }
@@ -67,6 +66,10 @@ export const convertBoolean = (value: string | undefined): boolean => {
 export const convertInteger = (value: string | undefined): number | null => {
   if (!value) {
     return null
+  }
+
+  if (value === '-0') {
+    return 0
   }
 
   return parseInt(value)
