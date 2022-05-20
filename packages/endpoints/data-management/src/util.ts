@@ -1,7 +1,7 @@
 export const convertData = (value: Record<string,string>, fields: any): Record<string,any> => {
   const converted: Record<string,any> = {}
   Object.keys(value).forEach(k => {
-    const field = fields.find(f => f.field === k)
+    const field = fields.find((f:any) => f.field === k)
     if (field) {
       switch (field.type) {
         case 'json':
@@ -14,6 +14,9 @@ export const convertData = (value: Record<string,string>, fields: any): Record<s
           break;
         case 'boolean':
           converted[k] = convertBoolean(value[k])
+          break;
+        case 'integer':
+          converted[k] = convertInteger(value[k]) 
           break;
         default:
           converted[k] = value[k]
@@ -61,8 +64,17 @@ export const convertBoolean = (value: string | undefined): boolean => {
 	return true
 }
 
+export const convertInteger = (value: string | undefined): number | null => {
+  if (!value) {
+    return null
+  }
+
+  return parseInt(value)
+}
+
 export default {
   convertArray,
   convertJson,
   convertBoolean,
+  convertInteger,
 }
