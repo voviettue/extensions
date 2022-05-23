@@ -83,8 +83,7 @@ export default defineComponent({
 
 		const relatedCollection = relationsStore.getRelationsForCollection(props.collection)
 			.find((relation: any) => relation?.field == props.relationField)?.related_collection;
-		const lookupFieldObj = fieldsStore.getFieldsForCollection(relatedCollection)
-			.find((e: any) => e.field === props.lookupField);
+		const lookupFieldObj = cloneDeep(fieldsStore.getField(relatedCollection, props.lookupField));
 		const relatedCollectionPK = fieldsStore.getPrimaryKeyFieldForCollection(relatedCollection)?.field;
 
 		watch(
@@ -113,7 +112,7 @@ export default defineComponent({
 					break;
 
 				case 'input-formula':
-					lookupFieldObj?.meta?.interface = 'input';
+					lookupFieldObj.meta.interface = 'input';
 					break;
 			}
 
