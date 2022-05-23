@@ -1,4 +1,5 @@
 import { defineHook } from '@directus/extensions-sdk';
+import merge from 'lodash/merge';
 import round from 'lodash/round';
 import sum from 'lodash/sum';
 import mean from 'lodash/mean';
@@ -113,6 +114,8 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 	}
 
 	function calculate(input: Array<any>, func: string, rollupField: string, sortBy: string) {
+		if (!['count', 'counta', 'countd', 'countn'].includes(func) && input.length == 0) return undefined;
+
 		switch (func) {
 			case 'counta': // Count all including empty or null values
 				input = input.map((el: any) => el[rollupField]);
@@ -135,8 +138,6 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 				input = input.map((el: any) => el[rollupField]).filter((el: any) => el != null && el != '');
 				break;
 		}
-
-		if (!['count', 'counta', 'countd', 'countn'].includes(func) && input.length == 0) return undefined;
 
 		switch (func) {
 			case 'count':
@@ -190,10 +191,14 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 					payload[option.field] = null;
 
 					if (record) {
-						const items = await database
-							.select()
-							.from(option.rollupCollection)
-							.where(option.rollupCollectionFK, record[pk]); // filter ???
+						const rollupCollectionItemsService = new services.ItemsService(
+							option.rollupCollection, { knex: database, schema: await getSchema() }
+						);
+						const filter = { [option.rollupCollectionFK]: { '_eq': key } };
+						const items = await rollupCollectionItemsService.readByQuery({
+							filter: merge(option.filter, filter),
+							limit: -1
+						});
 
 						if (items) {
 							const fieldSchema = fieldSchemas.find((schema: any) => schema.field === option.field);

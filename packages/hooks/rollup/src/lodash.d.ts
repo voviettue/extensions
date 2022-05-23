@@ -1,3 +1,4 @@
+declare module 'lodash/merge';
 declare module 'lodash/round';
 declare module 'lodash/sum';
 declare module 'lodash/mean';
