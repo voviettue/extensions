@@ -105,18 +105,20 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 		return mapper;
 	}
 
-	const getItem = async (id: any, map: LookupMap) => {
+	const getItem = async (value: any, map: LookupMap) => {
+		const id = value instanceof Object ? value?.[map.lookupCollectionPK] : value
 		const key = `${map.lookupCollection}.${id}`
+
 		if (!_items?.[key]) {
-			const item = await database
+			_items[key] = await database
 				.from(map.lookupCollection)
 				.where(map.lookupCollectionPK, id)
 				.first();
-
-			_items[key] = item
 		}
+		const item = _items[key] ?? {}
+		let result = value instanceof Object ? { ...item, ...value } : item
 
-		return _items[key]
+		return result
 	}
 
 	const execute = async (collection: any, input: any) => {
