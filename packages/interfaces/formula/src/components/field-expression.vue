@@ -1,11 +1,7 @@
 <template>
   <v-menu v-model="menuActive" attached>
     <template #activator="{ toggle }">
-      <v-input
-        :data-tooltip="tooltipContent"
-        class="input-formula"
-        :disabled="disabled"
-      >
+      <v-input :disabled="disabled">
         <template #input>
           <div v-if="tooltipEnable" class="tooltip bottom">
             <span v-if="tooltipContent">{{ tooltipContent }}</span>
@@ -44,27 +40,34 @@
       </v-input>
     </template>
 
-    <v-list v-if="!disabled" :mandatory="false">
-      <v-list-item :disabled="true">FIELDS</v-list-item>
-      <v-list-item
-        v-for="field in fields"
-        :key="`field-${field.field}`"
-        clickable
-        :value="field.field"
-        @click="addField(field.field)"
-      >
-        {{ field.name }}
-      </v-list-item>
-      <v-list-item :disabled="true">FUNCTIONS</v-list-item>
-      <v-list-item
-        v-for="functionName in Object.keys(tooltips)"
-        :key="`function-${functionName}`"
-        v-tooltip.html.left="tooltips[functionName]"
-        clickable
-        @click="addText(`${functionName}()`)"
-      >
-        {{ `${functionName}()` }}
-      </v-list-item>
+    <v-list
+      v-if="!disabled"
+      :mandatory="false"
+      @toggle="loadFieldRelations($event.value)"
+      style="display: grid; grid-template-columns: 50% 50%"
+    >
+      <div>
+        <v-list-item :disabled="true">FIELDS</v-list-item>
+        <field-list-item
+          v-for="field in treeList"
+          :key="field.field"
+          :field="field"
+          :depth="depth"
+          @add="addField"
+        />
+      </div>
+      <div>
+        <v-list-item :disabled="true">FUNCTIONS</v-list-item>
+        <v-list-item
+          v-for="functionName in Object.keys(tooltips)"
+          :key="`function-${functionName}`"
+          v-tooltip.html.left="tooltips[functionName]"
+          clickable
+          @click="addText(`${functionName}()`)"
+        >
+          {{ `${functionName}()` }}
+        </v-list-item>
+      </div>
     </v-list>
   </v-menu>
 </template>
@@ -73,16 +76,30 @@
 import {
   defineComponent,
   toRefs,
-  inject,
   ref,
   watch,
   onMounted,
   onUnmounted,
+  PropType,
+  inject as injectVue,
 } from "vue";
-import tooltipsConfig from "./tooltips";
+import FieldListItem from "./field-list-item.vue";
+import { FieldTree } from "../types";
+import { Field, Relation } from "@directus/shared/types";
+import { useFieldTree } from "../composables/use-field-tree";
+import tooltipsConfig from "../composables/tooltips";
 
 export default defineComponent({
+  components: { FieldListItem },
   props: {
+    value: {
+      type: Object,
+      default: null,
+    },
+    options: {
+      type: Object,
+      default: null,
+    },
     disabled: {
       type: Boolean,
       default: false,
@@ -107,24 +124,37 @@ export default defineComponent({
       type: String,
       default: null,
     },
+    inject: {
+      type: Object as PropType<{ fields: Field[]; relations: Relation[] }>,
+      default: null,
+    },
   },
-  emits: ["update:modelValue"],
+  emits: ["update:modelValue", "input"],
   setup(props, { emit }) {
-    const stores: any = inject("stores");
     const contentEl = ref<HTMLElement | null>(null);
 
     const menuActive = ref(false);
+    const stores: any = injectVue("stores");
 
-    const { collection } = toRefs(props);
-    const useFieldsStore = stores.useFieldsStore();
-    const fields = useFieldsStore
-      .getFieldsForCollection(collection.value)
-      .filter(
-        (e) =>
-          e?.type !== "alias" && e?.meta?.interface.search("formula") === -1
-      );
+    const { collection, inject } = toRefs(props);
+    const { treeList, loadFieldRelations } = useFieldTree(
+      stores,
+      collection,
+      inject,
+      (field) => {
+        return (
+          !field?.meta?.special?.includes("m2m") &&
+          field?.meta?.interface !== "input-formula"
+        );
+      }
+    );
 
-    const tooltips = tooltipsConfig;
+    // const useFieldsStore = stores.useFieldsStore();
+    // const fields = useFieldsStore.getFieldsForCollection(collection.value).filter((e) => {
+    // 	return e?.type !== 'alias' && e?.meta?.interface !== 'input-formula';
+    // });
+
+    const tooltips: any = tooltipsConfig;
     const tooltipContent = ref("");
     const tooltipEnable = ref(false);
 
@@ -145,7 +175,7 @@ export default defineComponent({
 
     return {
       menuActive,
-      fields,
+      // fields,
       tooltips,
       tooltipEnable,
       tooltipContent,
@@ -155,13 +185,24 @@ export default defineComponent({
       contentEl,
       onClick,
       onKeyDown,
+      treeList,
+      loadFieldRelations,
     };
 
-    function onInput() {
-      if (!contentEl.value) return;
+    function handleTooltipFocus(target: HTMLElement) {
+      const selection = window.getSelection();
+      if (selection?.type !== "Caret") return;
 
-      const valueString = getInputValue();
-      emit("update:modelValue", valueString);
+      tooltipEnable.value = true;
+      const text = target.innerText;
+
+      const offset = selection?.anchorOffset || 0;
+      const left = text.substring(0, offset).match(/[A-Z]+$/);
+      const right = text.substring(offset, text.length).match(/^[A-Z]+/);
+      let result = "";
+      result += left ? left.shift() : "";
+      result += right ? right.shift() : "";
+      tooltipContent.value = tooltips[result] || "";
     }
 
     function onClick(event: MouseEvent) {
@@ -205,20 +246,11 @@ export default defineComponent({
       }
     }
 
-    function handleTooltipFocus(target: HTMLElement) {
-      const selection = window.getSelection();
-      if (selection?.type !== "Caret") return;
+    function onInput() {
+      if (!contentEl.value) return;
 
-      tooltipEnable.value = true;
-      const text = target.innerText;
-
-      const offset = selection?.anchorOffset || 0;
-      const left = text.substring(0, offset).match(/[A-Z]+$/);
-      const right = text.substring(offset, text.length).match(/^[A-Z]+/);
-      let result = "";
-      result += left ? left.shift() : "";
-      result += right ? right.shift() : "";
-      tooltipContent.value = tooltips[result] || "";
+      const valueString = getInputValue();
+      emit("update:modelValue", valueString);
     }
 
     function onSelect() {
@@ -259,16 +291,17 @@ export default defineComponent({
       }
     }
 
-    function addField(fieldKey: string) {
+    function addField(field: FieldTree) {
       if (!contentEl.value) return;
 
-      const field = fields.find((field) => field.field === fieldKey);
+      // const field = fields.find((field) => field.field === value.field);
 
-      if (!field) return;
+      // if (!field) return;
 
       const button = document.createElement("button");
-      button.dataset.field = fieldKey;
+      button.dataset.field = field.key;
       button.setAttribute("contenteditable", "false");
+      button.setAttribute("title", field.key);
       button.innerText = String(field.name);
 
       if (window.getSelection()?.rangeCount == 0) {
@@ -282,8 +315,6 @@ export default defineComponent({
       range.deleteContents();
 
       const end = splitElements();
-
-      // modelValue.
 
       if (end) {
         contentEl.value.insertBefore(button, end);
@@ -303,7 +334,6 @@ export default defineComponent({
 
       const ele = document.createElement("span");
       ele.classList.add("text");
-      // ele.setAttribute('contenteditable', 'false');
       ele.innerText = value;
 
       if (window.getSelection()?.rangeCount == 0) {
@@ -326,6 +356,26 @@ export default defineComponent({
       }
 
       onInput();
+    }
+
+    function findTree(
+      tree: FieldTree[] | undefined,
+      fieldSections: string[]
+    ): FieldTree | undefined {
+      if (tree === undefined) return undefined;
+
+      const fields = tree.reduce(
+        (resulst, e) =>
+          (resulst =
+            e?.group === true ? resulst.concat(e.children) : resulst.concat(e)),
+        []
+      );
+
+      const fieldObject = fields.find((f) => f.field === fieldSections[0]);
+
+      if (fieldObject === undefined) return undefined;
+      if (fieldSections.length === 1) return fieldObject;
+      return findTree(fieldObject.children, fieldSections.slice(1));
     }
 
     function joinElements(first: HTMLElement, second: HTMLElement) {
@@ -403,11 +453,17 @@ export default defineComponent({
               return `<span class="text">${part}</span>`;
             }
             const fieldKey = part.replace(/({|})/g, "").trim();
-            const field = fields.find((field) => field.field === fieldKey);
+            const fieldPath = fieldKey.split(".");
+
+            for (let i = 0; i < fieldPath.length; i++) {
+              loadFieldRelations(fieldPath.slice(0, i).join("."));
+            }
+
+            const field = findTree(treeList.value, fieldPath);
 
             if (!field) return "";
 
-            return `<button contenteditable="false" data-field="${fieldKey}" ${
+            return `<button contenteditable="false" title="${fieldKey}" data-field="${fieldKey}" ${
               props.disabled ? "disabled" : ""
             }>${field.name}</button>`;
           })

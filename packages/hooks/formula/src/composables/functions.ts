@@ -1,5 +1,5 @@
 import isNumber from 'lodash/isNumber';
-import isEmpty from 'lodash/isEmpty';
+import isNil from 'lodash/isNil';
 import add from 'date-fns/add';
 import getSeconds from 'date-fns/getSeconds';
 import getMinutes from 'date-fns/getMinutes';
@@ -7,6 +7,7 @@ import getHours from 'date-fns/getHours';
 import getDate from 'date-fns/getDate';
 import getMonth from 'date-fns/getMonth';
 import getYear from 'date-fns/getYear';
+import format from 'date-fns/format';
 import differenceInDays from 'date-fns/differenceInDays';
 import differenceInMonths from 'date-fns/differenceInMonths';
 import differenceInYears from 'date-fns/differenceInYears';
@@ -14,26 +15,27 @@ import differenceInHours from 'date-fns/differenceInHours';
 import differenceInMinutes from 'date-fns/differenceInMinutes';
 import differenceInSeconds from 'date-fns/differenceInSeconds';
 import differenceInBusinessDays from 'date-fns/differenceInBusinessDays';
-
-const parseDate = (date: any) => {
-	return date instanceof Date ? date : new Date(date)
-};
+import { getWeek } from 'date-fns';
+import getDay from 'date-fns/getDay';
+import addDays from 'date-fns/addDays';
+import subDays from 'date-fns/subDays';
+import { daysInWeek, parseDate } from './utils'
 
 const functions = {
 	CONCATENATE: (...args: any[]) => {
 		return args.join('');
 	},
 	TRIM: (string: any) => {
-		return String(string).trim();
+		return isNil(string) ? '' : String(string).trim();
 	},
 	LOWER(string: any) {
-		return String(string).toLowerCase();
+		return isNil(string) ? '' : String(string).toLowerCase();
 	},
 	UPPER(string: any) {
-		return String(string).toUpperCase();
+		return isNil(string) ? '' : String(string).toUpperCase();
 	},
 	LEN(string: any) {
-		return String(string).length;
+		return isNil(string) ? '' : String(string).length;
 	},
 	AND(...expressions: any) {
 		const result = expressions.reduce(
@@ -76,14 +78,19 @@ const functions = {
 		}, 0);
 	},
 	VALUE(string: any) {
-		const numbers = String(string).match(/\d+.\d+/g)
+		const numbers = isNil(string) ? '' : String(string).match(/\d+.\d+/g)
 		return numbers ? parseFloat(String(numbers[0])) : '';
 	},
 	DATEADD(date: any, qty: number, unit = 'days') {
-		if (isEmpty(date)) return '';
+		if (!date) return '';
 		const duration: any = {};
 		duration[unit] = qty;
 		return add(parseDate(date), duration);
+	},
+	DATESTR(date: any) {
+		if (!date) return '';
+
+		return format(parseDate(date), 'yyyy-MM-dd');
 	},
 	DATETIME_DIFF(dateLeft: any, dateRight: any, unit = 'days') {
 		if (!dateLeft || !dateRight) return '';
@@ -98,32 +105,96 @@ const functions = {
 
 		return map[unit] ? map[unit](parseDate(dateRight), parseDate(dateLeft)) : '';
 	},
+	DATETIME_FORMAT(date: any, formatDate: any = 'yyyy-MM-DD') {
+		if (!date) return '';
+		return format(parseDate(date), formatDate);
+	},
+	IS_AFTER(date1: any, date2: any) {
+		if (!date1) return '';
+		if (!date2) return '';
+
+		return parseDate(date1).getTime() > parseDate(date2).getTime() ? 1 : 0;
+	},
+	IS_BEFORE(date1: any, date2: any) {
+		if (!date1) return '';
+		if (!date2) return '';
+
+		return parseDate(date1).getTime() < parseDate(date2).getTime() ? 1 : 0;
+	},
+	IS_SAME(date1: any, date2: any) {
+		if (!date1) return '';
+		if (!date2) return '';
+
+		return parseDate(date1).getTime() == parseDate(date2).getTime() ? 1 : 0;
+	},
+	WEEKDAY(date: any, startDayOfWeek: any) {
+		if (!date) return '';
+		let days = startDayOfWeek || 0;
+		if (typeof startDayOfWeek === 'string') {
+			const dayName: any = String(startDayOfWeek).toLowerCase();
+			days = daysInWeek.includes(dayName) ? daysInWeek.indexOf(dayName) : 0;
+		}
+		if (days < 0 || days > 6) return '';
+
+		return getDay(subDays(parseDate(date), days));
+	},
+	WEEKNUM(date: any, startDayOfWeek: any) {
+		if (!date) return '';
+		let startOn = startDayOfWeek || 0;
+		if (typeof startDayOfWeek === 'string') {
+			const dayName: any = String(startDayOfWeek).toLowerCase();
+			startOn = daysInWeek.includes(dayName) ? daysInWeek.indexOf(dayName) : 0;
+		}
+		if (startDayOfWeek < 0 || startDayOfWeek > 6) return '';
+
+		return getWeek(parseDate(date), { weekStartsOn: startOn });
+	},
 	SECOND(date: any) {
-		if (isEmpty(date)) return '';
+		if (!date) return '';
 		return getSeconds(parseDate(date));
 	},
 	MINUTE(date: any) {
-		if (isEmpty(date)) return '';
+		if (!date) return '';
 		return getMinutes(parseDate(date));
 	},
 	HOUR(date: any) {
-		if (isEmpty(date)) return '';
+		if (!date) return '';
 		return getHours(parseDate(date));
 	},
 	DAY(date: any) {
-		if (isEmpty(date)) return '';
+		if (!date) return '';
 		return getDate(parseDate(date));
 	},
 	MONTH(date: any) {
-		if (isEmpty(date)) return '';
+		if (!date) return '';
 		return getMonth(parseDate(date)) + 1;
 	},
 	YEAR(date: any) {
-		if (isEmpty(date)) return '';
+		if (!date) return '';
 		return getYear(parseDate(date));
 	},
 	NOW() {
-		return new Date();
+		return format(new Date(), 'yyyy-MM-dd');
+	},
+	WORKDAY(date: any, numDays: any, ...holidays: any[]) {
+		if (!date) return '';
+		if (!parseDate(date)) return '';
+		if (typeof numDays !== 'number' || numDays < 0) return '';
+
+		const strHolidays = holidays.filter((e) => !!parseDate(e)).map((e) => parseDate(e).toDateString());
+		let nextDate = parseDate(date);
+		let days = numDays;
+
+		while (days > 0) {
+			nextDate = addDays(nextDate, 1);
+
+			if (strHolidays.includes(nextDate.toDateString())) continue;
+			if ([0, 6].includes(getDay(nextDate))) continue;
+
+			--days;
+		}
+
+		return format(nextDate, 'yyyy-MM-dd');
 	},
 	WORKDAY_DIFF(dateLeft: any, dateRight: any, ...holidays: any[]) {
 		if (!dateLeft || !dateRight) return '';
