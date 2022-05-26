@@ -3,7 +3,7 @@ import busboy from 'busboy';
 import { IncomingHttpHeaders } from 'http'
 import csv from 'csv-parser'
 import { queue } from 'async'
-import { convertData } from './util'
+import { convertData } from './utils'
 import destroyStream from 'destroy'
 
 export default defineEndpoint(async (router, { services, exceptions, database }) => {
@@ -69,7 +69,6 @@ export default defineEndpoint(async (router, { services, exceptions, database })
 				stream.pipe(csv())
 					.on('data', (value: Record<string,string>) => {
 						value = convertData(value, fields)
-						console.log(value)
 						saveQueue.push(value)
 					})
 					.on('error', (err) => {
