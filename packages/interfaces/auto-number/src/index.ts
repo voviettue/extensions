@@ -9,6 +9,8 @@ export default defineInterface({
 	description: 'Set format and increments a number',
 	component: InterfaceComponent,
 	types: ['string'],
+	group: 'standard',
+	recommendedDisplays: ['formatted-value'],
 	options: ({ field }) => {
 		const options: { standard: DeepPartial<Field[]>, advanced: DeepPartial<Field[]>} = {
 			standard: [
