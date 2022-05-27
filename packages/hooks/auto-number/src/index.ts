@@ -31,6 +31,18 @@ export default defineHook(({ filter }, { logger }) => {
 		return input
 	});
 
+	filter('items.update', async(input: any, meta: any, ctx: any) => {
+		const fields = await getAutoNumberFields(ctx, meta.collection)
+		
+		fields.forEach((field: any) => {
+			if (input.hasOwnProperty(field.field)) {
+				delete input[field.field]
+			}
+		})
+
+		return input
+	})
+
 	filter('fields.create', () => {
 		resetState()
 	})
