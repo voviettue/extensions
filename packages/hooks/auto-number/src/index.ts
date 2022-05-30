@@ -33,7 +33,7 @@ export default defineHook(({ filter }, { logger }) => {
 
 	filter('items.update', async(input: any, meta: any, ctx: any) => {
 		const fields = await getAutoNumberFields(ctx, meta.collection)
-		
+
 		fields.forEach((field: any) => {
 			if (input.hasOwnProperty(field.field)) {
 				delete input[field.field]
@@ -59,8 +59,9 @@ export default defineHook(({ filter }, { logger }) => {
 		const data = await ctx.database
 			.from(collection)
 			.where(field, 'like', prefix + '%')
-			.orderBy(field, 'desc').limit(1)
-		
+			.orderBy(ctx.database.raw(`replace(${field}, '${prefix}', '') * 1`), 'desc')
+			.limit(1)
+
 		if (data.length === 0) {
 			return null
 		}
@@ -78,7 +79,7 @@ export default defineHook(({ filter }, { logger }) => {
 				.where('interface', '=', 'auto-number')
 				.andWhere('collection', '=', collection)
 		}
-		
+
 		return state.fields
 	}
 
