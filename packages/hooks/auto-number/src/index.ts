@@ -1,10 +1,6 @@
 import { defineHook } from '@directus/extensions-sdk';
 import { generateAutoNumber, convertPlaceholder, getNextNumber } from './utils'
 
-interface AutoNumberHookState {
-	fields?: any
-}
-
 interface AutoNumberHookOptions {
 	startNumber: number
 	minNumberOfDigits: number
@@ -12,10 +8,6 @@ interface AutoNumberHookOptions {
 }
 
 export default defineHook(({ filter }, { logger }) => {
-	const state: AutoNumberHookState = {
-		fields: null
-	}
-
 	filter('items.create', async (input: any, meta: any, ctx: any) => {
 		const fields = await getAutoNumberFields(ctx, meta.collection)
 
@@ -43,18 +35,6 @@ export default defineHook(({ filter }, { logger }) => {
 		return input
 	})
 
-	filter('fields.create', () => {
-		resetState()
-	})
-
-	filter('fields.update', () => {
-		resetState()
-	})
-
-	filter('fields.delete', () => {
-		resetState()
-	})
-
 	async function getLatestNumber(ctx: any, collection: string, field: string, prefix: string): Promise<null | number> {
 		const data = await ctx.database
 			.from(collection)
@@ -74,13 +54,9 @@ export default defineHook(({ filter }, { logger }) => {
 	}
 
 	async function getAutoNumberFields(ctx: any, collection: string) {
-		if (state.fields === null) {
-			state.fields = await ctx.database.from('directus_fields')
-				.where('interface', '=', 'auto-number')
-				.andWhere('collection', '=', collection)
-		}
-
-		return state.fields
+		return await ctx.database.from('directus_fields')
+			.where('interface', '=', 'auto-number')
+			.andWhere('collection', '=', collection)
 	}
 
 	function withDefaults(options: AutoNumberHookOptions): AutoNumberHookOptions {
@@ -89,9 +65,5 @@ export default defineHook(({ filter }, { logger }) => {
 		options.prefix = options.prefix || ''
 
 		return options
-	}
-
-	function resetState() {
-		state.fields = null
 	}
 });
