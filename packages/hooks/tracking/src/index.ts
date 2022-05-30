@@ -17,7 +17,7 @@ export default defineHook(({ action }, { database, logger }) => {
 		if (users[id]) return users[id];
 
 		const user: any = await database.from('directus_users').where('id', '=', id).first()
-		users[user.id] = user
+		users[user?.id] = user
 
 		return user;
 	}
@@ -27,14 +27,14 @@ export default defineHook(({ action }, { database, logger }) => {
 
 		const user: any = await getUser(event.user)
 
-		mixpanel.people.set(user.email, {
-			$email: user.email,
-			$first_name: user.first_name,
-			$last_name: user.last_name,
+		mixpanel.people.set(user?.email, {
+			$email: user?.email,
+			$first_name: user?.first_name,
+			$last_name: user?.last_name,
 		});
 
 		mixpanel.track("Log In", {
-			distinct_id: user.email,
+			distinct_id: user?.email,
 			ip: context.accountability.ip,
 			userAgent: context.accountability.userAgent,
 			provider: event.provider,
@@ -47,7 +47,7 @@ export default defineHook(({ action }, { database, logger }) => {
 		if (event.user) {
 			const user: any = await getUser(event.user)
 			mixpanel.track("Log Out", {
-				distinct_id: user.email,
+				distinct_id: user?.email,
 				ip: context.accountability.ip,
 				userAgent: context.accountability.userAgent,
 				workspace: TERMINAL_WORKSPACE_SLUG,
@@ -60,7 +60,7 @@ export default defineHook(({ action }, { database, logger }) => {
 			const user: any = await getUser(context.accountability.user)
 
 			mixpanel.track("Access Page", {
-				distinct_id: user.email,
+				distinct_id: user?.email,
 				ip: context.accountability.ip,
 				userAgent: context.accountability.userAgent,
 				workspace: TERMINAL_WORKSPACE_SLUG,
@@ -71,7 +71,7 @@ export default defineHook(({ action }, { database, logger }) => {
 	const trackCreateItem = async (event: any, context: any) => {
 		const user: any = await getUser(context.accountability.user)
 		mixpanel.track("Create Item", {
-			distinct_id: user.email,
+			distinct_id: user?.email,
 			collection: event.collection,
 			workspace: TERMINAL_WORKSPACE_SLUG,
 		});
@@ -80,7 +80,7 @@ export default defineHook(({ action }, { database, logger }) => {
 	const trackReadItem = async (event: any, context: any) => {
 		const user: any = await getUser(context.accountability.user)
 		mixpanel.track("Read Item", {
-			distinct_id: user.email,
+			distinct_id: user?.email,
 			collection: event.collection,
 			workspace: TERMINAL_WORKSPACE_SLUG,
 		});
@@ -89,7 +89,7 @@ export default defineHook(({ action }, { database, logger }) => {
 	const trackUpdateItem = async (event: any, context: any) => {
 		const user: any = await getUser(context.accountability.user)
 		mixpanel.track("Update Item", {
-			distinct_id: user.email,
+			distinct_id: user?.email,
 			collection: event.collection,
 			workspace: TERMINAL_WORKSPACE_SLUG,
 		});
@@ -98,7 +98,7 @@ export default defineHook(({ action }, { database, logger }) => {
 	const trackDeleteItem = async (event: any, context: any) => {
 		const user: any = await getUser(context.accountability.user)
 		mixpanel.track("Delete Item", {
-			distinct_id: user.email,
+			distinct_id: user?.email,
 			countItem: event.payload.length,
 			collection: event.collection,
 			workspace: TERMINAL_WORKSPACE_SLUG,
@@ -109,14 +109,14 @@ export default defineHook(({ action }, { database, logger }) => {
 		const user: any = await getUser(context.accountability.user)
 		if (event.payload.status === 'invited') {
 			mixpanel.track("Invite User", {
-				distinct_id: user.email,
+				distinct_id: user?.email,
 				email: event.payload.email,
 				workspace: TERMINAL_WORKSPACE_SLUG,
 			});
 		}
 		else {
 			mixpanel.track("Create User", {
-				distinct_id: user.email,
+				distinct_id: user?.email,
 				email: event.payload.email,
 				workspace: TERMINAL_WORKSPACE_SLUG,
 			});
@@ -126,7 +126,7 @@ export default defineHook(({ action }, { database, logger }) => {
 	const trackDeleteUser = async (_event: any, context: any) => {
 		const user: any = await getUser(context.accountability.user)
 		mixpanel.track("Delete User", {
-			distinct_id: user.email,
+			distinct_id: user?.email,
 			workspace: TERMINAL_WORKSPACE_SLUG,
 		});
 	}
@@ -134,7 +134,7 @@ export default defineHook(({ action }, { database, logger }) => {
 	const trackCreateCollection = async (event: any, context: any) => {
 		const user: any = await getUser(context.accountability.user)
 		mixpanel.track("Create Collection", {
-			distinct_id: user.email,
+			distinct_id: user?.email,
 			singleton: event.payload.singleton,
 			name: event.payload.collection,
 			workspace: TERMINAL_WORKSPACE_SLUG,
@@ -144,7 +144,7 @@ export default defineHook(({ action }, { database, logger }) => {
 	const trackDeleteCollection = async (event: any, context: any) => {
 		const user: any = await getUser(context.accountability.user)
 		mixpanel.track("Delete Collection", {
-			distinct_id: user.email,
+			distinct_id: user?.email,
 			name: event.payload[0] || '',
 			workspace: TERMINAL_WORKSPACE_SLUG,
 		});
@@ -154,7 +154,7 @@ export default defineHook(({ action }, { database, logger }) => {
 	action('auth.logout', trackLogOut);
 	action('response', trackAccessPage);
 
-	action('items.read', trackReadItem);
+	// action('items.read', trackReadItem);
 	action('items.create', trackCreateItem);
 	action('items.update', trackUpdateItem);
 	action('items.delete', trackDeleteItem);
