@@ -11,7 +11,7 @@ export default defineInterface({
 	types: ['string'],
 	group: 'standard',
 	recommendedDisplays: ['formatted-value'],
-	options: ({ field }) => {
+	options: () => {
 		const options: { standard: DeepPartial<Field[]>, advanced: DeepPartial<Field[]>} = {
 			standard: [
 				{
@@ -39,6 +39,7 @@ export default defineInterface({
 					meta: {
 						width: 'half',
 						interface: 'input',
+						note: 'The prefix supports date parameters like [YYYY], [MM], [DD]',
 					}
 				},
 				{
