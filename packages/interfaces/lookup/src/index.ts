@@ -63,36 +63,39 @@ export default defineInterface({
 
 			if (selectedRelationField) {
 				const selectedRelatedCollection = relationsStore.getRelationsForCollection(collection)
-					.find((relation: any) => relation?.field == selectedRelationField)?.related_collection;
-				return fieldsStore.getFieldsForCollection(selectedRelatedCollection).map((el: any) => {
-					let isDisabled = true;
+					.find((field: any) => field?.field == selectedRelationField)?.related_collection;
 
-					switch (field.type) {
-						case 'string':
-						case 'text':
-						case 'json':
-						case 'csv':
-							isDisabled = false;
-							break;
+				return fieldsStore.getFieldsForCollection(selectedRelatedCollection)
+					.filter((field: any) => field?.type !== 'alias')
+					.map((el: any) => {
+						let isDisabled = true;
 
-						case 'integer':
-						case 'bigInteger':
-						case 'float':
-						case 'decimal':
-							isDisabled = !['integer', 'bigInteger', 'float', 'decimal'].includes(el.type);
-							break;
+						switch (field.type) {
+							case 'string':
+							case 'text':
+							case 'json':
+							case 'csv':
+								isDisabled = false;
+								break;
 
-						case el.type:
-							isDisabled = false;
-							break;
-					}
+							case 'integer':
+							case 'bigInteger':
+							case 'float':
+							case 'decimal':
+								isDisabled = !['integer', 'bigInteger', 'float', 'decimal'].includes(el.type);
+								break;
 
-					return {
-						text: el.name,
-						value: el.field,
-						disabled: isDisabled,
-					}
-				});
+							case el.type:
+								isDisabled = false;
+								break;
+						}
+
+						return {
+							text: el.name,
+							value: el.field,
+							disabled: isDisabled,
+						}
+					});
 			} else {
 				return null;
 			}

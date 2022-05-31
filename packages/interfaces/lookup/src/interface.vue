@@ -1,223 +1,259 @@
 <template>
-	<div class="interface">
-		<v-skeleton-loader v-if="loading" />
+  <div class="interface">
+    <v-skeleton-loader v-if="loading" />
 
-		<v-notice v-if="!lookupFieldObj || !relationField || !lookupField" type="warning">
-			<template v-if="!relationField || !lookupField">
-				{{ `Invalid interface options.` }}
-			</template>
-			<template v-else>
-				{{ `Interface "${lookupFieldObj?.meta?.interface}" not found.` }}
-			</template>
-		</v-notice>
+    <v-notice
+      v-if="!lookupFieldObj || !relationField || !lookupField"
+      type="warning"
+    >
+      <template v-if="!relationField || !lookupField">
+        {{ `Invalid interface options.` }}
+      </template>
+      <template v-else>
+        {{ `Interface "${lookupFieldObj?.meta?.interface}" not found.` }}
+      </template>
+    </v-notice>
 
-		<component
-			v-else
-			:is="
-				lookupFieldObj.meta?.interface
-					? `interface-${lookupFieldObj.meta.interface}`
-					: `interface-${getDefaultInterfaceForType(lookupFieldObj.type)}`
-			"
-			v-bind="lookupFieldObj.meta?.options || {}"
-			:width="lookupFieldObj.meta?.width || 'full'"
-			:type="lookupFieldObj.type"
-			:collection="lookupFieldObj.collection"
-			:field="lookupFieldObj.field"
-			:field-data="lookupFieldObj"
-			:value="localValue === undefined ? lookupFieldObj.schema?.default_value : localValue"
-			:loading="loading"
-			disabled
-			@update:model-value="emitValue"
-		/>
-
-
-	</div>
+    <component
+      v-else
+      :is="
+        lookupFieldObj.meta?.interface
+          ? `interface-${lookupFieldObj.meta.interface}`
+          : `interface-${getDefaultInterfaceForType(lookupFieldObj.type)}`
+      "
+      v-bind="lookupFieldObj.meta?.options || {}"
+      :width="lookupFieldObj.meta?.width || 'full'"
+      :type="lookupFieldObj.type"
+      :collection="lookupFieldObj.collection"
+      :field="lookupFieldObj.field"
+      :field-data="lookupFieldObj"
+      :value="
+        localValue === undefined
+          ? lookupFieldObj.schema?.default_value
+          : localValue
+      "
+      :loading="loading"
+      disabled
+      @update:model-value="emitValue"
+    />
+  </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch, inject } from 'vue';
-import { useApi, useStores } from '@directus/extensions-sdk';
-import { isEqual, round, cloneDeep } from 'lodash';
-import { getDefaultInterfaceForType } from './get-default-interface-for-type';
+import { defineComponent, ref, watch, inject } from "vue";
+import { useApi, useStores } from "@directus/extensions-sdk";
+import { isEqual, round, cloneDeep } from "lodash";
+import { getDefaultInterfaceForType } from "./get-default-interface-for-type";
 
 export default defineComponent({
-	props: {
-		value: {
-			type: [String, Number],
-			default: null,
-		},
-		relationField: {
-			type: String,
-			required: true,
-		},
-		lookupField: {
-			type: String,
-			required: true,
-		},
-		collection: {
-			type: String,
-			required: true,
-		},
-		field: {
-			type: String,
-			required: true,
-		},
-		disabled: {
-			type: Boolean,
-			default: true,
-		},
-	},
-	emits: ['input'],
-	setup(props, { emit }) {
-		const localValue = ref<string | number | object>(props.value);
-		const loading = ref<boolean>(false);
+  props: {
+    value: {
+      type: [String, Number],
+      default: null,
+    },
+    relationField: {
+      type: String,
+      required: true,
+    },
+    lookupField: {
+      type: String,
+      required: true,
+    },
+    collection: {
+      type: String,
+      required: true,
+    },
+    field: {
+      type: String,
+      required: true,
+    },
+    disabled: {
+      type: Boolean,
+      default: true,
+    },
+  },
+  emits: ["input"],
+  setup(props, { emit }) {
+    const localValue = ref<string | number | object>(props.value);
+    const loading = ref<boolean>(false);
 
-		const api = useApi();
-		const { useFieldsStore, useRelationsStore } = useStores();
-		const fieldsStore = useFieldsStore();
-		const relationsStore = useRelationsStore();
-		const values = inject('values', ref<Record<string, any>>({}));
+    const api = useApi();
+    const { useFieldsStore, useRelationsStore } = useStores();
+    const fieldsStore = useFieldsStore();
+    const relationsStore = useRelationsStore();
+    const values = inject("values", ref<Record<string, any>>({}));
 
-		const currentFieldObj = fieldsStore.getFieldsForCollection(props.collection)
-			.find((e: any) => e.field === props.field);
+    const currentFieldObj = fieldsStore
+      .getFieldsForCollection(props.collection)
+      .find((e: any) => e.field === props.field);
 
-		const relatedCollection = relationsStore.getRelationsForCollection(props.collection)
-			.find((relation: any) => relation?.field == props.relationField)?.related_collection;
-		const lookupFieldObj = fieldsStore.getFieldsForCollection(relatedCollection)
-			.find((e: any) => e.field === props.lookupField);
-		const relatedCollectionPK = fieldsStore.getPrimaryKeyFieldForCollection(relatedCollection)?.field;
+    const relatedCollection = relationsStore
+      .getRelationsForCollection(props.collection)
+      .find(
+        (relation: any) => relation?.field == props.relationField
+      )?.related_collection;
 
-		watch(
-			() => cloneDeep(values.value[props.relationField]),
-			async (newValue, oldValue) => {
-				if (newValue == null && oldValue == null) return;
+    const relatedCollectionPK =
+      fieldsStore.getPrimaryKeyFieldForCollection(relatedCollection)?.field;
 
-				if (!isEqual(newValue, oldValue)) {
-					await lookupItems(newValue);
-				}
-			}
-		);
+    const lookupField = fieldsStore
+      .getFieldsForCollection(relatedCollection)
+      .filter((e: any) => e?.type !== "alias")
+      .find((e: any) => e.field === props.lookupField);
 
-		return { emitValue, loading, localValue, lookupFieldObj, getDefaultInterfaceForType };
+    const lookupFieldObj = cloneDeep(lookupField);
 
-		function emitValue(value: any): void {
-			localValue.value = cast(value);
+    console.log({
+      fields: relationsStore.getRelationsForCollection(props.collection),
+    });
 
-			switch (lookupFieldObj?.meta?.interface) {
-				case 'list':
-				case 'select-multiple-checkbox':
-				case 'select-multiple-checkbox-tree':
-				case 'select-multiple-dropdown':
-				case 'tags':
-					localValue.value = value ? JSON.parse(value) : undefined;
-					break;
+    watch(
+      () => cloneDeep(values.value[props.relationField]),
+      async (newValue, oldValue) => {
+        if (newValue == null && oldValue == null) return;
 
-				case 'input-formula':
-					lookupFieldObj?.meta?.interface = 'input';
-					break;
-			}
+        if (!isEqual(newValue, oldValue)) {
+          await lookupItems(newValue);
+        }
+      }
+    );
 
-			emit('input', localValue.value);
-		}
+    return {
+      emitValue,
+      loading,
+      localValue,
+      lookupFieldObj,
+      getDefaultInterfaceForType,
+    };
 
-		function buildFilter(item: any) {
-			if (!item) return null;
+    function emitValue(value: any): void {
+      localValue.value = cast(value);
 
-			if (item.hasOwnProperty(relatedCollectionPK)) {
-				return { [relatedCollectionPK]: { '_eq': item[relatedCollectionPK] } }
-			} else {
-				if (['number', 'string'].includes(typeof item)) {
-					return { [relatedCollectionPK]: { '_eq': item } };
-				} else {
-					return null;
-				}
-			}
-		}
+      switch (lookupFieldObj?.meta?.interface) {
+        case "list":
+        case "select-multiple-checkbox":
+        case "select-multiple-checkbox-tree":
+        case "select-multiple-dropdown":
+        case "tags":
+          localValue.value = value ? JSON.parse(value) : undefined;
+          break;
 
-		async function lookupItems(items: any) {
-			loading.value = true;
+        case "input-formula":
+          lookupFieldObj.meta.interface = "input";
+          break;
+      }
 
-			try {
-				let itemValues = [];
+      emit("input", localValue.value);
+    }
 
-				const url = relatedCollection.startsWith('directus_') === true
-					? relatedCollection.replace('directus_', '')
-					: `items/${relatedCollection}`;
-				const filter = buildFilter(items);
-				const fields = `${relatedCollectionPK},${props.lookupField}`;
+    function buildFilter(item: any) {
+      if (!item) return null;
 
-				if (relatedCollection && filter) {
-					const res = await api.get(url, { params: { filter, fields, limit: -1 } });
-					itemValues = res.data.data;
-				}
+      if (item.hasOwnProperty(relatedCollectionPK)) {
+        return { [relatedCollectionPK]: { _eq: item[relatedCollectionPK] } };
+      } else {
+        if (["number", "string"].includes(typeof item)) {
+          return { [relatedCollectionPK]: { _eq: item } };
+        } else {
+          return null;
+        }
+      }
+    }
 
-				itemValues = [Object.assign({}, itemValues[0], items)];
+    async function lookupItems(items: any) {
+      loading.value = true;
 
-				if (itemValues?.length > 0) {
-					const emitValues = itemValues
-						.map((el: any) => cast(el[props.lookupField]))
-						.filter((el: any) => el != null);
+      try {
+        let itemValues = [];
 
-					emitValue(emitValues[0]);
-				} else {
-					emitValue(currentFieldObj.schema?.default_value ?? undefined);
-				}
-			} catch (err) {
-				console.log(err);
-			} finally {
-				loading.value = false;
-			}
-		}
+        const url =
+          relatedCollection.startsWith("directus_") === true
+            ? relatedCollection.replace("directus_", "")
+            : `items/${relatedCollection}`;
+        const filter = buildFilter(items);
+        const fields = `${relatedCollectionPK},${props.lookupField}`;
 
-		function cast(value: any) {
-			if (value === null) return undefined;
-			if (typeof value == 'object') value = JSON.stringify(value);
-			if (typeof value == 'undefined') return undefined;
+        if (relatedCollection && filter) {
+          const res = await api.get(url, {
+            params: { filter, fields, limit: -1 },
+          });
+          itemValues = res.data.data;
+        }
 
-			const schema = currentFieldObj.schema;
+        itemValues = [Object.assign({}, itemValues[0], items)];
 
-			switch (schema.data_type) {
-				case 'decimal':
-				case 'float':
-					return value == 0 ? 0 : round(value, schema.numeric_scale) || undefined;
+        if (itemValues?.length > 0) {
+          const emitValues = itemValues
+            .map((el: any) => cast(el[props.lookupField]))
+            .filter((el: any) => el != null);
 
-				case 'int':
-				case 'bigint':
-					return value == 0 ? 0 : round(value) || undefined;
+          emitValue(emitValues[0]);
+        } else {
+          emitValue(currentFieldObj.schema?.default_value ?? undefined);
+        }
+      } catch (err) {
+        emitValue(undefined);
+        console.log(err);
+      } finally {
+        loading.value = false;
+      }
+    }
 
-				case 'boolean':
-					if (['true', '1'].includes(String(value).toLowerCase())) {
-						return true;
-					} else if (['false', '0'].includes(String(value).toLowerCase())) {
-						return false;
-					} else {
-						return undefined;
-					}
+    function cast(value: any) {
+      if (value === null) return undefined;
+      if (typeof value == "object") value = JSON.stringify(value);
+      if (typeof value == "undefined") return undefined;
 
-				case 'string':
-				case 'text':
-				case 'varchar':
-				case 'char':
-					return value.toString().substring(0, schema.max_length || undefined);
+      const schema = currentFieldObj.schema;
 
-				default:
-					return value;
-			}
-		}
-	},
+      switch (schema.data_type) {
+        case "decimal":
+        case "float":
+          return value == 0
+            ? 0
+            : round(value, schema.numeric_scale) || undefined;
+
+        case "int":
+        case "bigint":
+          return value == 0 ? 0 : round(value) || undefined;
+
+        case "json":
+        case "csv":
+          return Array.isArray(value) ? value : undefined;
+
+        case "boolean":
+          if (["true", "1"].includes(String(value).toLowerCase())) {
+            return true;
+          } else if (["false", "0"].includes(String(value).toLowerCase())) {
+            return false;
+          } else {
+            return undefined;
+          }
+
+        case "string":
+        case "text":
+        case "varchar":
+        case "char":
+          return value.toString().substring(0, schema.max_length || undefined);
+
+        default:
+          return value;
+      }
+    }
+  },
 });
 </script>
-<style lang="scss" scoped>
+<style scoped>
 .interface {
-	position: relative;
+  position: relative;
+}
 
-	.v-skeleton-loader {
-		position: absolute;
-		top: 0;
-		left: 0;
-		z-index: 2;
-		width: 100%;
-		height: 100%;
-	}
+.v-skeleton-loader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
 }
 </style>
