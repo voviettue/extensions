@@ -265,7 +265,11 @@ export default defineComponent({
 
 				itemValues = buildValues(items, itemValues);
 
-				emitValue(calculate(itemValues, props.function) ?? currentFieldObj.schema?.default_value);
+				if (itemValues?.length > 0) {
+					emitValue(calculate(itemValues, props.function) ?? currentFieldObj.schema?.default_value);
+				} else {
+					emitValue(currentFieldObj.schema?.default_value);
+				}
 			} catch (err) {
 				console.log(err);
 			} finally {
