@@ -41,19 +41,33 @@ export default defineInterface({
 			{ deep: true }
 		);
 
-		const o2mCollections = relationsStore.getRelationsForCollection(collection)
+		// Support O2M collections
+		const collectionRelations = relationsStore.getRelationsForCollection(collection)
 			.filter((relation: any) =>
 				relation.related_collection === collection
 				&& relation?.meta?.junction_field === null
 				&& relation?.meta?.one_field !== null
 			);
-		const selectedO2MCollection = computed(() => field.meta?.options?.o2mCollection?.split('-')[0])
+		const relatedCollectionOptions = collectionRelations.map((el: any) => {
+			const text = `${formatTitle(el.collection.replace('directus_', 'system_'))} (${el.meta?.one_field ?? 'undefined'})`;
+			const value = `${el.meta?.one_field}`;
 
+			return { text, value }
+		});
+
+		const selectedRelatedCollection = computed(() => {
+			return collectionRelations
+				.find((relation: any) => relation?.meta?.one_field == field.meta?.options?.relationField)?.collection;
+		});
 		const relatedCollectionFields = computed(() => {
+			return fieldsStore.getFieldsForCollection(selectedRelatedCollection.value);
+		});
+
+		const rollupFieldOptions = computed(() => {
 			const selectedFunction = field.meta?.options?.function;
 
-			if (selectedO2MCollection.value) {
-				return fieldsStore.getFieldsForCollection(selectedO2MCollection.value).map((el: any) => {
+			if (relatedCollectionFields.value) {
+				return relatedCollectionFields.value.map((el: any) => {
 					let isDisabled = true;
 
 					switch (field.type) {
@@ -87,14 +101,13 @@ export default defineInterface({
 			}
 		});
 
-		const sortFields = computed(() => {
-			return fieldsStore.getFieldsForCollection(selectedO2MCollection.value)
-				.map((el: any) => {
-					return {
-						text: el.name,
-						value: el.field,
-					}
-				});
+		const sortFieldOptions = computed(() => {
+			return relatedCollectionFields.value.map((el: any) => {
+				return {
+					text: el.name,
+					value: el.field,
+				};
+			});
 		});
 
 		const supportNumberCalculation = computed(() =>
@@ -103,34 +116,31 @@ export default defineInterface({
 
 		return [
 			{
-				field: 'o2mCollection',
+				field: 'relationField',
 				type: 'string',
 				name: 'Related Collection',
 				meta: {
 					width: 'half',
 					interface: 'select-dropdown',
 					options: {
-						choices: o2mCollections.map((el: any) => ({
-							text: `${formatTitle(el.collection)} (${el.meta?.one_field ?? 'undefined'})`,
-							value: `${el.collection}-${el.meta?.one_field}`,
-						})),
+						choices: relatedCollectionOptions,
 						placeholder: 'Select related collection',
 						allowNone: false,
 					},
 				},
 			},
 			{
-				field: 'o2mField',
+				field: 'rollupField',
 				type: 'string',
 				name: 'Related Collection Field',
 				meta: {
+					width: 'half',
 					interface: 'select-dropdown',
 					options: {
-						choices: relatedCollectionFields.value,
+						choices: rollupFieldOptions.value,
 						placeholder: 'Select related field',
 						allowNone: false,
 					},
-					width: 'half',
 				},
 			},
 			{
@@ -165,13 +175,13 @@ export default defineInterface({
 				type: 'string',
 				name: 'Sort Field',
 				meta: {
+					width: 'half',
 					interface: 'select-dropdown',
 					options: {
-						choices: sortFields.value,
+						choices: sortFieldOptions.value,
 						placeholder: 'Select sort field',
 						allowNone: false,
 					},
-					width: 'half',
 				},
 			},
 			{
@@ -181,7 +191,7 @@ export default defineInterface({
 				meta: {
 					interface: 'system-filter',
 					options: {
-						collectionName: selectedO2MCollection.value,
+						collectionName: selectedRelatedCollection.value,
 					},
 				},
 			},

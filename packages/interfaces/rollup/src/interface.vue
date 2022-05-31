@@ -1,7 +1,32 @@
 <template>
-	<v-input :model-value="localValue" @update:model-value="emitValue" :disabled="true" :readonly="true">
-		<template #append><v-progress-circular v-if="loading" indeterminate /></template>
-	</v-input>
+	<div class="interface">
+		<v-skeleton-loader v-if="loading" />
+
+		<v-notice v-if="!relationField || !rollupField" type="warning">
+			<template v-if="!relationField || !rollupField">
+				{{ `Invalid interface options.` }}
+			</template>
+		</v-notice>
+
+		<component
+			v-else
+			:is="
+				rollupFieldObj.meta?.interface
+					? `interface-${rollupFieldObj.meta.interface}`
+					: `interface-${getDefaultInterfaceForType(rollupFieldObj.type)}`
+			"
+			v-bind="rollupFieldObj.meta?.options || {}"
+			:width="rollupFieldObj.meta?.width || 'full'"
+			:type="rollupFieldObj.type"
+			:collection="rollupFieldObj.collection"
+			:field="rollupFieldObj.field"
+			:field-data="rollupFieldObj"
+			:value="localValue === undefined ? rollupFieldObj.schema?.default_value : localValue"
+			:loading="loading"
+			disabled
+			@update:model-value="emitValue"
+		/>
+	</div>
 </template>
 
 <script lang="ts">
@@ -9,6 +34,7 @@ import { defineComponent, PropType, ref, inject, watch } from 'vue';
 import { useApi, useStores } from '@directus/extensions-sdk';
 import { Filter } from '@directus/shared/types';
 import { sum, mean, min, max, first, orderBy, round, isEqual, merge, cloneDeep } from 'lodash';
+import { getDefaultInterfaceForType } from './get-default-interface-for-type';
 
 type ChangesItem = {
 	create: Record<string, any>[];
@@ -22,11 +48,11 @@ export default defineComponent({
 			type: [String, Number],
 			default: null,
 		},
-		o2mCollection: {
+		relationField: {
 			type: String,
 			required: true,
 		},
-		o2mField: {
+		rollupField: {
 			type: String,
 			required: true,
 		},
@@ -66,21 +92,19 @@ export default defineComponent({
 		const relationsStore = useRelationsStore();
 		const values = inject('values', ref<Record<string, any>>({}));
 
-		const [relatedCollection, oneField] = props.o2mCollection.split('-');
-
-		const currentField = fieldsStore.getFieldsForCollection(props.collection)
+		const currentFieldObj = fieldsStore.getFieldsForCollection(props.collection)
 			.find((e) => e.field === props.field);
 
+		const collectionRelation = relationsStore.getRelationsForCollection(props.collection)
+			.find((relation: any) => relation?.meta?.one_field == props.relationField);
+		const relatedCollection = collectionRelation?.collection;
+		const relatedCollectionFK = collectionRelation?.field;
+
 		const relatedCollectionPK = fieldsStore.getPrimaryKeyFieldForCollection(relatedCollection)?.field;
-		const manyCollectionField = relationsStore.getRelationsForCollection(props.collection)
-			.find((relation: any) =>
-					relation.meta?.one_collection === props.collection
-					&& relation.meta?.many_collection === relatedCollection
-					&& relation.meta?.one_field == oneField
-			)?.field;
+		const rollupFieldObj = cloneDeep(fieldsStore.getField(relatedCollection, props.rollupField));
 
 		watch(
-			() => cloneDeep(values.value[oneField]),
+			() => cloneDeep(values.value[props.relationField]),
 			async (newValue, oldValue) => {
 				if (newValue == null && oldValue == null) return;
 
@@ -90,26 +114,47 @@ export default defineComponent({
 			},
 		);
 
-		return { emitValue, loading, localValue };
+		return { emitValue, loading, localValue, rollupFieldObj, getDefaultInterfaceForType };
 
 		function emitValue(value: any): void {
 			localValue.value = cast(value);
+
+			if (!['first', 'last'].includes(props.function)) {
+				rollupFieldObj.meta.interface = 'input';
+			}
+
+			switch (rollupFieldObj?.meta?.interface) {
+				case 'list':
+				case 'select-multiple-checkbox':
+				case 'select-multiple-checkbox-tree':
+				case 'select-multiple-dropdown':
+				case 'tags':
+					localValue.value = JSON.parse(value ?? null);
+					break;
+
+				case 'input-formula':
+					rollupFieldObj.meta.interface = 'input';
+					break;
+			}
+
 			emit('input', localValue.value);
 		}
 
 		function calculate(input: Array<any>, func: string) {
+			if (!['count', 'counta', 'countd', 'countn'].includes(func) && input?.length == 0) return undefined;
+
 			switch (func) {
 				case 'counta': // Count all including empty or null values
-					input = input.map((el: any) => el[props.o2mField]);
+					input = input.map((el: any) => el[props.rollupField]);
 					break;
 
 				case 'countd': // Count unique values
-					input = input.map((el: any) => el[props.o2mField])
+					input = input.map((el: any) => el[props.rollupField])
 						.filter((el: any, index: number, self: any[]) => (el != null && el != '') && self.indexOf(el) === index);
 					break;
 
 				case 'countn': // Count empty and null values
-					input = input.map((el: any) => el[props.o2mField]).filter((el: any) => el == null || el == '');
+					input = input.map((el: any) => el[props.rollupField]).filter((el: any) => el == null || el == '');
 					break;
 
 				case 'count': // Count non-empty and not null values
@@ -117,11 +162,9 @@ export default defineComponent({
 				case 'avg':
 				case 'min':
 				case 'max':
-					input = input.map((el: any) => el[props.o2mField]).filter((el: any) => el != null && el != '');
+					input = input.map((el: any) => el[props.rollupField]).filter((el: any) => el != null && el != '');
 					break;
 			}
-
-			if (!['count', 'counta', 'countd', 'countn'].includes(func) && input.length == 0) return undefined;
 
 			switch (func) {
 				case 'count':
@@ -143,10 +186,10 @@ export default defineComponent({
 					return max(input);
 
 				case 'first':
-					return first(orderBy(input, [props.sortBy], 'asc'))?.[props.o2mField];
+					return first(orderBy(input, [props.sortBy], 'asc'))?.[props.rollupField];
 
 				case 'last':
-					return first(orderBy(input, [props.sortBy], 'desc'))?.[props.o2mField];
+					return first(orderBy(input, [props.sortBy], 'desc'))?.[props.rollupField];
 			}
 		}
 
@@ -167,12 +210,12 @@ export default defineComponent({
 								[relatedCollectionPK]: { '_in': items.update.map((item: any) => item[relatedCollectionPK]) }
 							},
 							{
-								[manyCollectionField]: { '_eq': props.primaryKey }
+								[relatedCollectionFK]: { '_eq': props.primaryKey }
 							}
 						]
 					};
 				} else {
-					return { [manyCollectionField]: { '_eq': props.primaryKey } };
+					return { [relatedCollectionFK]: { '_eq': props.primaryKey } };
 				}
 			}
 		}
@@ -212,7 +255,7 @@ export default defineComponent({
 					? relatedCollection.replace('directus_', '')
 					: `items/${relatedCollection}`;
 				const filter = buildFilter(items) ? merge(buildFilter(items), props.filter) : null;
-				const fields = [relatedCollectionPK, props.o2mField, props.sortBy].filter((val: any) => val).join(',');
+				const fields = [relatedCollectionPK, props.rollupField, props.sortBy].filter((val: any) => val).join(',');
 
 				if (relatedCollection && filter) {
 					const res = await api.get(url, { params: { filter, fields, limit: -1 } });
@@ -223,9 +266,9 @@ export default defineComponent({
 				itemValues = buildValues(items, itemValues);
 
 				if (itemValues?.length > 0) {
-					emitValue(calculate(itemValues, props.function));
+					emitValue(calculate(itemValues, props.function) ?? currentFieldObj.schema?.default_value);
 				} else {
-					emitValue(currentField.schema?.default_value ?? undefined);
+					emitValue(currentFieldObj.schema?.default_value);
 				}
 			} catch (err) {
 				console.log(err);
@@ -239,7 +282,7 @@ export default defineComponent({
 			if (typeof value == 'object') value = JSON.stringify(value);
 			if (typeof value == 'undefined') return undefined;
 
-			const schema = currentField.schema;
+			const schema = currentFieldObj.schema;
 
 			switch (schema.data_type) {
 				case 'decimal':
@@ -272,3 +315,17 @@ export default defineComponent({
 	},
 });
 </script>
+<style scoped>
+.interface {
+	position: relative;
+}
+
+.v-skeleton-loader {
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 2;
+	width: 100%;
+	height: 100%;
+}
+</style>
