@@ -180,9 +180,10 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 			const mapper = getMappingFields(collection, rollupFields, schema);
 
 			for (var i in keys) {
+				const knex = ctx.database?.isCompleted && ctx.database.isCompleted() ? database : ctx.database
 				const key = keys[i];
 				const payload: any = {};
-				const record = await database(collection).where(pk, key).first();
+				const record = await knex(collection).where(pk, key).first();
 
 				if (!record) continue;
 
@@ -192,7 +193,7 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 
 					if (record) {
 						const rollupCollectionItemsService = new services.ItemsService(
-							option.rollupCollection, { knex: database, schema: await getSchema() }
+							option.rollupCollection, { knex: knex, schema: await getSchema() }
 						);
 						const filter = { [option.rollupCollectionFK]: { '_eq': key } };
 						const items = await rollupCollectionItemsService.readByQuery({
@@ -216,7 +217,7 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 				}
 
 				if (Object.keys(payload).length > 0) {
-					await database(collection)
+					await knex(collection)
 						.update(payload)
 						.where(pk, key);
 					logger.info(`ROLLUP: UPDATE ${collection}:${key} - ${JSON.stringify(payload)}`);
