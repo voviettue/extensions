@@ -1,6 +1,6 @@
 {
 	"name": "directus-extension-hook-formula",
-	"version": "1.0.4",
+	"version": "1.0.7",
 	"keywords": [
 		"directus",
 		"directus-extension",
@@ -15,6 +15,9 @@
 	"scripts": {
 		"build": "directus-extension build"
 	},
+	"files": [
+		"dist"
+	],
 	"devDependencies": {
 		"@directus/extensions-sdk": "9.4.0",
 		"@types/node": "^17.0.0",
