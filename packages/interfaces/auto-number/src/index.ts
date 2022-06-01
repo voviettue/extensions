@@ -6,7 +6,7 @@ export default defineInterface({
 	id: 'auto-number',
 	name: 'Auto Number',
 	icon: '123',
-	description: 'Set format and increments a number',
+	description: 'A system-generated sequence number',
 	component: InterfaceComponent,
 	types: ['string'],
 	group: 'standard',
