@@ -42,8 +42,6 @@
 				>
 					Import
 				</v-button>
-				<!-- <v-upload fromLibrary fromUrl @input="onUpload" />
-        <v-input type="file" accept=".csv" @input="onChangeFile" /> -->
 			</form>
 
 			<br />
@@ -129,11 +127,12 @@
 
 			<v-dialog v-model="isSucceed" @esc="resetState()">
 				<v-card>
-					<v-card-title>{{ formatTitle('import_success') }}</v-card-title>
-					<v-card-text>Import {{ payload.length }} items succeed.</v-card-text>
+					<v-card-title>Import has been scheduled</v-card-title>
+					<v-card-text>
+						It'll take a few minutes to complete this import. You will be notified by email when it's done.
+					</v-card-text>
 					<v-card-actions>
-						<v-button secondary @click="clearAll()">Continue Import</v-button>
-						<v-button kind="success" :to="`/content/${collectionName}`">View data</v-button>
+						<v-button secondary @click="clearAll()">Close</v-button>
 					</v-card-actions>
 				</v-card>
 			</v-dialog>
@@ -263,6 +262,7 @@ export default {
 			const collection = this.collection.collection;
 			const formData = new FormData();
 			formData.append('file', new Blob([this.fileContent], { type: 'text/csv' }));
+			formData.append('collectionName', formatTitle(this.collection.name));
 			this.api
 				.post(`/data-management/import/${collection}`, formData)
 				.then((res) => (this.isSucceed = true))
