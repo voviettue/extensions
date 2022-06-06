@@ -30,17 +30,17 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
-import get from "lodash/get";
-import round from "lodash/round";
-import isNil from "lodash/isNil";
-import cloneDeep from "lodash/cloneDeep";
-import functions from "./composables/functions";
-import format from "date-fns/format";
-import { parseDate } from "./composables/utils";
+import { defineComponent } from 'vue';
+import get from 'lodash/get';
+import round from 'lodash/round';
+import isNil from 'lodash/isNil';
+import cloneDeep from 'lodash/cloneDeep';
+import functions from './composables/functions';
+import format from 'date-fns/format';
+import { parseDate } from './composables/utils';
 
 export default defineComponent({
-	inject: ["values", "stores", "api"],
+	inject: ['values', 'stores', 'api'],
 	props: {
 		collection: {
 			type: String,
@@ -56,23 +56,23 @@ export default defineComponent({
 		},
 		template: {
 			type: String,
-			default: "",
+			default: '',
 		},
 		thousandsSeparator: {
 			type: String,
-			default: "",
+			default: '',
 		},
 		decimalSeparator: {
 			type: String,
-			default: "",
+			default: '',
 		},
 		prefix: {
 			type: String,
-			default: "",
+			default: '',
 		},
 		suffix: {
 			type: String,
-			default: "",
+			default: '',
 		},
 		iconLeft: {
 			type: String,
@@ -87,7 +87,7 @@ export default defineComponent({
 			default: false,
 		},
 	},
-	emits: ["update:modelValue", "input"],
+	emits: ['update:modelValue', 'input'],
 	data() {
 		return {
 			oldValues: null,
@@ -106,10 +106,10 @@ export default defineComponent({
 			return this.fields.find((e) => e.field === this.field);
 		},
 		numberTypes() {
-			return ["integer", "bigInteger", "decimal", "float"];
+			return ['integer', 'bigInteger', 'decimal', 'float'];
 		},
 		dateTypes() {
-			return ["date", "dateTime", "time", "timestamp"];
+			return ['date', 'dateTime', 'time', 'timestamp'];
 		},
 		interfaceName() {
 			switch (this.currentField?.type) {
@@ -119,11 +119,11 @@ export default defineComponent({
 				// case "timestamp":
 				//   return "interface-datetime";
 
-				case "boolean":
-					return "interface-boolean";
+				case 'boolean':
+					return 'interface-boolean';
 
 				default:
-					return "";
+					return '';
 			}
 		},
 		isNumberField() {
@@ -142,17 +142,15 @@ export default defineComponent({
 				return this.formatDate(value);
 			}
 
-			return this.prefix || this.suffix
-				? `${this.prefix ?? ""}${value ?? ""}${this.suffix ?? ""}`
-				: value;
+			return this.prefix || this.suffix ? `${this.prefix ?? ''}${value ?? ''}${this.suffix ?? ''}` : value;
 		},
 		expressionKeys() {
 			const regex = /({{.*?}})/g;
 			const keys = [];
 			this.template.split(regex).map((part: string) => {
-				if (part.startsWith("{{") === false) return part;
+				if (part.startsWith('{{') === false) return part;
 
-				let fieldKey = part.replace(/{{/g, "").replace(/}}/g, "").trim();
+				let fieldKey = part.replace(/{{/g, '').replace(/}}/g, '').trim();
 				keys.push(fieldKey);
 			});
 			return keys;
@@ -166,11 +164,8 @@ export default defineComponent({
 			handler: async function () {
 				const values = this.values.value;
 				for (var key of this.expressionKeys) {
-					const fieldName = key.split(".").shift();
-					if (
-						this.oldValues !== null &&
-						values?.[fieldName] !== this.oldValues?.[fieldName]
-					) {
+					const fieldName = key.split('.').shift();
+					if (this.oldValues !== null && values?.[fieldName] !== this.oldValues?.[fieldName]) {
 						await this.execute();
 						break;
 					}
@@ -181,10 +176,7 @@ export default defineComponent({
 		},
 	},
 	mounted() {
-		if (
-			this.$attrs["primary-key"] === "+" ||
-			!!this.$attrs["field-data"]?.meta?.group
-		) {
+		if (this.$attrs['primary-key'] === '+' || !!this.$attrs['field-data']?.meta?.group) {
 			this.execute();
 		}
 	},
@@ -209,14 +201,14 @@ export default defineComponent({
 		},
 		emitInput() {
 			setTimeout(() => {
-				this.$emit("input", this.formulaValue);
+				this.$emit('input', this.formulaValue);
 			}, 50);
 		},
 		async getValues() {
 			const values = {};
 			for (var i in this.expressionKeys) {
 				const path = this.expressionKeys[i];
-				if (path.includes(".")) {
+				if (path.includes('.')) {
 					values[path] = await this.getValueFromPath(path);
 				} else {
 					values[path] = this.getValueFromKey(path);
@@ -225,7 +217,7 @@ export default defineComponent({
 			return values;
 		},
 		async getValueFromPath(path) {
-			const keys = path.split(".");
+			const keys = path.split('.');
 			const relationKey = keys.shift();
 			const relationField = this.fields.find((e) => e.field === relationKey);
 			const collection = relationField?.schema?.foreign_key_table;
@@ -234,25 +226,21 @@ export default defineComponent({
 			const id = value instanceof Object ? value?.[collectionPK] : value;
 			if (!collection || !id) return null;
 
-			const url = collection.startsWith("directus")
-				? `${collection.replace("directus_", "")}/${id}`
+			const url = collection.startsWith('directus')
+				? `${collection.replace('directus_', '')}/${id}`
 				: `items/${collection}/${id}`;
 
 			let item = await this.api.get(url);
 			const data = item?.data?.data;
 			item = value instanceof Object ? { ...data, ...value } : data;
 
-			return get(item, keys.join("."));
+			return get(item, keys.join('.'));
 		},
 		getValueFromKey(fieldKey: any) {
 			const field = this.fields.find((e) => e.field === fieldKey);
 			const isNumberField = this.numberTypes.includes(field.type);
 			const defaultNullValue = isNumberField ? 0 : null;
-			const value = get(
-				this.values.value,
-				field.field,
-				field?.schema?.default_value || defaultNullValue
-			);
+			const value = get(this.values.value, field.field, field?.schema?.default_value || defaultNullValue);
 
 			return value;
 		},
@@ -294,11 +282,7 @@ export default defineComponent({
 					WORKDAY_DIFF,
 				} = functions;
 
-				const fn = new Function(
-					"PROP",
-					Object.keys(functions).join(","),
-					`return ${statement}`
-				);
+				const fn = new Function('PROP', Object.keys(functions).join(','), `return ${statement}`);
 				const PROP = (fieldKey) => {
 					return values?.[fieldKey];
 				};
@@ -352,49 +336,38 @@ export default defineComponent({
 			}
 		},
 		cast(value) {
-			if (
-				isNil(value) ||
-				value === "" ||
-				value === [] ||
-				value === {} ||
-				value === NaN ||
-				value === Infinity
-			)
+			if (isNil(value) || value === '' || value === [] || value === {} || value === NaN || value === Infinity)
 				return null;
 
 			const schema = this.currentField.schema;
 
-			if (typeof value === "boolean") {
+			if (typeof value === 'boolean') {
 				value = value ? 1 : 0;
 			}
 
 			switch (this.currentField.type) {
-				case "decimal":
-				case "float":
+				case 'decimal':
+				case 'float':
 					return round(value, schema.numeric_scale);
 
-				case "integer":
-				case "bigInteger":
+				case 'integer':
+				case 'bigInteger':
 					return round(value);
 
-				case "boolean":
+				case 'boolean':
 					return !!value;
 
-				case "time":
+				case 'time':
 					return this.convertTime(value);
 
-				case "date":
-					return this.isValidDate(value)
-						? format(parseDate(value), "yyyy-MM-dd")
-						: null;
+				case 'date':
+					return this.isValidDate(value) ? format(parseDate(value), 'yyyy-MM-dd') : null;
 
-				case "dateTime":
+				case 'dateTime':
 					const d = parseDate(value);
-					return this.isValidDate(value)
-						? d.toISOString().substring(0, 19)
-						: null;
+					return this.isValidDate(value) ? d.toISOString().substring(0, 19) : null;
 
-				case "timestamp":
+				case 'timestamp':
 					const dd = parseDate(value);
 					return this.isValidDate(value) ? dd.toISOString() : null;
 
@@ -414,7 +387,7 @@ export default defineComponent({
 
 			// valid time
 			if (String(value).match(regex) || String(value).match(regexNoHour)) {
-				return value.split(":").length < 3 ? `${value}:00` : value;
+				return value.split(':').length < 3 ? `${value}:00` : value;
 			}
 
 			// invalid number
@@ -427,37 +400,37 @@ export default defineComponent({
 			const mm = Math.floor((seconds - hh * 3600) / 60);
 			const ss = seconds - hh * 3600 - mm * 60;
 			return (
-				`${String(hh).padStart(2, "0")}` +
-				":" +
-				`${String(mm).padStart(2, "0")}` +
-				":" +
-				`${String(ss).padStart(2, "0")}`
+				`${String(hh).padStart(2, '0')}` +
+				':' +
+				`${String(mm).padStart(2, '0')}` +
+				':' +
+				`${String(ss).padStart(2, '0')}`
 			);
 		},
 		formatNumber(number) {
-			var str = String(number).split(".");
+			var str = String(number).split('.');
 
-			str[0] = str[0] || "";
+			str[0] = str[0] || '';
 			var left = [];
 			for (var i = str[0].length; i > 0; i -= 3) {
 				left.unshift(str[0].substring(Math.max(0, i - 3), i));
 			}
 			str[0] = left.join(this.thousandsSeparator);
 
-			return str.join(this.decimalSeparator || ".");
+			return str.join(this.decimalSeparator || '.');
 		},
 		formatDate(value) {
 			if (!value) return null;
 
 			switch (this.currentField?.type) {
-				case "date":
-					return format(parseDate(value), "MMMM do, yyyy");
+				case 'date':
+					return format(parseDate(value), 'MMMM do, yyyy');
 
-				case "dateTime":
-					return format(parseDate(value), "MMMM do, yyyy HH:mm:ss");
+				case 'dateTime':
+					return format(parseDate(value), 'MMMM do, yyyy HH:mm:ss');
 
-				case "timestamp":
-					return format(parseDate(value), "MMMM do, yyyy HH:mm:ss");
+				case 'timestamp':
+					return format(parseDate(value), 'MMMM do, yyyy HH:mm:ss');
 
 				default:
 					return value;

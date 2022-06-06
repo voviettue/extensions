@@ -40,7 +40,7 @@ type ChangesItem = {
 	create: Record<string, any>[];
 	update: Record<string, any>[];
 	delete: (string | number)[];
-}
+};
 
 export default defineComponent({
 	props: {
@@ -57,7 +57,9 @@ export default defineComponent({
 			required: true,
 		},
 		function: {
-			type: String as PropType<'count' | 'counta' | 'countd' | 'countn' | 'sum' | 'avg' | 'min' | 'max' | 'first' | 'last'>,
+			type: String as PropType<
+				'count' | 'counta' | 'countd' | 'countn' | 'sum' | 'avg' | 'min' | 'max' | 'first' | 'last'
+			>,
 			required: true,
 		},
 		sortBy: {
@@ -92,10 +94,10 @@ export default defineComponent({
 		const relationsStore = useRelationsStore();
 		const values = inject('values', ref<Record<string, any>>({}));
 
-		const currentFieldObj = fieldsStore.getFieldsForCollection(props.collection)
-			.find((e) => e.field === props.field);
+		const currentFieldObj = fieldsStore.getFieldsForCollection(props.collection).find((e) => e.field === props.field);
 
-		const collectionRelation = relationsStore.getRelationsForCollection(props.collection)
+		const collectionRelation = relationsStore
+			.getRelationsForCollection(props.collection)
 			.find((relation: any) => relation?.meta?.one_field == props.relationField);
 		const relatedCollection = collectionRelation?.collection;
 		const relatedCollectionFK = collectionRelation?.field;
@@ -111,7 +113,7 @@ export default defineComponent({
 				if (!isEqual(newValue, oldValue)) {
 					await rollupItems(newValue);
 				}
-			},
+			}
 		);
 
 		return { emitValue, loading, localValue, rollupFieldObj, getDefaultInterfaceForType };
@@ -149,8 +151,9 @@ export default defineComponent({
 					break;
 
 				case 'countd': // Count unique values
-					input = input.map((el: any) => el[props.rollupField])
-						.filter((el: any, index: number, self: any[]) => (el != null && el != '') && self.indexOf(el) === index);
+					input = input
+						.map((el: any) => el[props.rollupField])
+						.filter((el: any, index: number, self: any[]) => el != null && el != '' && self.indexOf(el) === index);
 					break;
 
 				case 'countn': // Count empty and null values
@@ -197,7 +200,7 @@ export default defineComponent({
 			if (props.primaryKey == '+') {
 				if (items?.update?.length > 0) {
 					return {
-						[relatedCollectionPK]: { '_in': items.update.map((item: any) => item[relatedCollectionPK]) }
+						[relatedCollectionPK]: { _in: items.update.map((item: any) => item[relatedCollectionPK]) },
 					};
 				} else {
 					return;
@@ -205,17 +208,17 @@ export default defineComponent({
 			} else {
 				if (items?.update?.length > 0) {
 					return {
-						'_or': [
+						_or: [
 							{
-								[relatedCollectionPK]: { '_in': items.update.map((item: any) => item[relatedCollectionPK]) }
+								[relatedCollectionPK]: { _in: items.update.map((item: any) => item[relatedCollectionPK]) },
 							},
 							{
-								[relatedCollectionFK]: { '_eq': props.primaryKey }
-							}
-						]
+								[relatedCollectionFK]: { _eq: props.primaryKey },
+							},
+						],
 					};
 				} else {
-					return { [relatedCollectionFK]: { '_eq': props.primaryKey } };
+					return { [relatedCollectionFK]: { _eq: props.primaryKey } };
 				}
 			}
 		}
@@ -229,10 +232,9 @@ export default defineComponent({
 
 			if (items?.update?.length > 0) {
 				values = values.map((val: any) => {
-					const updateItem = items.update
-						.find((item: any) => item[relatedCollectionPK] == val[relatedCollectionPK]);
+					const updateItem = items.update.find((item: any) => item[relatedCollectionPK] == val[relatedCollectionPK]);
 					if (updateItem) {
-						val = Object.assign({}, val, updateItem)
+						val = Object.assign({}, val, updateItem);
 					}
 					return val;
 				});
@@ -251,9 +253,10 @@ export default defineComponent({
 			try {
 				let itemValues = [];
 
-				const url = relatedCollection.startsWith('directus_') === true
-					? relatedCollection.replace('directus_', '')
-					: `items/${relatedCollection}`;
+				const url =
+					relatedCollection.startsWith('directus_') === true
+						? relatedCollection.replace('directus_', '')
+						: `items/${relatedCollection}`;
 				const filter = buildFilter(items) ? merge(buildFilter(items), props.filter) : null;
 				const fields = [relatedCollectionPK, props.rollupField, props.sortBy].filter((val: any) => val).join(',');
 

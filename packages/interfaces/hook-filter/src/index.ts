@@ -44,10 +44,11 @@ export default defineInterface({
 					interface: 'input-multiline',
 					width: 'full',
 					options: {
-						placeholder: 'Support 3 arguments \n 1. The modifiable payload \n 2. An event-specific meta object \n 3. A context object \nYou can use it by using arguments object.',
+						placeholder:
+							'Support 3 arguments \n 1. The modifiable payload \n 2. An event-specific meta object \n 3. A context object \nYou can use it by using arguments object.',
 					},
 				},
 			},
-		]
+		];
 	},
 });

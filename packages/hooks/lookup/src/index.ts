@@ -11,12 +11,11 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 
 	const getLookupFields = async (collection: string) => {
 		if (_lookupFields === null) {
-			_lookupFields = await database.from('directus_fields')
-				.where('interface', '=', 'input-lookup');
+			_lookupFields = await database.from('directus_fields').where('interface', '=', 'input-lookup');
 		}
 
 		return _lookupFields.filter((field: any) => field.collection === collection);
-	}
+	};
 
 	const getSchemaFields = async (collection: string): Promise<Field[]> => {
 		if (_schemaFields === null) {
@@ -24,12 +23,12 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 			_schemaFields = await fieldsService.readAll(collection);
 		}
 		return _schemaFields.filter((schema: any) => !collection || schema.collection === collection);
-	}
+	};
 
 	const clearCache = () => {
-		_lookupFields = null
-		_schemaFields = null
-	}
+		_lookupFields = null;
+		_schemaFields = null;
+	};
 
 	const cast = (value: any, fieldSchema: Field) => {
 		if (value === null) return null;
@@ -72,7 +71,7 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 			default:
 				return value;
 		}
-	}
+	};
 
 	const getLookupMaps = (collection: string, lookupFields: any[], schema: any): LookupMap[] => {
 		const mapper: LookupMap[] = [];
@@ -103,23 +102,20 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 		}
 
 		return mapper;
-	}
+	};
 
 	const getItem = async (value: any, map: LookupMap) => {
-		const id = value instanceof Object ? value?.[map.lookupCollectionPK] : value
-		const key = `${map.lookupCollection}.${id}`
+		const id = value instanceof Object ? value?.[map.lookupCollectionPK] : value;
+		const key = `${map.lookupCollection}.${id}`;
 
 		if (!_items?.[key]) {
-			_items[key] = await database
-				.from(map.lookupCollection)
-				.where(map.lookupCollectionPK, id)
-				.first();
+			_items[key] = await database.from(map.lookupCollection).where(map.lookupCollectionPK, id).first();
 		}
-		const item = _items[key] ?? {}
-		let result = value instanceof Object ? { ...item, ...value } : item
+		const item = _items[key] ?? {};
+		let result = value instanceof Object ? { ...item, ...value } : item;
 
-		return result
-	}
+		return result;
+	};
 
 	const execute = async (collection: any, input: any) => {
 		const lookupFields = await getLookupFields(collection);
@@ -131,9 +127,9 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 			const lookupMaps = getLookupMaps(collection, lookupFields, schema);
 
 			for (var map of lookupMaps) {
-				if (!input?.[map.relationField]) continue
+				if (!input?.[map.relationField]) continue;
 
-				const item = await getItem(input[map.relationField], map)
+				const item = await getItem(input[map.relationField], map);
 				if (item) {
 					const fieldSchema = fieldSchemas.find((schema: any) => schema.field === map.field);
 					if (!fieldSchema) continue;
@@ -144,31 +140,31 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 		} catch (error: any) {
 			logger.error(`LOOKUP: ${error.toString()}`);
 		} finally {
-			_items = {}
+			_items = {};
 		}
-	}
+	};
 
 	filter('items.create', async (input: any, event: any, ctx: any) => {
-		const collection = event.collection
+		const collection = event.collection;
 		await execute(collection, input);
-		return input
+		return input;
 	});
 
 	filter('items.update', async (input: any, event: any, ctx: any) => {
-		const collection = event.collection
+		const collection = event.collection;
 		await execute(collection, input);
-		return input
+		return input;
 	});
 
 	action('fields.create', () => {
-		clearCache()
+		clearCache();
 	});
 
 	action('fields.update', () => {
-		clearCache()
+		clearCache();
 	});
 
 	action('fields.delete', () => {
-		clearCache()
+		clearCache();
 	});
 });

@@ -12,25 +12,29 @@ export default defineEndpoint((router, { database }) => {
 	});
 
 	async function getSubscription() {
-		return stripe.subscriptions.list({
-			customer: stripeCustomerId,
-			limit: 1,
-			expand: ['data.plan.product'],
-		}).then(response => {
-			if (response.data.length === 0) {
-				return null
-			}
-			return response.data[0]
-		})
+		return stripe.subscriptions
+			.list({
+				customer: stripeCustomerId,
+				limit: 1,
+				expand: ['data.plan.product'],
+			})
+			.then((response) => {
+				if (response.data.length === 0) {
+					return null;
+				}
+				return response.data[0];
+			});
 	}
 
 	async function getUpcomingInvoice() {
 		// await updateUsage(subscription)
-		return stripe.invoices.retrieveUpcoming({
-			customer: stripeCustomerId,
-		}).then((response): any => {
-			return response
-		})
+		return stripe.invoices
+			.retrieveUpcoming({
+				customer: stripeCustomerId,
+			})
+			.then((response): any => {
+				return response;
+			});
 	}
 
 	// async function getTotalUser() {
@@ -49,40 +53,41 @@ export default defineEndpoint((router, { database }) => {
 
 	router.get('/check', (_req, res) => {
 		if (!apiKey || !stripeCustomerId) {
-			res.statusCode = 403
-			return res.send("You don't have permission!")
+			res.statusCode = 403;
+			return res.send("You don't have permission!");
 		}
 
-		return res.send("")
-	})
+		return res.send('');
+	});
 
 	router.get('/subscription', async (_req, res) => {
 		try {
-			const subscription: any = await getSubscription()
+			const subscription: any = await getSubscription();
 
 			if (!subscription) {
-				return res.send({ data: null })
+				return res.send({ data: null });
 			}
 
-			const upcomingInvoice: any = await getUpcomingInvoice()
+			const upcomingInvoice: any = await getUpcomingInvoice();
 
-			return res.send({ data: subscription, meta: { upcomingInvoice } })
+			return res.send({ data: subscription, meta: { upcomingInvoice } });
 		} catch (err: any) {
-			res.statusCode = err.statusCode || 400
-			return res.send(err)
+			res.statusCode = err.statusCode || 400;
+			return res.send(err);
 		}
-	})
+	});
 
 	router.post('/portal/sessions', (_req, res) => {
-		const returnUrl = siteAddress ? `http://${siteAddress}/admin/workspace` : _req.headers.referer
-		stripe.billingPortal.sessions.create({
-			customer: stripeCustomerId,
-			return_url: returnUrl,
-		})
-			.then(response => res.send(response))
-			.catch((err: any) => {
-				res.statusCode = err.statusCode || 400
-				return res.send(err)
+		const returnUrl = siteAddress ? `http://${siteAddress}/admin/workspace` : _req.headers.referer;
+		stripe.billingPortal.sessions
+			.create({
+				customer: stripeCustomerId,
+				return_url: returnUrl,
 			})
-	})
+			.then((response) => res.send(response))
+			.catch((err: any) => {
+				res.statusCode = err.statusCode || 400;
+				return res.send(err);
+			});
+	});
 });

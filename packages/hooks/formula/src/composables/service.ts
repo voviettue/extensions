@@ -1,8 +1,8 @@
-import { Field } from '@directus/shared/types'
-import get from 'lodash/get'
-import round from 'lodash/round'
-import functions from './functions'
-import { numberTypes, parseDate, parseTime, getExpressionFieldKeys } from './utils'
+import { Field } from '@directus/shared/types';
+import get from 'lodash/get';
+import round from 'lodash/round';
+import functions from './functions';
+import { numberTypes, parseDate, parseTime, getExpressionFieldKeys } from './utils';
 
 export class Service {
 	schemaFields: Field[];
@@ -12,9 +12,9 @@ export class Service {
 
 	constructor(schemaFields: Field[], getSchema: Function, services: any, knex: any) {
 		this.schemaFields = schemaFields;
-		this.getSchema = getSchema
-		this.services = services
-		this.knex = knex
+		this.getSchema = getSchema;
+		this.services = services;
+		this.knex = knex;
 
 		return this;
 	}
@@ -41,22 +41,22 @@ export class Service {
 				return !!value;
 
 			case 'time':
-				return parseTime(value)
+				return parseTime(value);
 
 			case 'date':
 			case 'dateTime':
 			case 'timestamp':
-				return parseDate(value)
+				return parseDate(value);
 
 			default:
 				return value;
 		}
-	}
+	};
 
 	getResult(statement: any, values: any) {
 		try {
 			const PROP = (fieldKey: string) => {
-				return values?.[fieldKey] || null
+				return values?.[fieldKey] || null;
 			};
 
 			const {
@@ -92,7 +92,7 @@ export class Service {
 				YEAR,
 				NOW,
 				WORKDAY,
-				WORKDAY_DIFF
+				WORKDAY_DIFF,
 			} = functions;
 
 			const fn = new Function('PROP', Object.keys(functions).join(','), `return ${statement}`);
@@ -133,7 +133,7 @@ export class Service {
 				WORKDAY_DIFF
 			);
 
-			return result
+			return result;
 		} catch (err: any) {
 			console.log({ err, message: err?.message });
 			return null;
@@ -141,8 +141,8 @@ export class Service {
 	}
 
 	async getValues(payload: any, field: any) {
-		const template = JSON.parse(field.options)?.template || ''
-		const keys = getExpressionFieldKeys(template)
+		const template = JSON.parse(field.options)?.template || '';
+		const keys = getExpressionFieldKeys(template);
 		const statement = keys.reduce((str: any, key: any) => {
 			return str.replace(`{{${key}}}`, `PROP("${key}")`);
 		}, template);
@@ -163,27 +163,27 @@ export class Service {
 	async getValueFromPath(payload: any, path: string) {
 		const keys = path.split('.');
 		const relationKey: any = keys.shift();
-		const relationField = this.schemaFields.find((e: any) => e.field === relationKey)
+		const relationField = this.schemaFields.find((e: any) => e.field === relationKey);
 		const collection = relationField?.schema?.foreign_key_table;
 		const id = this.getValueFromKey(payload, relationKey);
 
 		if (!collection || !id) return '';
 
-		const { ItemsService } = this.services
-		const schema = await this.getSchema()
+		const { ItemsService } = this.services;
+		const schema = await this.getSchema();
 		const itemsService = new ItemsService(collection, {
 			accountability: null,
 			schema: schema,
 			knex: this.knex,
 		});
 
-		const item = await itemsService.readOne(id, { fields: [keys.join('.')] })
-		return get(item, keys.join('.'), null)
+		const item = await itemsService.readOne(id, { fields: [keys.join('.')] });
+		return get(item, keys.join('.'), null);
 	}
 
 	getValueFromKey(input: any, fieldKey: any) {
 		const field = this.schemaFields.find((e: any) => e.field === fieldKey);
-		if (!field) return null
+		if (!field) return null;
 
 		const isNumberField = numberTypes.includes(field.type);
 		const defaultNullValue = isNumberField ? 0 : '';

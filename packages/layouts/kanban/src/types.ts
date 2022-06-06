@@ -6,14 +6,14 @@ export type LayoutQuery = {
 };
 
 export type LayoutOptions = {
-	groupBy?: string,
-	groupTitle?: string,
-	cardTitle?: string,
-	cardSubtitle?: string,
-	cardTags?: string,
-	cardDate?: string,
-	cardImage?: string,
-	cardImageFit?: boolean,
-	cardUser?: string,
-	showUngrouped?: boolean,
+	groupBy?: string;
+	groupTitle?: string;
+	cardTitle?: string;
+	cardSubtitle?: string;
+	cardTags?: string;
+	cardDate?: string;
+	cardImage?: string;
+	cardImageFit?: boolean;
+	cardUser?: string;
+	showUngrouped?: boolean;
 };

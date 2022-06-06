@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent } from 'vue';
 import { round } from 'lodash';
 
 export default defineComponent({
@@ -27,6 +27,6 @@ export default defineComponent({
 		}
 
 		return { displayValue };
-	}
+	},
 });
 </script>

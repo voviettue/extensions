@@ -19,7 +19,7 @@ npm run build
 In case you just want to build a specific package, you can pass the argument `-w` with the package name:
 
 ```bash
-npm run build -w <package_name> 
+npm run build -w <package_name>
 ```
 
 ## Development

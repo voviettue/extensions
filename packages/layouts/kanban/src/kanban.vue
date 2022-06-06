@@ -34,10 +34,7 @@
 						<render-template :collection="collection" :item="element" :template="cardSubtitle" />
 					</div>
 					<div v-if="element[cardTags]" class="display-labels">
-						<v-chip
-							v-for="tag in element[cardTags]" :key="tag"
-							small label disabled
-						>{{ tag }}</v-chip>
+						<v-chip v-for="tag in element[cardTags]" :key="tag" small label disabled>{{ tag }}</v-chip>
 					</div>
 					<div class="addition">
 						<span class="datetime">{{ formattedTime(element[cardDate]) }}</span>
@@ -78,9 +75,7 @@
 			</template>
 		</v-info>
 
-		<v-info v-if="!groupBy" type="warning" icon="layers" center>
-			Configure the Group By option first
-		</v-info>
+		<v-info v-if="!groupBy" type="warning" icon="layers" center>Configure the Group By option first</v-info>
 	</div>
 </template>
 
@@ -192,7 +187,7 @@ export default defineComponent({
 
 					groupByField?.meta?.options?.choices?.forEach((option: any) => {
 						result[option.value] = props.items?.filter((item: any) => option.value == item[props.groupBy]);
-					})
+					});
 
 					return result;
 				} else {
@@ -204,7 +199,7 @@ export default defineComponent({
 		});
 
 		const groupItems = ref(computedGroupedItems.value);
-		watchEffect(() => groupItems.value = computedGroupedItems.value);
+		watchEffect(() => (groupItems.value = computedGroupedItems.value));
 
 		const onChangeError = ref(null);
 
@@ -230,20 +225,21 @@ export default defineComponent({
 		}
 
 		async function updateGroupBy(itemId: string | number, targetGroupName: any) {
-			return await api.patch(
-				`items/${props.collection}/${itemId}`,
-				{ [props.groupBy]: targetGroupName }
-			).catch(async (err: any) => {
-				onChangeError.value = err;
-				await props.getItems();
-			})
+			return await api
+				.patch(`items/${props.collection}/${itemId}`, { [props.groupBy]: targetGroupName })
+				.catch(async (err: any) => {
+					onChangeError.value = err;
+					await props.getItems();
+				});
 		}
 
 		function groupByText(value: string | number): string {
 			const groupByField = fieldsStore.getField(props.collection, props.groupBy);
 
-			return groupByField?.meta?.options?.choices?.
-				find((option: any) => option.value == value)?.text?.replace('$t:', '') ?? 'Ungrouped';
+			return (
+				groupByField?.meta?.options?.choices?.find((option: any) => option.value == value)?.text?.replace('$t:', '') ??
+				'Ungrouped'
+			);
 		}
 
 		function formattedTime(time: any) {
@@ -251,7 +247,7 @@ export default defineComponent({
 				// timestamp is in iso-8601
 				return format(new Date(time), String(`${t('date-fns_date_short')} ${t('date-fns_time_short')}`));
 			}
-		};
+		}
 
 		function imageSrc(image: any): string | null {
 			if (image?.id) {

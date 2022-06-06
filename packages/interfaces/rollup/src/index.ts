@@ -42,22 +42,27 @@ export default defineInterface({
 		);
 
 		// Support O2M collections
-		const collectionRelations = relationsStore.getRelationsForCollection(collection)
-			.filter((relation: any) =>
-				relation.related_collection === collection
-				&& relation?.meta?.junction_field === null
-				&& relation?.meta?.one_field !== null
+		const collectionRelations = relationsStore
+			.getRelationsForCollection(collection)
+			.filter(
+				(relation: any) =>
+					relation.related_collection === collection &&
+					relation?.meta?.junction_field === null &&
+					relation?.meta?.one_field !== null
 			);
 		const relatedCollectionOptions = collectionRelations.map((el: any) => {
-			const text = `${formatTitle(el.collection.replace('directus_', 'system_'))} (${el.meta?.one_field ?? 'undefined'})`;
+			const text = `${formatTitle(el.collection.replace('directus_', 'system_'))} (${
+				el.meta?.one_field ?? 'undefined'
+			})`;
 			const value = `${el.meta?.one_field}`;
 
-			return { text, value }
+			return { text, value };
 		});
 
 		const selectedRelatedCollection = computed(() => {
-			return collectionRelations
-				.find((relation: any) => relation?.meta?.one_field == field.meta?.options?.relationField)?.collection;
+			return collectionRelations.find(
+				(relation: any) => relation?.meta?.one_field == field.meta?.options?.relationField
+			)?.collection;
 		});
 		const relatedCollectionFields = computed(() => {
 			return fieldsStore.getFieldsForCollection(selectedRelatedCollection.value);
@@ -94,7 +99,7 @@ export default defineInterface({
 						text: el.name,
 						value: el.field,
 						disabled: ['count', 'counta', 'countd', 'countn'].includes(selectedFunction) ? false : isDisabled,
-					}
+					};
 				});
 			} else {
 				return null;
@@ -155,15 +160,43 @@ export default defineInterface({
 							{ text: 'FIRST — Returns the first value, according to sorting', value: 'first', disabled: false },
 							{ text: 'LAST — Returns the last value, according to sorting', value: 'last', disabled: false },
 							{ divider: true },
-							{ text: 'COUNT — Count only non-empty values', value: 'count', disabled: !supportNumberCalculation.value },
-							{ text: 'COUNTA — Count all number of items including blank values', value: 'counta', disabled: !supportNumberCalculation.value },
-							{ text: 'COUNTD — Count unique values (except empty values)', value: 'countd', disabled: !supportNumberCalculation.value },
-							{ text: 'COUNTN — Count the number of empty values', value: 'countn', disabled: !supportNumberCalculation.value },
+							{
+								text: 'COUNT — Count only non-empty values',
+								value: 'count',
+								disabled: !supportNumberCalculation.value,
+							},
+							{
+								text: 'COUNTA — Count all number of items including blank values',
+								value: 'counta',
+								disabled: !supportNumberCalculation.value,
+							},
+							{
+								text: 'COUNTD — Count unique values (except empty values)',
+								value: 'countd',
+								disabled: !supportNumberCalculation.value,
+							},
+							{
+								text: 'COUNTN — Count the number of empty values',
+								value: 'countn',
+								disabled: !supportNumberCalculation.value,
+							},
 							{ divider: true },
 							{ text: 'SUM — Sum together the values', value: 'sum', disabled: !supportNumberCalculation.value },
-							{ text: 'AVERAGE — Arithmetic mean of the values', value: 'avg', disabled: !supportNumberCalculation.value },
-							{ text: 'MINIMUM — Returns the smallest value, ignoring empty fields', value: 'min', disabled: !supportNumberCalculation.value },
-							{ text: 'MAXIMUM — Returns the largest value, ignoring empty fields', value: 'max', disabled: !supportNumberCalculation.value },
+							{
+								text: 'AVERAGE — Arithmetic mean of the values',
+								value: 'avg',
+								disabled: !supportNumberCalculation.value,
+							},
+							{
+								text: 'MINIMUM — Returns the smallest value, ignoring empty fields',
+								value: 'min',
+								disabled: !supportNumberCalculation.value,
+							},
+							{
+								text: 'MAXIMUM — Returns the largest value, ignoring empty fields',
+								value: 'max',
+								disabled: !supportNumberCalculation.value,
+							},
 						],
 						placeholder: 'Select function',
 						allowNone: false,

@@ -97,8 +97,8 @@ export default defineComponent({
 						secStr = localValue.value;
 
 						hours = Math.floor(parseInt(secStr) / 3600);
-						minutes = Math.floor((parseInt(secStr) - (hours * 3600)) / 60);
-						seconds = parseInt(secStr) - (hours * 3600) - (minutes * 60);
+						minutes = Math.floor((parseInt(secStr) - hours * 3600) / 60);
+						seconds = parseInt(secStr) - hours * 3600 - minutes * 60;
 					} else {
 						minStr = localValue.value;
 
@@ -113,8 +113,8 @@ export default defineComponent({
 						minStr = localValue.value;
 
 						hours = Math.floor(parseInt(minStr) / 60);
-						minutes = Math.floor((parseInt(minStr) - (hours * 60)));
-						seconds = Math.floor((parseFloat(minStr) - (hours * 60) - minutes) * 60);
+						minutes = Math.floor(parseInt(minStr) - hours * 60);
+						seconds = Math.floor((parseFloat(minStr) - hours * 60 - minutes) * 60);
 					} else {
 						hourStr = localValue.value;
 						hours = Math.floor(parseInt(hourStr));

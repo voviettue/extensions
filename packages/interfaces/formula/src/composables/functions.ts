@@ -19,7 +19,7 @@ import getDay from 'date-fns/getDay';
 import getWeek from 'date-fns/getWeek';
 import addDays from 'date-fns/addDays';
 import subDays from 'date-fns/subDays';
-import { daysInWeek, parseDate } from './utils'
+import { daysInWeek, parseDate } from './utils';
 
 const functions = {
 	CONCATENATE: (...args: any[]) => {
@@ -78,7 +78,7 @@ const functions = {
 		}, 0);
 	},
 	VALUE(string: any) {
-		const numbers = isNil(string) ? '' : String(string).match(/\d+.\d+/g)
+		const numbers = isNil(string) ? '' : String(string).match(/\d+.\d+/g);
 		return numbers ? parseFloat(String(numbers[0])) : null;
 	},
 	DATEADD(date: any, qty: number, unit = 'days') {

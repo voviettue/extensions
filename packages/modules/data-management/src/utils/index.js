@@ -1,39 +1,38 @@
 export const convertArray = (value) => {
 	if (!value) {
-		return value
+		return value;
 	}
 
-	return value.split(",").map((e) => e.trim())
-}
+	return value.split(',').map((e) => e.trim());
+};
 
 export const convertJson = (value) => {
 	if (!value) {
-		return value
+		return value;
 	}
 
 	try {
-		return JSON.parse(value)
+		return JSON.parse(value);
+	} catch (err) {
+		return value;
 	}
-	catch (err) {
-		return value
-	}
-}
+};
 
 export const convertBoolean = (value) => {
 	if (!value) {
-		return value
+		return value;
 	}
 
-	if (["1", "TRUE", "YES", "Y", 'O'].includes(String(value).toUpperCase())) {
-		return true
+	if (['1', 'TRUE', 'YES', 'Y', 'O'].includes(String(value).toUpperCase())) {
+		return true;
 	}
 
-	if (["0", "FALSE", "NO", "N", "X"].includes(String(value).toUpperCase())) {
-		return false
+	if (['0', 'FALSE', 'NO', 'N', 'X'].includes(String(value).toUpperCase())) {
+		return false;
 	}
 
-	return value
-}
+	return value;
+};
 
 export const getDateFormatted = () => {
 	const date = new Date();
@@ -44,5 +43,8 @@ export const getDateFormatted = () => {
 	let minutes = String(date.getMinutes());
 	let seconds = String(date.getSeconds());
 
-	return `${date.getFullYear()}-${month.padStart(2, '0')}-${day.padStart(2, '0')} at ${hours.padStart(2, '0')}.${minutes.padStart(2, '0')}.${seconds.padStart(2, '0')}`;
-}
+	return `${date.getFullYear()}-${month.padStart(2, '0')}-${day.padStart(2, '0')} at ${hours.padStart(
+		2,
+		'0'
+	)}.${minutes.padStart(2, '0')}.${seconds.padStart(2, '0')}`;
+};

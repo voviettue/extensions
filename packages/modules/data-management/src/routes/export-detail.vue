@@ -17,7 +17,7 @@
 		<div v-if="collection" class="fields padding-box">
 			<div>
 				<div class="export-label type-label">Export content</div>
-				<div style="margin-bottom: 20px;">
+				<div style="margin-bottom: 20px">
 					<v-select
 						:items="bookmarkOptions"
 						item-value="id"
@@ -28,18 +28,18 @@
 					/>
 				</div>
 				<div class="export-label type-label">Search and filters</div>
-				<div style="margin-bottom: 20px;">
+				<div style="margin-bottom: 20px">
 					<search-input
-						style="z-index: 1;"
+						style="z-index: 1"
 						v-model="search"
 						v-model:filter="filter"
 						:collection="collection.collection"
 					/>
 				</div>
 				<div class="export-label type-label">Type</div>
-				<div style="display: flex; margin-bottom: 20px;">
+				<div style="display: flex; margin-bottom: 20px">
 					<v-radio
-						style="padding-left: 20px;"
+						style="padding-left: 20px"
 						v-for="item in fileTypes"
 						:key="item.value"
 						:label="item.text"
@@ -75,7 +75,7 @@
 				<v-card-title>The requested export completed successfully</v-card-title>
 				<v-card-text>
 					<div class="field">
-						<span class="type-label">File name: </span>
+						<span class="type-label">File name:</span>
 						<span class="type-text">{{ exportResult.name }}</span>
 					</div>
 				</v-card-text>
@@ -130,7 +130,7 @@ export default {
 
 		const { treeList, loadFieldRelations } = useFieldTree(ref(collection.collection));
 		availableFields.value = treeList.value;
-		selectedFields.value = availableFields.value.map(field => field.key);
+		selectedFields.value = availableFields.value.map((field) => field.key);
 
 		const fileTypes = computed(() => {
 			const types = [
@@ -140,13 +140,13 @@ export default {
 			];
 
 			if (GOOGLE_CLIENT_ID) {
-				types.push({ value: 'google-sheet', text: 'Google Sheet' })
+				types.push({ value: 'google-sheet', text: 'Google Sheet' });
 			}
 
 			return types;
 		});
 
-		const bookmarkOptions = presetStore.bookmarks.filter(el => el.collection == collection.collection);
+		const bookmarkOptions = presetStore.bookmarks.filter((el) => el.collection == collection.collection);
 		bookmarkOptions.unshift({ id: null, bookmark: collection.name });
 
 		const isSubmit = ref(false);
@@ -188,14 +188,14 @@ export default {
 		function onUpdateBookmark(newValue) {
 			selectedBookmark.value = newValue;
 
-			const bookmark = bookmarkOptions.find(el => el.id == newValue);
+			const bookmark = bookmarkOptions.find((el) => el.id == newValue);
 			if (bookmark) {
 				search.value = bookmark.search;
 				filter.value = bookmark.filter;
-				availableFields.value = bookmark.id ? treeList.value.filter(
-					field => bookmark.layout_query?.tabular?.fields.includes(field.field)
-				) : treeList.value;
-				selectedFields.value = availableFields.value.map(field => field.key);
+				availableFields.value = bookmark.id
+					? treeList.value.filter((field) => bookmark.layout_query?.tabular?.fields.includes(field.field))
+					: treeList.value;
+				selectedFields.value = availableFields.value.map((field) => field.key);
 			}
 		}
 
@@ -205,7 +205,7 @@ export default {
 
 		function onUpdateFileType(newValue) {
 			selectedFileType.value = newValue;
-			isSelectedUploadGoogleSheet.value = (newValue === 'google-sheet');
+			isSelectedUploadGoogleSheet.value = newValue === 'google-sheet';
 		}
 
 		function submit() {
@@ -213,7 +213,7 @@ export default {
 			error.value = null;
 
 			return selectedFileType.value === 'google-sheet' ? exportGoogleSheet() : exportFile();
-		};
+		}
 
 		function exportFile() {
 			const collectionName = collection.collection;
@@ -249,18 +249,18 @@ export default {
 		}
 
 		function downloadFile(arrayBuffer, filename) {
-			const blob = new Blob([arrayBuffer], { type: 'application/octet-stream' })
+			const blob = new Blob([arrayBuffer], { type: 'application/octet-stream' });
 
-			const link = document.createElement('a')
-			link.download = filename
-			link.href = URL.createObjectURL(blob)
-			link.click()
+			const link = document.createElement('a');
+			link.download = filename;
+			link.href = URL.createObjectURL(blob);
+			link.click();
 
-			URL.revokeObjectURL(blob)
-		};
+			URL.revokeObjectURL(blob);
+		}
 
 		function downloadExcelFile(jsonData, fileName) {
-			let flatJson = jsonData.map(el => flatten(el));
+			let flatJson = jsonData.map((el) => flatten(el));
 			let ws = XLSX.utils.json_to_sheet(flatJson);
 			let wb = XLSX.utils.book_new();
 			XLSX.utils.book_append_sheet(wb, ws, 'data');
@@ -276,7 +276,7 @@ export default {
 					{
 						client_id: GOOGLE_CLIENT_ID,
 						scope: GOOGLE_CLIENT_SCOPE,
-						immediate: false
+						immediate: false,
 					},
 					handleAuthResult
 				);
@@ -319,7 +319,7 @@ export default {
 		}
 
 		function pickerCallback(data) {
-			console.log('Picker callback')
+			console.log('Picker callback');
 			if (data.action == google.picker.Action.PICKED) {
 				folderId.value = data.docs[0].id;
 				fetchCollectionData();
@@ -351,24 +351,24 @@ export default {
 			return api
 				.get(query)
 				.then((res) => {
-					let jsonData = res.data
-					let flatJson = jsonData.map(el => flatten(el));
+					let jsonData = res.data;
+					let flatJson = jsonData.map((el) => flatten(el));
 					let ws = XLSX.utils.json_to_sheet(flatJson);
 					let wb = XLSX.utils.book_new();
 					XLSX.utils.book_append_sheet(wb, ws, 'data');
 
 					return uploadGoogleDriveFile(XLSX.write(wb, { type: 'array', bookType: 'xlsx' }));
 				})
-				.catch((err) => (error.value = err))
+				.catch((err) => (error.value = err));
 		}
 
 		function uploadGoogleDriveFile(fileContent) {
 			var file = new Blob([fileContent], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
 
 			var metadata = {
-				'name': `${collection.collection} ${getDateFormatted()}`,
-				'mimeType': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-				'parents': [folderId.value],
+				name: `${collection.collection} ${getDateFormatted()}`,
+				mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+				parents: [folderId.value],
 			};
 
 			var accessToken = oAuthToken.value;
@@ -378,21 +378,24 @@ export default {
 
 			fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink', {
 				method: 'POST',
-				headers: new Headers({ 'Authorization': 'Bearer ' + accessToken }),
+				headers: new Headers({ Authorization: 'Bearer ' + accessToken }),
 				body: form,
-			}).then((res) => {
-				return res.json();
-			}).then(function(val) {
-				if (val.error) {
-					error.value = val.error;
-				} else {
-					exportResult.value = val;
-					isExportGoogleCompleted.value = true;
-				}
-			}).finally(() => {
-				oAuthToken.value = null;
-				isSubmit.value = false;
 			})
+				.then((res) => {
+					return res.json();
+				})
+				.then(function (val) {
+					if (val.error) {
+						error.value = val.error;
+					} else {
+						exportResult.value = val;
+						isExportGoogleCompleted.value = true;
+					}
+				})
+				.finally(() => {
+					oAuthToken.value = null;
+					isSubmit.value = false;
+				});
 		}
 	},
 	mounted() {

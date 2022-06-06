@@ -1,9 +1,5 @@
 <template>
-	<v-input
-		:disabled="true"
-		:readonly="true"
-		:model-value="props.value"
-	>
+	<v-input :disabled="true" :readonly="true" :model-value="props.value">
 		<template v-if="iconLeft" #prepend><v-icon :name="props.iconLeft" /></template>
 		<template v-if="iconRight" #append><v-icon :name="props.iconRight" /></template>
 	</v-input>
@@ -29,5 +25,5 @@ const props = withDefaults(defineProps<Props>(), {
 	prefix: null,
 	startNumber: 1,
 	minNumberOfDigits: 1,
-})
+});
 </script>

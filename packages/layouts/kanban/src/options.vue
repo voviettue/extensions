@@ -1,10 +1,7 @@
 <template>
 	<div class="field">
 		<div class="type-label">Group By</div>
-		<v-select
-			v-model="groupByWriteable"
-			:items="groupByFields" item-text="name" item-value="field"
-		/>
+		<v-select v-model="groupByWriteable" :items="groupByFields" item-text="name" item-value="field" />
 	</div>
 
 	<!-- <div class="field">
@@ -29,27 +26,36 @@
 	<div class="field">
 		<div class="type-label">Card Tags</div>
 		<v-select
-			v-model="cardTagsWriteable" show-deselect
+			v-model="cardTagsWriteable"
+			show-deselect
 			placeholder="Optional Card Tags"
-			:items="cardTagsFields" item-text="name" item-value="field"
+			:items="cardTagsFields"
+			item-text="name"
+			item-value="field"
 		/>
 	</div>
 
 	<div class="field">
 		<div class="type-label">Card Date</div>
 		<v-select
-			v-model="cardDateWriteable" show-deselect
+			v-model="cardDateWriteable"
+			show-deselect
 			placeholder="Optional Card Date"
-			:items="cardDateFields" item-text="name" item-value="field"
+			:items="cardDateFields"
+			item-text="name"
+			item-value="field"
 		/>
 	</div>
 
 	<div class="field">
 		<div class="type-label">Card Image</div>
 		<v-select
-			v-model="cardImageWriteable" show-deselect
+			v-model="cardImageWriteable"
+			show-deselect
 			placeholder="Optional Card Image"
-			:items="cardImageFields" item-text="name" item-value="field"
+			:items="cardImageFields"
+			item-text="name"
+			item-value="field"
 		/>
 	</div>
 
@@ -61,9 +67,12 @@
 	<div class="field">
 		<div class="type-label">Card User</div>
 		<v-select
-			v-model="cardUserWriteable" show-deselect
+			v-model="cardUserWriteable"
+			show-deselect
 			placeholder="Optional Card User"
-			:items="cardUserFields" item-text="name" item-value="field"
+			:items="cardUserFields"
+			item-text="name"
+			item-value="field"
 		/>
 	</div>
 
@@ -167,14 +176,18 @@ export default defineComponent({
 		},
 	},
 	emits: [
-		'update:groupBy', 'update:groupTitle',
-		'update:cardTitle', 'update:cardSubtitle',
-		'update:cardTags', 'update:cardDate',
-		'update:cardImage', 'update:cardImageFit',
-		'update:cardUser', 'update:showUngrouped',
+		'update:groupBy',
+		'update:groupTitle',
+		'update:cardTitle',
+		'update:cardSubtitle',
+		'update:cardTags',
+		'update:cardDate',
+		'update:cardImage',
+		'update:cardImageFit',
+		'update:cardUser',
+		'update:showUngrouped',
 	],
 	setup(props, { emit }) {
-
 		const groupByWriteable = useSync(props, 'groupBy', emit);
 		const groupTitleWriteable = useSync(props, 'groupTitle', emit);
 		const cardTitleWriteable = useSync(props, 'cardTitle', emit);

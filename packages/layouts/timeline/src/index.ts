@@ -128,7 +128,6 @@ export default defineLayout<LayoutOptions>({
 			viewInfo,
 			showingCount,
 			layoutOptions,
-
 		};
 	},
 });

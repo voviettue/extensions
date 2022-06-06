@@ -34,14 +34,11 @@ export default defineComponent({
 		symbol = currency?.symbol || '';
 		spacing = currency?.spacer ? ' ' : '';
 		const absValue = Math.abs(floatValue);
-		number = formatNumber(
-			absValue,
-			currency?.decimals,
-			currency?.thousandsSeparator,
-			currency?.decimalsSeparator,
-		);
+		number = formatNumber(absValue, currency?.decimals, currency?.thousandsSeparator, currency?.decimalsSeparator);
 
-		const displayValue = currency?.prefix ? `${sign}${symbol}${spacing}${number}` : `${sign}${number}${spacing}${symbol}`;
+		const displayValue = currency?.prefix
+			? `${sign}${symbol}${spacing}${number}`
+			: `${sign}${number}${spacing}${symbol}`;
 
 		return { currency, displayValue };
 
@@ -58,7 +55,10 @@ export default defineComponent({
 				(j ? i.substr(0, j) + thousands : '') +
 				i.substr(j).replace(/(\d{3})(?=\d)/g, '$1' + thousands) +
 				(decimalCount
-					? decimal + Math.abs(number - i).toFixed(decimalCount).slice(2)
+					? decimal +
+					  Math.abs(number - i)
+							.toFixed(decimalCount)
+							.slice(2)
 					: '')
 			);
 		}

@@ -25,14 +25,12 @@ export default defineComponent({
 		watch(
 			localValue,
 			async (newValue) => {
-				displayValue.value = props.includeSeconds
-					? props.value
-					: props.value.slice(0, -3);
+				displayValue.value = props.includeSeconds ? props.value : props.value.slice(0, -3);
 			},
 			{ immediate: true }
 		);
 
-		return { displayValue }
+		return { displayValue };
 	},
 });
 </script>

@@ -44,10 +44,11 @@ export default defineInterface({
 					interface: 'input-multiline',
 					width: 'full',
 					options: {
-						placeholder: 'Support 2 arguments \n 1. An event-specific meta object \n 2. A context object \nYou can use it by using arguments object.',
+						placeholder:
+							'Support 2 arguments \n 1. An event-specific meta object \n 2. A context object \nYou can use it by using arguments object.',
 					},
 				},
 			},
-		]
+		];
 	},
 });

@@ -45,13 +45,13 @@ export default defineLayout<LayoutOptions, LayoutQuery>({
 		const showUngrouped = syncRefProperty(layoutOptions, 'showUngrouped', undefined);
 
 		const collectionFields = computed(() => {
-			return fieldsInCollection.value
+			return fieldsInCollection.value;
 		});
 
 		const groupByFields = computed(() => {
 			return (collectionFields.value as Field[]).filter(
 				({ meta }) => meta?.interface == 'select-dropdown' || meta?.interface == 'select-radio'
-			)
+			);
 		});
 
 		const groupTitleFields = computed(() => {
@@ -59,62 +59,50 @@ export default defineLayout<LayoutOptions, LayoutQuery>({
 
 			if (selectedGroupByField?.schema?.foreign_key_table) {
 				const { fields: fieldsInGroupBy } = useCollection(selectedGroupByField.schema.foreign_key_table);
-				return (fieldsInGroupBy.value as Field[]).filter(
-					({ type }) => type == 'string'
-				);
+				return (fieldsInGroupBy.value as Field[]).filter(({ type }) => type == 'string');
 			} else {
 				return [];
 			}
 		});
 
 		const cardTitleFields = computed(() => {
-			return (collectionFields.value as Field[]).filter(
-				({ type }) => type == 'string'
-			)
+			return (collectionFields.value as Field[]).filter(({ type }) => type == 'string');
 		});
 
 		const cardSubtitleFields = computed(() => {
-			return (collectionFields.value as Field[]).filter(
-				({ type }) => ['string', 'text'].includes(type)
-			)
+			return (collectionFields.value as Field[]).filter(({ type }) => ['string', 'text'].includes(type));
 		});
 
 		const cardTagsFields = computed(() => {
-			return (collectionFields.value as Field[]).filter(
-				({ meta }) => meta?.interface == 'tags'
-			)
+			return (collectionFields.value as Field[]).filter(({ meta }) => meta?.interface == 'tags');
 		});
 
 		const cardDateFields = computed(() => {
-			return (collectionFields.value as Field[]).filter(
-				({ schema }) => ['dateTime', 'date', 'time', 'timestamp'].includes(schema?.data_type || '')
-			)
+			return (collectionFields.value as Field[]).filter(({ schema }) =>
+				['dateTime', 'date', 'time', 'timestamp'].includes(schema?.data_type || '')
+			);
 		});
 
 		const cardImageFields = computed(() => {
 			return (collectionFields.value as Field[]).filter(
 				({ meta, schema }) => meta?.interface == 'file-image' && schema?.foreign_key_table == 'directus_files'
-			)
+			);
 		});
 
 		const cardUserFields = computed(() => {
 			return (collectionFields.value as Field[]).filter(
 				({ meta, schema }) => meta?.interface == 'select-dropdown-m2o' && schema?.foreign_key_table == 'directus_users'
-			)
+			);
 		});
 
-
-		const { items, loading, error, totalPages, itemCount, totalCount, getItems } = useItems(
-			collection,
-			{
-				sort,
-				limit,
-				page,
-				fields,
-				filter,
-				search,
-			}
-		);
+		const { items, loading, error, totalPages, itemCount, totalCount, getItems } = useItems(collection, {
+			sort,
+			limit,
+			page,
+			fields,
+			filter,
+			search,
+		});
 
 		return {
 			name,
@@ -137,7 +125,14 @@ export default defineLayout<LayoutOptions, LayoutQuery>({
 			cardUser,
 			cardUserFields,
 			showUngrouped,
-			items, loading, error, totalPages, itemCount, totalCount, getItems, resetPresetAndRefresh,
+			items,
+			loading,
+			error,
+			totalPages,
+			itemCount,
+			totalCount,
+			getItems,
+			resetPresetAndRefresh,
 		};
 
 		async function resetPresetAndRefresh() {
@@ -158,21 +153,26 @@ export default defineLayout<LayoutOptions, LayoutQuery>({
 				let customFieldsDefaultValue: Array<string> = [];
 				collectionFields.value.forEach(({ field, schema, meta }: Field) => {
 					if (schema?.foreign_key_table == 'directus_files' && meta?.interface == 'file-image') {
-						[
-							'id', 'filename_disk', 'modified_on', 'storage', 'type'
-						].forEach((subField: string) => customFieldsDefaultValue.push(`${field}.${subField}`))
+						['id', 'filename_disk', 'modified_on', 'storage', 'type'].forEach((subField: string) =>
+							customFieldsDefaultValue.push(`${field}.${subField}`)
+						);
 					}
 
 					if (schema?.foreign_key_table == 'directus_users') {
 						[
-							'id', 'first_name', 'last_name',
-							'avatar.id', 'avatar.storage', 'avatar.filename_disk',
-							'avatar.type', 'avatar.modified_on'
-						].forEach((subField: string) => customFieldsDefaultValue.push(`${field}.${subField}`))
+							'id',
+							'first_name',
+							'last_name',
+							'avatar.id',
+							'avatar.storage',
+							'avatar.filename_disk',
+							'avatar.type',
+							'avatar.modified_on',
+						].forEach((subField: string) => customFieldsDefaultValue.push(`${field}.${subField}`));
 					}
 
 					customFieldsDefaultValue.push(field);
-				})
+				});
 
 				const titleSubtitleFields: string[] = [];
 				if (cardTitle.value) {

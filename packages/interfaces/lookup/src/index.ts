@@ -33,19 +33,18 @@ export default defineInterface({
 		const { useRelationsStore, useFieldsStore } = useStores();
 		const relationsStore = useRelationsStore();
 		const fieldsStore = useFieldsStore();
-		const relatedCollections = relationsStore.getRelationsForCollection(collection)
+		const relatedCollections = relationsStore
+			.getRelationsForCollection(collection)
 			.filter((relation: any) => relation?.meta?.junction_field === null && relation?.related_collection != collection);
 
 		const relatedCollectionOptions = relatedCollections.map((el: any) => {
-			const collectionName = el.related_collection == collection
-				? el.collection : el.related_collection;
-			const relationField = el.related_collection == collection
-				? el.meta?.one_field : el.field;
+			const collectionName = el.related_collection == collection ? el.collection : el.related_collection;
+			const relationField = el.related_collection == collection ? el.meta?.one_field : el.field;
 
 			const text = `${formatTitle(collectionName.replace('directus_', 'system_'))} (${relationField})`;
 			const value = `${relationField}`;
 
-			return { text, value }
+			return { text, value };
 		});
 
 		watch(
@@ -62,10 +61,12 @@ export default defineInterface({
 			const selectedRelationField = field.meta?.options?.relationField;
 
 			if (selectedRelationField) {
-				const selectedRelatedCollection = relationsStore.getRelationsForCollection(collection)
+				const selectedRelatedCollection = relationsStore
+					.getRelationsForCollection(collection)
 					.find((field: any) => field?.field == selectedRelationField)?.related_collection;
 
-				return fieldsStore.getFieldsForCollection(selectedRelatedCollection)
+				return fieldsStore
+					.getFieldsForCollection(selectedRelatedCollection)
 					.filter((field: any) => field?.type !== 'alias')
 					.map((el: any) => {
 						let isDisabled = true;
@@ -94,7 +95,7 @@ export default defineInterface({
 							text: el.name,
 							value: el.field,
 							disabled: isDisabled,
-						}
+						};
 					});
 			} else {
 				return null;

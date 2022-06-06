@@ -12,7 +12,7 @@ export default defineInterface({
 	group: 'standard',
 	recommendedDisplays: ['formatted-value'],
 	options: () => {
-		const options: { standard: DeepPartial<Field[]>, advanced: DeepPartial<Field[]>} = {
+		const options: { standard: DeepPartial<Field[]>; advanced: DeepPartial<Field[]> } = {
 			standard: [
 				{
 					field: 'iconLeft',
@@ -40,7 +40,7 @@ export default defineInterface({
 						width: 'half',
 						interface: 'input',
 						note: 'The prefix supports date parameters like [YYYY], [MM], [DD]',
-					}
+					},
 				},
 				{
 					field: 'startNumber',
@@ -55,8 +55,8 @@ export default defineInterface({
 						},
 					},
 					schema: {
-						default_value: 1
-					}
+						default_value: 1,
+					},
 				},
 				{
 					field: 'minNumberOfDigits',
@@ -71,13 +71,13 @@ export default defineInterface({
 						},
 					},
 					schema: {
-						default_value: 1
-					}
+						default_value: 1,
+					},
 				},
 			],
 			advanced: [],
-		}
+		};
 
-		return options
-	}
+		return options;
+	},
 });

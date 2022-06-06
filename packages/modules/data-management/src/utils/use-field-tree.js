@@ -24,32 +24,63 @@ export function useFieldTree(collection, inject, filter = () => true) {
 
 	function getTree(collection, parent) {
 		var _a;
-		const injectedFields = (_a = inject === null || inject === void 0 ? void 0 : inject.value) === null || _a === void 0 ? void 0 : _a.fields.filter((field) => field.collection === collection);
+		const injectedFields =
+			(_a = inject === null || inject === void 0 ? void 0 : inject.value) === null || _a === void 0
+				? void 0
+				: _a.fields.filter((field) => field.collection === collection);
 		const fields = fieldsStore
 			.getFieldsForCollection(collection)
 			.concat(injectedFields || [])
 			.filter((field) => {
 				var _a, _b, _c, _d, _e, _f;
-				return ((_b = (_a = field.meta) === null || _a === void 0 ? void 0 : _a.special) === null || _b === void 0 ? void 0 : _b.includes('group')) ||
-					(!((_d = (_c = field.meta) === null || _c === void 0 ? void 0 : _c.special) === null || _d === void 0 ? void 0 : _d.includes('alias')) && !((_f = (_e = field.meta) === null || _e === void 0 ? void 0 : _e.special) === null || _f === void 0 ? void 0 : _f.includes('no-data')));
+				return (
+					((_b = (_a = field.meta) === null || _a === void 0 ? void 0 : _a.special) === null || _b === void 0
+						? void 0
+						: _b.includes('group')) ||
+					(!((_d = (_c = field.meta) === null || _c === void 0 ? void 0 : _c.special) === null || _d === void 0
+						? void 0
+						: _d.includes('alias')) &&
+						!((_f = (_e = field.meta) === null || _e === void 0 ? void 0 : _e.special) === null || _f === void 0
+							? void 0
+							: _f.includes('no-data')))
+				);
 			});
-		const nonGroupFields = fields.filter((field) => { var _a; return !((_a = field.meta) === null || _a === void 0 ? void 0 : _a.group); });
+		const nonGroupFields = fields.filter((field) => {
+			var _a;
+			return !((_a = field.meta) === null || _a === void 0 ? void 0 : _a.group);
+		});
 		const sortGroupFields = (a, b) => {
 			var _a, _b;
-			if (!((_a = a.meta) === null || _a === void 0 ? void 0 : _a.sort) || !((_b = b.meta) === null || _b === void 0 ? void 0 : _b.sort))
+			if (
+				!((_a = a.meta) === null || _a === void 0 ? void 0 : _a.sort) ||
+				!((_b = b.meta) === null || _b === void 0 ? void 0 : _b.sort)
+			)
 				return 0;
 			return a.meta.sort - b.meta.sort;
 		};
 
 		for (const [index, field] of nonGroupFields.entries()) {
-			const groupFields = fields.filter((groupField) => { var _a; return ((_a = groupField.meta) === null || _a === void 0 ? void 0 : _a.group) === field.field; });
+			const groupFields = fields.filter((groupField) => {
+				var _a;
+				return ((_a = groupField.meta) === null || _a === void 0 ? void 0 : _a.group) === field.field;
+			});
 			if (groupFields.length) {
 				nonGroupFields.splice(index + 1, 0, ...groupFields.sort(sortGroupFields));
 			}
 		}
 
 		const sortedFields = nonGroupFields
-			.filter((field) => { var _a, _b, _c, _d; return !((_b = (_a = field.meta) === null || _a === void 0 ? void 0 : _a.special) === null || _b === void 0 ? void 0 : _b.includes('alias')) && !((_d = (_c = field.meta) === null || _c === void 0 ? void 0 : _c.special) === null || _d === void 0 ? void 0 : _d.includes('no-data')); })
+			.filter((field) => {
+				var _a, _b, _c, _d;
+				return (
+					!((_b = (_a = field.meta) === null || _a === void 0 ? void 0 : _a.special) === null || _b === void 0
+						? void 0
+						: _b.includes('alias')) &&
+					!((_d = (_c = field.meta) === null || _c === void 0 ? void 0 : _c.special) === null || _d === void 0
+						? void 0
+						: _d.includes('no-data'))
+				);
+			})
 			.filter(filter)
 			.flatMap((field) => makeNode(field, parent));
 
@@ -81,11 +112,9 @@ export function useFieldTree(collection, inject, filter = () => true) {
 	}
 
 	function getRelatedCollections(field) {
-
 		const relation = getRelationForField(field);
 
-		if (!(relation === null || relation === void 0 ? void 0 : relation.meta))
-			return [];
+		if (!(relation === null || relation === void 0 ? void 0 : relation.meta)) return [];
 		const relationType = getRelationType({ relation, collection: field.collection, field: field.field });
 		switch (relationType) {
 			case 'o2m':
@@ -104,13 +133,18 @@ export function useFieldTree(collection, inject, filter = () => true) {
 
 		const relations = [
 			...relationsStore.getRelationsForField(field.collection, field.field),
-			...(((_a = inject === null || inject === void 0 ? void 0 : inject.value) === null || _a === void 0 ? void 0 : _a.relations) || []),
+			...(((_a = inject === null || inject === void 0 ? void 0 : inject.value) === null || _a === void 0
+				? void 0
+				: _a.relations) || []),
 		];
 
 		return relations.find((relation) => {
 			var _a;
-			return (relation.collection === field.collection && relation.field === field.field) ||
-				(relation.related_collection === field.collection && ((_a = relation.meta) === null || _a === void 0 ? void 0 : _a.one_field) === field.field);
+			return (
+				(relation.collection === field.collection && relation.field === field.field) ||
+				(relation.related_collection === field.collection &&
+					((_a = relation.meta) === null || _a === void 0 ? void 0 : _a.one_field) === field.field)
+			);
 		});
 	}
 
@@ -119,8 +153,7 @@ export function useFieldTree(collection, inject, filter = () => true) {
 			if (node.field === field) {
 				if (path.length) {
 					return getNodeAtPath(path, node.children);
-				}
-				else {
+				} else {
 					return node;
 				}
 			}

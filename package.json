@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "npm run build --workspaces && node ./scripts/build.js",
-    "pack": "node ./scripts/pack.js"
+    "pack": "node ./scripts/pack.js",
+    "lint:eslint": "eslint .",
+    "format": "prettier --write \"**/*.{js,ts,vue,md,yaml}\""
   },
   "author": "",
   "license": "ISC",

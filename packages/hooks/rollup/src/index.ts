@@ -15,12 +15,11 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 
 	const getRollupFields = async (collection: string) => {
 		if (_rollupFields === null) {
-			_rollupFields = await database.from('directus_fields')
-				.where('interface', '=', 'input-rollup');
+			_rollupFields = await database.from('directus_fields').where('interface', '=', 'input-rollup');
 		}
 
 		return _rollupFields.filter((field: any) => field.collection === collection);
-	}
+	};
 
 	const getSchemaFields = async (collection: string) => {
 		if (_schemaFields === null) {
@@ -28,7 +27,7 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 			_schemaFields = await fieldsService.readAll(collection);
 		}
 		return _schemaFields.filter((schema: any) => !collection || schema.collection === collection);
-	}
+	};
 
 	const getMappingFields = (collection: string, rollupFields: any[], schema: any) => {
 		const mapper: any = [];
@@ -37,10 +36,7 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 		for (var i in rollupFields) {
 			const field = rollupFields[i];
 
-			const {
-				relationField, rollupField,
-				function: rollupFunction, sortBy, filter
-			} = JSON.parse(field?.options) || {};
+			const { relationField, rollupField, function: rollupFunction, sortBy, filter } = JSON.parse(field?.options) || {};
 			const relation = relations.find((relation: any) => relation?.meta?.one_field == relationField);
 			const relatedCollection = relation?.collection;
 			const relatedCollectionFK = relation?.field;
@@ -68,7 +64,7 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 		}
 
 		return mapper;
-	}
+	};
 
 	const cast = (value: any, fieldSchema: any) => {
 		if (value === null) return null;
@@ -111,7 +107,7 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 			default:
 				return value;
 		}
-	}
+	};
 
 	function calculate(input: Array<any>, func: string, rollupField: string, sortBy: string) {
 		if (!['count', 'counta', 'countd', 'countn'].includes(func) && input.length == 0) return undefined;
@@ -122,8 +118,9 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 				break;
 
 			case 'countd': // Count unique values
-				input = input.map((el: any) => el[rollupField])
-					.filter((el: any, index: number, self: any[]) => (el != null && el != '') && self.indexOf(el) === index);
+				input = input
+					.map((el: any) => el[rollupField])
+					.filter((el: any, index: number, self: any[]) => el != null && el != '' && self.indexOf(el) === index);
 				break;
 
 			case 'countn': // Count empty and null values
@@ -180,7 +177,7 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 			const mapper = getMappingFields(collection, rollupFields, schema);
 
 			for (var i in keys) {
-				const knex = ctx.database?.isCompleted && ctx.database.isCompleted() ? database : ctx.database
+				const knex = ctx.database?.isCompleted && ctx.database.isCompleted() ? database : ctx.database;
 				const key = keys[i];
 				const payload: any = {};
 				const record = await knex(collection).where(pk, key).first();
@@ -192,13 +189,14 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 					payload[option.field] = null;
 
 					if (record) {
-						const rollupCollectionItemsService = new services.ItemsService(
-							option.rollupCollection, { knex: knex, schema: await getSchema() }
-						);
-						const filter = { [option.rollupCollectionFK]: { '_eq': key } };
+						const rollupCollectionItemsService = new services.ItemsService(option.rollupCollection, {
+							knex: knex,
+							schema: await getSchema(),
+						});
+						const filter = { [option.rollupCollectionFK]: { _eq: key } };
 						const items = await rollupCollectionItemsService.readByQuery({
 							filter: merge(option.filter, filter),
-							limit: -1
+							limit: -1,
 						});
 
 						if (items) {
@@ -208,25 +206,22 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 								return el;
 							});
 
-							payload[option.field] = calculate(
-								castedItems, option.rollupFunction,
-								option.rollupField, option.sortBy
-							) ?? fieldSchema?.schema?.default_value;
+							payload[option.field] =
+								calculate(castedItems, option.rollupFunction, option.rollupField, option.sortBy) ??
+								fieldSchema?.schema?.default_value;
 						}
 					}
 				}
 
 				if (Object.keys(payload).length > 0) {
-					await knex(collection)
-						.update(payload)
-						.where(pk, key);
+					await knex(collection).update(payload).where(pk, key);
 					logger.info(`ROLLUP: UPDATE ${collection}:${key} - ${JSON.stringify(payload)}`);
 				}
 			}
 		} catch (error: any) {
 			logger.error(`ROLLUP: ${error.toString()}`);
 		}
-	}
+	};
 
 	action('items.create', async (obj: any, ctx: any) => {
 		await execute(obj, ctx);
