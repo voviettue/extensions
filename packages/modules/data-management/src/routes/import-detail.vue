@@ -14,19 +14,19 @@
 			<navigation></navigation>
 		</template>
 
-		<div class="padding-box" v-if="collection">
+		<div v-if="collection" class="padding-box">
 			<form id="form-import" style="display: flex; align-items: center">
 				<div style="flex-grow: 1">
 					<component
+						:is="'interface-file'"
 						v-if="folder"
 						ref="inputFile"
-						:is="'interface-file'"
 						:value="file ? file.id : null"
 						:folder="folder.id"
 						collection="directus_settings"
 						field="project_logo"
-						@input="onUpload"
 						:disabled="isSubmit"
+						@input="onUpload"
 						@update:model-value="onUpload($event)"
 					>
 						<template #append></template>
@@ -34,11 +34,11 @@
 				</div>
 
 				<v-button
-					:disabled="!canImport"
-					@click="submit()"
 					v-tooltip="createAllowed ? '' : t('not_allowed')"
+					:disabled="!canImport"
 					style="margin-left: 20px"
 					:loading="isSubmit"
+					@click="submit()"
 				>
 					Import
 				</v-button>
@@ -58,25 +58,18 @@
 				<span>&nbsp;|&nbsp;</span>
 				<span>Mapped fields: {{ mappedFields.length }}/{{ fields.length }}</span>
 				<span>&nbsp;|&nbsp;</span>
-				<span>Page {{ this.page }}/{{ Math.ceil(this.payload.length / this.limit) }}</span>
+				<span>Page {{ page }}/{{ Math.ceil(payload.length / limit) }}</span>
 				<div style="flex-grow: 1; text-align: right">
-					<v-button
-						icon
-						secondary
-						size="sm"
-						:disabled="this.page === 1"
-						@click="this.page = this.page - 1"
-						style="margin-left: 10px"
-					>
+					<v-button icon secondary size="sm" :disabled="page === 1" style="margin-left: 10px" @click="page = page - 1">
 						<v-icon name="keyboard_arrow_left" />
 					</v-button>
 					<v-button
 						icon
 						secondary
 						size="sm"
-						:disabled="this.page === totalPage"
-						@click="this.page = this.page + 1"
+						:disabled="page === totalPage"
 						style="margin-left: 10px"
+						@click="page = page + 1"
 					>
 						<v-icon name="keyboard_arrow_right" />
 					</v-button>
@@ -93,14 +86,14 @@
 						</tr>
 					</thead>
 					<tbody>
-						<template v-for="(item, index) in items" :key="`row-${(index + 1) * this.page}`">
+						<template v-for="(item, index) in items" :key="`row-${(index + 1) * page}`">
 							<tr class="table-row">
-								<td class="cell" v-for="field in fields" :key="`item-${index}-${field.field}`">
+								<td v-for="field in fields" :key="`item-${index}-${field.field}`" class="cell">
 									<span v-if="Array.isArray(item[field.field])">
 										<v-chip
-											style="margin: 2px; height: auto !important"
 											v-for="value in item[field.field]"
 											:key="`${field.field}-${value}`"
+											style="margin: 2px; height: auto !important"
 											small
 										>
 											{{ value }}

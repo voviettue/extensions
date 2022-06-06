@@ -2,11 +2,11 @@
 	<div class="layout-kanban" :class="{ loading }">
 		<draggable
 			v-for="(group, index) in groupItems"
+			:key="index"
 			class="group"
 			:list="group"
 			:group="collection"
 			:item-key="index"
-			:key="index"
 			@change="onChange(index, $event)"
 		>
 			<template #header>
@@ -39,7 +39,7 @@
 					<div class="addition">
 						<span class="datetime">{{ formattedTime(element[cardDate]) }}</span>
 						<div class="avatar">
-							<v-avatar x-small v-tooltip="userName(element[cardUser])">
+							<v-avatar v-tooltip="userName(element[cardUser])" x-small>
 								<img
 									v-if="avatarSrc(element[cardUser])"
 									:src="avatarSrc(element[cardUser])"
@@ -91,8 +91,8 @@ import { getRootPath } from './utils/get-root-path';
 import { getFieldsFromTemplate } from '@directus/shared/utils';
 
 export default defineComponent({
-	inheritAttrs: false,
 	components: { draggable },
+	inheritAttrs: false,
 	props: {
 		collection: {
 			type: String,

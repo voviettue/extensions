@@ -150,7 +150,7 @@ export default defineLayout<LayoutOptions, LayoutQuery>({
 			const defaultSort = computed(() => (primaryKeyField.value ? [primaryKeyField.value?.field] : []));
 			const sort = syncRefProperty(layoutQuery, 'sort', defaultSort);
 			const fieldsDefaultValue = computed(() => {
-				let customFieldsDefaultValue: Array<string> = [];
+				const customFieldsDefaultValue: Array<string> = [];
 				collectionFields.value.forEach(({ field, schema, meta }: Field) => {
 					if (schema?.foreign_key_table == 'directus_files' && meta?.interface == 'file-image') {
 						['id', 'filename_disk', 'modified_on', 'storage', 'type'].forEach((subField: string) =>

@@ -96,7 +96,7 @@ export class Service {
 			} = functions;
 
 			const fn = new Function('PROP', Object.keys(functions).join(','), `return ${statement}`);
-			let result = fn(
+			const result = fn(
 				PROP,
 				CONCATENATE,
 				TRIM,
@@ -148,7 +148,7 @@ export class Service {
 		}, template);
 
 		const values: any = {};
-		for (var i in keys) {
+		for (const i in keys) {
 			const path: any = keys[i];
 			if (path.includes('.')) {
 				values[path] = await this.getValueFromPath(payload, path);

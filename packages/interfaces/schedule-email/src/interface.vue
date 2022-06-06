@@ -19,7 +19,7 @@
 		<div class="drawer-content">
 			<label>Send to</label>
 			<div>
-				<v-chip class="chip" v-for="email in emailTo" :key="`to-${email}`">
+				<v-chip v-for="email in emailTo" :key="`to-${email}`" class="chip">
 					{{ email }}
 				</v-chip>
 			</div>
@@ -28,7 +28,7 @@
 			<template v-if="emailCC.length">
 				<label>CC</label>
 				<div>
-					<v-chip class="chip" v-for="email in emailCC" :key="`cc-${email}`">
+					<v-chip v-for="email in emailCC" :key="`cc-${email}`" class="chip">
 						{{ email }}
 					</v-chip>
 				</div>
@@ -38,7 +38,7 @@
 			<template v-if="emailBCC.length">
 				<label>BCC</label>
 				<div>
-					<v-chip class="chip" v-for="email in emailBCC" :key="`cc-${email}`">
+					<v-chip v-for="email in emailBCC" :key="`cc-${email}`" class="chip">
 						{{ email }}
 					</v-chip>
 				</div>

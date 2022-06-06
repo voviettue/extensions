@@ -33,7 +33,7 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 		const mapper: any = [];
 		const relations = schema.relations.filter((relation: any) => relation?.meta?.one_collection == collection);
 
-		for (var i in rollupFields) {
+		for (const i in rollupFields) {
 			const field = rollupFields[i];
 
 			const { relationField, rollupField, function: rollupFunction, sortBy, filter } = JSON.parse(field?.options) || {};

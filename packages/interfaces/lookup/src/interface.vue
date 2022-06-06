@@ -12,12 +12,12 @@
 		</v-notice>
 
 		<component
-			v-else
 			:is="
 				lookupFieldObj.meta?.interface
 					? `interface-${lookupFieldObj.meta.interface}`
 					: `interface-${getDefaultInterfaceForType(lookupFieldObj.type)}`
 			"
+			v-else
 			v-bind="lookupFieldObj.meta?.options || {}"
 			:width="lookupFieldObj.meta?.width || 'full'"
 			:type="lookupFieldObj.type"

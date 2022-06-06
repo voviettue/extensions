@@ -14,9 +14,9 @@
 			<navigation></navigation>
 		</template>
 
-		<div class="padding-box" v-if="fetched">
+		<div v-if="fetched" class="padding-box">
 			<template v-if="subscription">
-				<billing-detail :subscription="subscription" :upcomingInvoice="upcomingInvoice"></billing-detail>
+				<billing-detail :subscription="subscription" :upcoming-invoice="upcomingInvoice"></billing-detail>
 			</template>
 			<template v-else>There is no data to show</template>
 		</div>

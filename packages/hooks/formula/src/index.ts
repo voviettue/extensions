@@ -64,7 +64,7 @@ export default defineHook(({ action }, { logger, services, database, getSchema }
 		if (formulaFields.length === 0) return;
 
 		try {
-			for (var id of ids) {
+			for (const id of ids) {
 				await updateFormulaFields(collection, id, ctx);
 			}
 		} catch (err) {

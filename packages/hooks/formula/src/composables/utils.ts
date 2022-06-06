@@ -40,7 +40,7 @@ const getExpressionFieldKeys = (template: string) => {
 	template.split(regex).forEach((part: string) => {
 		if (part.startsWith('{{') === false) return;
 
-		let fieldKey = part.replace(/{{/g, '').replace(/}}/g, '').trim();
+		const fieldKey = part.replace(/{{/g, '').replace(/}}/g, '').trim();
 		keys.push(fieldKey);
 	});
 	return keys;

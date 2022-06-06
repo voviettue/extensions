@@ -23,25 +23,25 @@
 						item-value="id"
 						item-text="bookmark"
 						:model-value="selectedBookmark"
-						@update:model-value="onUpdateBookmark"
 						:disabled="bookmarkOptions.length == 0"
+						@update:model-value="onUpdateBookmark"
 					/>
 				</div>
 				<div class="export-label type-label">Search and filters</div>
 				<div style="margin-bottom: 20px">
 					<search-input
-						style="z-index: 1"
 						v-model="search"
 						v-model:filter="filter"
+						style="z-index: 1"
 						:collection="collection.collection"
 					/>
 				</div>
 				<div class="export-label type-label">Type</div>
 				<div style="display: flex; margin-bottom: 20px">
 					<v-radio
-						style="padding-left: 20px"
 						v-for="item in fileTypes"
 						:key="item.value"
+						style="padding-left: 20px"
 						:label="item.text"
 						:value="item.value"
 						:model-value="selectedFileType"

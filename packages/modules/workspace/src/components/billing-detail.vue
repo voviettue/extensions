@@ -8,10 +8,10 @@
 				</v-chip>
 			</div>
 			<v-button
+				v-tooltip="'View invoices, update payment methods, and billing information'"
 				class="btn-portal"
 				:small="true"
 				:loading="isloading"
-				v-tooltip="'View invoices, update payment methods, and billing information'"
 				@click="goToPortal"
 			>
 				Go to Customer Portal

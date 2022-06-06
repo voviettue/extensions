@@ -77,7 +77,7 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 		const mapper: LookupMap[] = [];
 		const relations = schema.relations.filter((relation: any) => relation?.meta?.many_collection == collection);
 
-		for (var field of lookupFields) {
+		for (const field of lookupFields) {
 			const { relationField, lookupField } = JSON.parse(field?.options) || {};
 			const relation = relations.find((relation: any) => relation.field == relationField);
 			const relatedCollection = relation?.related_collection;
@@ -112,7 +112,7 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 			_items[key] = await database.from(map.lookupCollection).where(map.lookupCollectionPK, id).first();
 		}
 		const item = _items[key] ?? {};
-		let result = value instanceof Object ? { ...item, ...value } : item;
+		const result = value instanceof Object ? { ...item, ...value } : item;
 
 		return result;
 	};

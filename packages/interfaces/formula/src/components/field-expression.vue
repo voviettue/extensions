@@ -35,8 +35,8 @@
 		<v-list
 			v-if="!disabled"
 			:mandatory="false"
-			@toggle="loadFieldRelations($event.value)"
 			style="display: grid; grid-template-columns: 50% 50%"
+			@toggle="loadFieldRelations($event.value)"
 		>
 			<div>
 				<v-list-item :disabled="true">FIELDS</v-list-item>

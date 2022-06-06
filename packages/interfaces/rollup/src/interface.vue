@@ -9,12 +9,12 @@
 		</v-notice>
 
 		<component
-			v-else
 			:is="
 				rollupFieldObj.meta?.interface
 					? `interface-${rollupFieldObj.meta.interface}`
 					: `interface-${getDefaultInterfaceForType(rollupFieldObj.type)}`
 			"
+			v-else
 			v-bind="rollupFieldObj.meta?.options || {}"
 			:width="rollupFieldObj.meta?.width || 'full'"
 			:type="rollupFieldObj.type"
