@@ -17,10 +17,10 @@ export default defineHook(({ action }, { services, exceptions, database, getSche
 	};
 
 	const destroyAllSchedule = () => {
-		schedules.forEach((schedule) => {
+		for (let schedule of schedules) {
 			schedule.stop();
 			schedule = null;
-		});
+		}
 		schedules = [];
 	};
 
@@ -49,7 +49,7 @@ export default defineHook(({ action }, { services, exceptions, database, getSche
 		destroyAllSchedule();
 
 		const fields = await getHookFields();
-		fields.forEach(async (field: any) => {
+		for (const field of fields) {
 			const options = JSON.parse(field.options) || {};
 
 			if (!cron.validate(options?.expression)) {
@@ -91,10 +91,12 @@ export default defineHook(({ action }, { services, exceptions, database, getSche
 				}
 			});
 			schedules.push(schedule);
-		});
+		};
 	}
 
-	init();
+	action('server.start', () => {
+		init();
+	});
 
 	// clear cache
 	action('fields.create', () => {
