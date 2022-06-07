@@ -44,12 +44,7 @@ export default defineInterface({
 		// Support O2M collections
 		const collectionRelations = relationsStore
 			.getRelationsForCollection(collection)
-			.filter(
-				(relation: any) =>
-					relation.related_collection === collection &&
-					relation?.meta?.junction_field === null &&
-					relation?.meta?.one_field !== null
-			);
+			.filter((relation: any) => relation.related_collection === collection && relation?.meta?.one_field !== null);
 		const relatedCollectionOptions = collectionRelations.map((el: any) => {
 			const text = `${formatTitle(el.collection.replace('directus_', 'system_'))} (${
 				el.meta?.one_field ?? 'undefined'
