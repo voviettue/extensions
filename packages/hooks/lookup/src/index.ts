@@ -6,13 +6,14 @@ import { LookupMap } from './types';
 import { Field } from '@directus/shared/types';
 
 export default defineHook(({ filter, action }, { services, database, getSchema, logger }) => {
+	const interfaceName = 'input-lookup';
 	let _lookupFields: any = null;
 	let _schemaFields: any = null;
 	let _items: any = {};
 
 	const getLookupFields = async (collection: string) => {
 		if (_lookupFields === null) {
-			_lookupFields = await database.from('directus_fields').where('interface', '=', 'input-lookup');
+			_lookupFields = await database.from('directus_fields').where('interface', '=', interfaceName);
 		}
 
 		return _lookupFields.filter((field: any) => field.collection === collection);
@@ -163,6 +164,13 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 		const collection = event.collection;
 		await execute(collection, input, ctx);
 		return input;
+	});
+
+	// update meta.special for type alias
+	filter('fields.create', async (input: any) => {
+		if (input?.meta?.interface !== interfaceName) return;
+
+		input.meta.special = input.type === 'alias' ? ['alias', 'no-data'] : null;
 	});
 
 	action('fields.create', () => {

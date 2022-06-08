@@ -24,11 +24,12 @@
 			:collection="schemaLookupField.collection"
 			:field="schemaLookupField.field"
 			:field-data="schemaLookupField"
+			:primary-key="RelationPimaryKey"
 			:placeholder="''"
 			:value="localValue"
+			:key="String(localValue)"
 			:loading="loading"
 			disabled
-			@update:model-value="emitValue"
 		/>
 	</div>
 </template>
@@ -70,7 +71,7 @@ export default defineComponent({
 	},
 	emits: ['input'],
 	setup(props, { emit }) {
-		const localValue = ref<string | number | object>(props.value);
+		const localValue = ref<string | number | object>(cast(props.value));
 		const loading = ref<boolean>(false);
 
 		const api = useApi();
@@ -97,10 +98,18 @@ export default defineComponent({
 			return field;
 		});
 
+		const RelationPimaryKey = computed(() => {
+			return values.value?.[props.relationField] || undefined;
+		});
+
+		let oldValues = null;
 		watch(
-			() => values.value?.[props.relationField],
-			async () => {
-				await lookup();
+			() => values.value,
+			async (newValue) => {
+				if (oldValues !== null && newValue?.[props.relationField] !== oldValues?.[props.relationField]) {
+					await lookup();
+				}
+				oldValues = cloneDeep(newValue);
 			}
 		);
 
@@ -108,6 +117,7 @@ export default defineComponent({
 			emitValue,
 			loading,
 			localValue,
+			RelationPimaryKey,
 			schemaLookupField,
 			getDefaultInterfaceForType,
 		};
@@ -164,7 +174,8 @@ export default defineComponent({
 
 				case 'json':
 				case 'csv':
-					return Array.isArray(value) ? value : undefined;
+				case 'alias':
+					return Array.isArray(value) ? value : [];
 
 				case 'boolean':
 					if (['true', '1'].includes(String(value).toLowerCase())) {

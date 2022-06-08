@@ -11,10 +11,10 @@
 </template>
 
 <script lang="ts">
-import { Field, Relation } from "@directus/shared/types";
-import { defineComponent, PropType, computed, inject, watch } from "vue";
-import cloneDeep from "lodash/cloneDeep";
-import formatTitle from "@directus/format-title";
+import { Field, Relation } from '@directus/shared/types';
+import { defineComponent, PropType, computed, inject, watch } from 'vue';
+import cloneDeep from 'lodash/cloneDeep';
+import formatTitle from '@directus/format-title';
 
 export default defineComponent({
 	props: {
@@ -59,51 +59,39 @@ export default defineComponent({
 			default: null,
 		},
 	},
-	emits: ["input", "update:modelValue"],
+	emits: ['input', 'update:modelValue'],
 	setup(props, { emit }) {
 		const optionsValues = computed({
 			get() {
 				return props.value ?? {};
 			},
 			set(values: any) {
-				emit("input", values);
+				emit('input', values);
 			},
 		});
 
-		const stores: any = inject("stores");
+		const stores: any = inject('stores');
 		const relationsStore = stores.useRelationsStore();
 		const fieldsStore = stores.useFieldsStore();
 		const fields = fieldsStore.getFieldsForCollection(props.collection);
 		const relatedCollections = relationsStore
 			.getRelationsForCollection(props.collection)
 			.filter(
-				(relation: any) =>
-					relation?.meta?.junction_field === null &&
-					relation?.related_collection != props.collection
+				(relation: any) => relation?.meta?.junction_field === null && relation?.related_collection != props.collection
 			);
 
 		const relatedCollectionOptions = relatedCollections.map((el: any) => {
-			const collectionName =
-				el.related_collection == props.collection
-					? el.collection
-					: el.related_collection;
-			const relationField =
-				el.related_collection == props.collection
-					? el.meta?.one_field
-					: el.field;
+			const collectionName = el.related_collection == props.collection ? el.collection : el.related_collection;
+			const relationField = el.related_collection == props.collection ? el.meta?.one_field : el.field;
 
-			const text = `${formatTitle(
-				collectionName.replace("directus_", "system_")
-			)} (${relationField})`;
+			const text = `${formatTitle(collectionName.replace('directus_', 'system_'))} (${relationField})`;
 			const value = `${relationField}`;
 
 			return { text, value };
 		});
 
 		const relationCollection = computed(() => {
-			const field = fields.find(
-				(e: any) => e.field === optionsValues.value?.relationField
-			);
+			const field = fields.find((e: any) => e.field === optionsValues.value?.relationField);
 			return field?.schema?.foreign_key_table ?? null;
 		});
 
@@ -115,37 +103,35 @@ export default defineComponent({
 		);
 
 		const optionsFields = computed(() => {
-			const field = fields.find(
-				(e: any) => e.field === optionsValues.value?.relationField
-			);
+			const field = fields.find((e: any) => e.field === optionsValues.value?.relationField);
 			const relationCollection = field?.schema?.foreign_key_table;
 			const choices = getFieldTree(relationCollection, 2);
 
 			return [
 				{
-					field: "relationField",
-					type: "string",
-					name: "Related Collection",
+					field: 'relationField',
+					type: 'string',
+					name: 'Related Collection',
 					meta: {
-						width: "half",
-						interface: "select-dropdown",
+						width: 'half',
+						interface: 'select-dropdown',
 						options: {
 							choices: relatedCollectionOptions,
-							placeholder: "Select related collection",
+							placeholder: 'Select related collection',
 							allowNone: false,
 						},
 					},
 				},
 				{
-					field: "lookupField",
-					type: "string",
-					name: "Lookup Field",
+					field: 'lookupField',
+					type: 'string',
+					name: 'Related Collection Field',
 					meta: {
-						width: "half",
-						interface: "select-dropdown",
+						width: 'half',
+						interface: 'select-dropdown',
 						options: {
 							choices: choices,
-							placeholder: "Select related collection",
+							placeholder: 'Select related field',
 							allowNone: false,
 						},
 					},
@@ -170,12 +156,13 @@ export default defineComponent({
 				.map((e) => {
 					const value = parentValue ? `${parentValue}.${e.field}` : e.field;
 					return {
-						disabled: e?.type === "alias" || e.type !== props.field.type,
+						disabled: e?.group === true || e.type !== props.field.type,
 						text: `${e.name} (${value})`,
 						value: value,
-						children: level > 1 && e?.schema?.foreign_key_table
-							? getFieldTree(e?.schema?.foreign_key_table, level - 1, e.field)
-							: null,
+						children:
+							level > 1 && e?.schema?.foreign_key_table
+								? getFieldTree(e?.schema?.foreign_key_table, level - 1, e.field)
+								: null,
 					};
 				});
 

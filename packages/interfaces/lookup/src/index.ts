@@ -25,6 +25,7 @@ export default defineInterface({
 		'hash',
 		'json',
 		'csv',
+		'alias',
 	],
 	recommendedDisplays: ['formatted-value'],
 	options: FieldOptions,
