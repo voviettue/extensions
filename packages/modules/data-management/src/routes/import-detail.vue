@@ -250,7 +250,7 @@ export default {
 			return payload;
 		},
 		canImport() {
-			return !this.error && this.fieldMapper.length;
+			return !this.error && this.fieldMapper.filter((field) => field.field !== null).length > 0;
 		},
 		items() {
 			const offset = this.limit * (this.page - 1);
