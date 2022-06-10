@@ -34,8 +34,8 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 
 	const cast = (value: any, fieldSchema: Field) => {
 		if (value === null) return null;
-		if (typeof value == 'object') value = JSON.stringify(value);
 		if (typeof value == 'undefined') return null;
+		if (typeof value == 'object') value = JSON.stringify(value);
 
 		switch (fieldSchema?.schema?.data_type) {
 			case 'decimal':
@@ -55,6 +55,11 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 					return null;
 				}
 
+			case 'json':
+			case 'csv':
+			case 'alias':
+				return Array.isArray(value) ? value : [];
+
 			case 'string':
 			case 'text':
 			case 'varchar':
@@ -62,8 +67,7 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 				return String(value).substring(0, fieldSchema?.schema?.max_length || undefined);
 
 			case 'time':
-				const parsedTime = parse(value, 'HH:mm:ss', new Date());
-				return isValid(parsedTime) ? value : null;
+				return isValid(parse(value, 'HH:mm:ss', new Date())) ? value : null;
 
 			case 'datetime':
 			case 'date':
@@ -79,8 +83,9 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 		const mapper: LookupMap[] = [];
 		const relations = schema.relations.filter((relation: any) => relation?.meta?.many_collection == collection);
 
-		for (var field of lookupFields) {
-			const { relationField, lookupField } = JSON.parse(field?.options) || {};
+		for (const field of lookupFields) {
+			const { relationField, lookupField, triggerOnCreate, triggerOnUpdate, manualUpdate } =
+				JSON.parse(field?.options) || {};
 			const relation = relations.find((relation: any) => relation.field == relationField);
 			const relatedCollection = relation?.related_collection;
 
@@ -100,6 +105,9 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 				lookupCollection: relatedCollection,
 				lookupCollectionPK: schema.collections[collection].primary,
 				lookupField: lookupField,
+				triggerOnCreate: triggerOnCreate ?? true,
+				triggerOnUpdate: triggerOnUpdate ?? true,
+				manualUpdate: manualUpdate ?? false,
 			});
 		}
 
@@ -113,20 +121,22 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 			knex: ctx.database,
 			schema: await getSchema(),
 		});
-		if (!_items?.[key]) {
+
+		if (!_items?.[key] && id) {
 			try {
 				_items[key] = await itemService.readOne(id, { fields: [map.lookupField] });
 			} catch {
 				return null;
 			}
 		}
+
 		const item = _items[key] ?? {};
-		let result = value instanceof Object ? { ...item, ...value } : item;
+		const result = value instanceof Object ? { ...item, ...value } : item;
 
 		return result;
 	};
 
-	const execute = async (collection: any, input: any, ctx: any) => {
+	const execute = async (collection: any, input: any, ctx: any, isUpdate = false) => {
 		const lookupFields = await getLookupFields(collection);
 		if (lookupFields.length === 0) return;
 
@@ -135,9 +145,30 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 			const fieldSchemas = await getSchemaFields(collection);
 			const lookupMaps = getLookupMaps(collection, lookupFields, schema);
 
-			for (var map of lookupMaps) {
-				if (!input?.[map.relationField]) continue;
+			for (const map of lookupMaps) {
+				// not fetch data for manual update
+				if (map.manualUpdate) continue;
 
+				// delete payload to prevent manual update
+				if (
+					(isUpdate === false && map.triggerOnCreate === true) ||
+					(isUpdate === true && map.triggerOnUpdate === true)
+				) {
+					delete input?.[map.field];
+				}
+
+				// ignore if not trigger
+				if (
+					(isUpdate === false && map.triggerOnCreate === false) ||
+					(isUpdate === true && map.triggerOnUpdate === false)
+				) {
+					continue;
+				}
+
+				// ignore if not change relation field
+				if (input?.[map.relationField] === undefined) continue;
+
+				input[map.field] = null;
 				const item = await getItem(input[map.relationField], map, ctx);
 				if (item) {
 					const fieldSchema = fieldSchemas.find((schema: any) => schema.field === map.field);
@@ -162,15 +193,21 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 
 	filter('items.update', async (input: any, event: any, ctx: any) => {
 		const collection = event.collection;
-		await execute(collection, input, ctx);
+		await execute(collection, input, ctx, true);
 		return input;
 	});
 
-	// update meta.special for type alias
+	// update meta.special
 	filter('fields.create', async (input: any) => {
 		if (input?.meta?.interface !== interfaceName) return;
 
-		input.meta.special = input.type === 'alias' ? ['alias', 'no-data'] : null;
+		if (input.type === 'alias') {
+			input.meta.special = ['alias', 'no-data'];
+		}
+
+		if (input.type === 'json') {
+			input.meta.special = ['cast-json'];
+		}
 	});
 
 	action('fields.create', () => {

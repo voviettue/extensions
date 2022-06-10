@@ -24,12 +24,12 @@
 			:collection="schemaLookupField.collection"
 			:field="schemaLookupField.field"
 			:field-data="schemaLookupField"
-			:primary-key="RelationPimaryKey"
+			:primary-key="relationId"
 			:placeholder="''"
 			:value="localValue"
-			:key="String(localValue)"
 			:loading="loading"
-			disabled
+			:disabled="manualUpdate === false || schemaField?.type === 'alias'"
+			@input="emitValue($event)"
 		/>
 	</div>
 </template>
@@ -39,22 +39,16 @@ import { defineComponent, ref, watch, inject, computed } from 'vue';
 import { useApi, useStores } from '@directus/extensions-sdk';
 import get from 'lodash/get';
 import round from 'lodash/round';
+import isNil from 'lodash/isNil';
+import isEqual from 'lodash/isEqual';
 import cloneDeep from 'lodash/cloneDeep';
 import { getDefaultInterfaceForType } from './composables/get-default-interface-for-type';
 
 export default defineComponent({
 	props: {
 		value: {
-			type: [String, Number],
+			type: [String, Number, Array],
 			default: null,
-		},
-		relationField: {
-			type: String,
-			required: true,
-		},
-		lookupField: {
-			type: String,
-			required: true,
 		},
 		collection: {
 			type: String,
@@ -68,24 +62,45 @@ export default defineComponent({
 			type: Boolean,
 			default: true,
 		},
+		relationField: {
+			type: String,
+			required: true,
+		},
+		lookupField: {
+			type: String,
+			required: true,
+		},
+		triggerOnCreate: {
+			type: Boolean,
+			default: () => true,
+		},
+		triggerOnUpdate: {
+			type: Boolean,
+			default: () => true,
+		},
+		manualUpdate: {
+			type: Boolean,
+			default: () => false,
+		},
 	},
 	emits: ['input'],
-	setup(props, { emit }) {
-		const localValue = ref<string | number | object>(cast(props.value));
-		const loading = ref<boolean>(false);
-
+	setup(props, { emit, attrs }) {
 		const api = useApi();
 		const { useFieldsStore, useRelationsStore } = useStores();
 		const fieldsStore = useFieldsStore();
 		const relationsStore = useRelationsStore();
 		const values = inject('values', ref<Record<string, any>>({}));
 
+		const lookupFields = fieldsStore
+			.getFieldsForCollection(props.collection)
+			.filter((e) => e?.meta?.interface === 'input-lookup')
+			.map((e) => e.field);
+
 		const relatedCollection = relationsStore
 			.getRelationsForCollection(props.collection)
 			.find((relation: any) => relation?.field === props.relationField)?.related_collection;
 
 		const schemaField = fieldsStore.getField(props.collection, props.field);
-
 		const schemaLookupField = computed(() => {
 			const field = cloneDeep(fieldsStore.getField(relatedCollection, props.lookupField));
 			if (field) {
@@ -98,18 +113,36 @@ export default defineComponent({
 			return field;
 		});
 
-		const RelationPimaryKey = computed(() => {
-			return values.value?.[props.relationField] || undefined;
+		const relationValue = computed(() => {
+			return values.value?.[props.relationField];
 		});
 
-		let oldValues = null;
+		const relationId = computed(() => {
+			const relationPK = fieldsStore.getPrimaryKeyFieldForCollection(relatedCollection)?.field;
+			return relationValue.value instanceof Object ? get(relationValue.value, relationPK) : relationValue.value;
+		});
+
+		const loading = ref<boolean>(false);
+		const isEdit = attrs?.['primary-key'] !== '+' ? true : false;
+		const localValue = ref(undefined);
+		localValue.value = cast(props.value);
+
 		watch(
-			() => values.value,
-			async (newValue) => {
-				if (oldValues !== null && newValue?.[props.relationField] !== oldValues?.[props.relationField]) {
-					await lookup();
+			() => props.value,
+			() => {
+				localValue.value = cast(props.value);
+			}
+		);
+
+		watch(
+			() => values?.value,
+			(newValue, oldValue) => {
+				if (isEdit && Object.keys(oldValue).length === 0) return;
+				if (!isEqual(newValue?.[props.relationField], oldValue?.[props.relationField])) {
+					const index = lookupFields.indexOf(props.field);
+					// run each field after 20ms to prevent form values only updated 1 field.
+					setTimeout(() => lookup(), index * 20);
 				}
-				oldValues = cloneDeep(newValue);
 			}
 		);
 
@@ -117,39 +150,33 @@ export default defineComponent({
 			emitValue,
 			loading,
 			localValue,
-			RelationPimaryKey,
+			relatedCollection,
+			relationValue,
+			relationId,
+			schemaField,
 			schemaLookupField,
 			getDefaultInterfaceForType,
 		};
 
 		function emitValue(value: any): void {
 			localValue.value = cast(value);
+			if (schemaField?.type === 'alias') return;
+			values.value[props.field] = localValue.value;
 			emit('input', localValue.value);
 		}
 
 		async function lookup() {
-			const value = values.value?.[props.relationField];
-
-			if (!value || !relatedCollection || !schemaLookupField.value) {
-				emitValue(null);
-				return;
-			}
+			if (!relatedCollection || !schemaLookupField.value) return;
+			if (!isEdit && props.triggerOnCreate === false) return;
+			if (isEdit && props.triggerOnUpdate === false) return;
 
 			loading.value = true;
 			try {
-				const id = values.value?.[props.relationField];
-				const url =
-					relatedCollection.startsWith('directus_') === true
-						? relatedCollection.replace('directus_', '') + `/${id}`
-						: `items/${relatedCollection}/${id}`;
-				const fields = props.lookupField;
-
-				const res = await api.get(url, {
-					params: { fields },
-				});
-				const item = res?.data?.data;
+				let item = await getItem();
+				if (relationValue.value instanceof Object) {
+					item = { ...item, ...relationValue.value };
+				}
 				const result = get(item, props.lookupField);
-
 				emitValue(result);
 			} catch {
 				emitValue(null);
@@ -158,19 +185,38 @@ export default defineComponent({
 			}
 		}
 
+		async function getItem() {
+			const id = relationId.value;
+			if (!id) return {};
+
+			try {
+				const url =
+					relatedCollection.startsWith('directus_') === true
+						? relatedCollection.replace('directus_', '') + `/${id}`
+						: `items/${relatedCollection}/${id}`;
+				const fields = props.lookupField;
+				const res = await api.get(url, {
+					params: { fields },
+				});
+				return res?.data?.data || {};
+			} catch {
+				return {};
+			}
+		}
+
 		function cast(value: any) {
-			if (value === null || value === undefined || value === '' || value === {} || value === []) return undefined;
+			// if (value === null || value === '' || value === {} || value === []) return undefined;
 
-			const schema = schemaField.schema;
-
-			switch (schema.data_type) {
+			switch (schemaField?.type) {
 				case 'decimal':
 				case 'float':
-					return value == 0 ? 0 : round(value, schema.numeric_scale) || undefined;
+					if (isNil(value)) return null;
+					return value == 0 ? 0 : round(value, schemaField?.schema?.numeric_scale) || null;
 
 				case 'int':
-				case 'bigint':
-					return value == 0 ? 0 : round(value) || undefined;
+				case 'bigInteger':
+					if (isNil(value)) return null;
+					return value == 0 ? 0 : round(value) || null;
 
 				case 'json':
 				case 'csv':
@@ -183,14 +229,13 @@ export default defineComponent({
 					} else if (['false', '0'].includes(String(value).toLowerCase())) {
 						return false;
 					} else {
-						return undefined;
+						return null;
 					}
 
 				case 'string':
 				case 'text':
-				case 'varchar':
-				case 'char':
-					return value.toString().substring(0, schema.max_length || undefined);
+					if (isNil(value)) return null;
+					return String(value).substring(0, schemaField?.schema.max_length || null);
 
 				default:
 					return value;

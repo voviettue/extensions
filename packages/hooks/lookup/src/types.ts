@@ -4,4 +4,7 @@ export type LookupMap = {
 	lookupCollection: string;
 	lookupCollectionPK: string;
 	lookupField: string;
+	triggerOnCreate: boolean;
+	triggerOnUpdate: boolean;
+	manualUpdate: boolean;
 };

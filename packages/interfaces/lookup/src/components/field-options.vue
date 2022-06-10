@@ -60,7 +60,8 @@ export default defineComponent({
 		},
 	},
 	emits: ['input', 'update:modelValue'],
-	setup(props, { emit }) {
+	setup(props, ctx) {
+		const { emit } = ctx;
 		const optionsValues = computed({
 			get() {
 				return props.value ?? {};
@@ -134,6 +135,43 @@ export default defineComponent({
 							placeholder: 'Select related field',
 							allowNone: false,
 						},
+					},
+				},
+				{
+					field: 'triggerOnCreate',
+					type: 'boolean',
+					name: 'Trigger on Create',
+					schema: {
+						default_value: true,
+					},
+					meta: {
+						width: 'half',
+						interface: 'boolean',
+					},
+					defaultValue: true,
+				},
+				{
+					field: 'triggerOnUpdate',
+					type: 'boolean',
+					name: 'Trigger on Update',
+					schema: {
+						default_value: true,
+					},
+					meta: {
+						width: 'half',
+						interface: 'boolean',
+					},
+				},
+				{
+					field: 'manualUpdate',
+					type: 'boolean',
+					name: 'Manual Update',
+					schema: {
+						default_value: false,
+					},
+					meta: {
+						width: 'half',
+						interface: 'boolean',
 					},
 				},
 			];

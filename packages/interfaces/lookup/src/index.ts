@@ -1,5 +1,5 @@
 import { defineInterface } from '@directus/extensions-sdk';
-import InterfaceComponent from './interface.vue';
+import InterfaceComponent from './input-lookup.vue';
 import FieldOptions from './components/field-options.vue';
 
 export default defineInterface({
