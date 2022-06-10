@@ -1,7 +1,7 @@
 <template>
-	<private-view :title="`Export ${formatTitle(collection?.name)}`">
+	<private-view :title="`${formatTitle(collection?.name)}`">
 		<template #headline>
-			<v-breadcrumb :items="[{ name: 'Export data', to: '/data-management/export' }]" />
+			<v-breadcrumb :items="[{ name: 'Export Data', to: '/data-management/export' }]" />
 		</template>
 
 		<template #title-outer:prepend>
@@ -97,7 +97,7 @@ import SearchInput from '../components/search-input.vue';
 import formatTitle from '@directus/format-title';
 import { useApi, useStores } from '@directus/extensions-sdk';
 import { useFieldTree } from '../utils/use-field-tree';
-import XLSX from 'xlsx';
+import * as XLSX from 'xlsx';
 import flatten from 'flat';
 import { getDateFormatted } from '../utils';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SCOPE } from '../config.ts';

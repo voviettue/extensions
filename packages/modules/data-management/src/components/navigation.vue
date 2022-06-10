@@ -18,13 +18,13 @@ export default {
 			return [
 				{
 					icon: 'file_upload',
-					name: 'Import data',
-					to: '/data-management/import',
+					name: 'Import Data',
+					to: '/import',
 				},
 				{
 					icon: 'file_download',
-					name: 'Export data',
-					to: '/data-management/export',
+					name: 'Export Data',
+					to: '/export',
 				},
 			];
 		},

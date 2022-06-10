@@ -1,7 +1,7 @@
 <template>
-	<private-view title="Export data">
+	<private-view title="Export Data">
 		<template #headline>
-			<v-breadcrumb :items="[{ name: 'Data management', to: '/data-management/export' }]" />
+			<v-breadcrumb :items="[{ name: 'Data Management', to: '/data-management/export' }]" />
 		</template>
 
 		<template #title-outer:prepend>

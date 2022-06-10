@@ -1,7 +1,7 @@
 <template>
-	<private-view title="Import data">
+	<private-view title="Import Data">
 		<template #headline>
-			<v-breadcrumb :items="[{ name: 'Data management', to: '/data-management/import' }]" />
+			<v-breadcrumb :items="[{ name: 'Data Management', to: '/import' }]" />
 		</template>
 
 		<template #title-outer:prepend>
