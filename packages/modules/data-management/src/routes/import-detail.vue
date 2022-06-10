@@ -71,7 +71,7 @@
 				>
 					<span>{{ itemCount }}</span>
 					<span>&nbsp;|&nbsp;</span>
-					<span>Page {{ page }}/{{ Math.ceil(items.length / limit) }}</span>
+					<span>{{ `Page ${page}/${totalPage}` }}</span>
 					<v-button icon secondary size="sm" :disabled="page === 1" style="margin-left: 10px" @click="page = page - 1">
 						<v-icon name="keyboard_arrow_left" />
 					</v-button>
