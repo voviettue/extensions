@@ -1,3 +1,5 @@
+import { format, parseISO } from 'date-fns';
+
 export const convertData = (value: Record<string, string>, fields: any): Record<string, any> => {
 	const converted: Record<string, any> = {};
 	Object.keys(value).forEach((k) => {
@@ -75,9 +77,34 @@ export const convertInteger = (value: string | undefined): number | null => {
 	return parseInt(value);
 };
 
+export const convertDateTime = (
+	value: string | undefined,
+	type?: 'dateTime' | 'date' | 'time' | 'timestamp'
+): string | null => {
+	if (!value) {
+		return null;
+	}
+
+	try {
+		const date = parseISO(value);
+
+		switch (type) {
+			case 'date':
+				return format(date, 'yyyy-MM-dd');
+			case 'time':
+				return format(date, 'HH:mm:ss');
+			default:
+				return format(date, `yyyy-MM-dd'T'HH:mm:ss`);
+		}
+	} catch (err) {
+		return null;
+	}
+};
+
 export default {
 	convertArray,
 	convertJson,
 	convertBoolean,
 	convertInteger,
+	convertDateTime,
 };

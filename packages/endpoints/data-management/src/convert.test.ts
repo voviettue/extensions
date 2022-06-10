@@ -1,4 +1,4 @@
-import { convertInteger, convertBoolean, convertArray, convertJson } from './utils';
+import { convertInteger, convertBoolean, convertArray, convertJson, convertDateTime } from './convert';
 
 describe('test convert integer', () => {
 	test('should convert integer', () => {
@@ -47,5 +47,15 @@ describe('test convert json', () => {
 		expect(convertJson('1x')).toBe('1x');
 		expect(convertJson('')).toBe('');
 		expect(convertJson(undefined)).toBe(undefined);
+	});
+});
+
+describe('test convert date time', () => {
+	test('should convert date time', () => {
+		expect(convertDateTime('abc')).toBe(null);
+		expect(convertDateTime('2022-06-09T16:25:00')).toBe('2022-06-09T16:25:00');
+		expect(convertDateTime('2022-06-09T16:25:00', 'date')).toBe('2022-06-09');
+		expect(convertDateTime('2022-06-09T16:25:00', 'time')).toBe('16:25:00');
+		expect(convertDateTime('2022-06-09T16:25:00', 'timestamp')).toBe('2022-06-09T16:25:00');
 	});
 });

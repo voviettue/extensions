@@ -3,7 +3,8 @@ import busboy from 'busboy';
 import { IncomingHttpHeaders } from 'http';
 import csv from 'csv-parser';
 import { queue } from 'async';
-import { convertData } from './utils';
+import { convertData } from './convert';
+import { mapFields } from './mapping';
 import destroyStream from 'destroy';
 
 export default defineEndpoint(async (router, { services, exceptions, database, logger }) => {
@@ -50,6 +51,7 @@ export default defineEndpoint(async (router, { services, exceptions, database, l
 				res.status(200).end();
 
 				user = await usersService.readOne(req.accountability.user, { fields: ['email'] });
+
 				await importCSV(req.params.collection, req.accountability, req.schema, file);
 
 				const collectionName = formData.get('collectionName') || req.params.collection;
@@ -92,6 +94,8 @@ export default defineEndpoint(async (router, { services, exceptions, database, l
 	});
 
 	function importCSV(collection: string, accountability: any, schema: any, stream: NodeJS.ReadableStream) {
+		const fieldMapper = JSON.parse(formData.get('fieldMapper') || '[]');
+
 		return database.transaction(async (trx) => {
 			const fieldService = new FieldsService({ knex: trx, accountability, schema });
 
@@ -111,6 +115,7 @@ export default defineEndpoint(async (router, { services, exceptions, database, l
 				stream
 					.pipe(csv())
 					.on('data', (value: Record<string, string>) => {
+						value = mapFields(value, fieldMapper);
 						value = convertData(value, fields);
 						saveQueue.push(value);
 					})
