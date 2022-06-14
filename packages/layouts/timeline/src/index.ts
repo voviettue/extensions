@@ -5,7 +5,7 @@ import { defineLayout } from '@directus/shared/utils';
 import { computed, ref, toRefs } from 'vue';
 import { useI18n } from 'vue-i18n';
 import TimelineActions from './actions.vue';
-import TimelineLayout from './layout.vue';
+import TimelineLayout from './layout-timeline.vue';
 import TimelineOptions from './options.vue';
 import { useSync } from '@directus/shared/composables';
 import { LayoutOptions } from './types';

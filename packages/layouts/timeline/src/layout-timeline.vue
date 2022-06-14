@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, onMounted } from 'vue';
+import { defineComponent, PropType, onMounted, ref } from 'vue';
 import { Item } from '@directus/shared/types';
 import { useSync } from '@directus/shared/composables';
 import TimelineChart from './components/timeline-chart.vue';
@@ -88,16 +88,18 @@ export default defineComponent({
 		const viewInfoEditable = useSync(props, 'viewInfo', emit);
 		const viewOptions = ['day', 'week', 'month'];
 		const formatDate = format;
+		const mouseDown = ref(false);
 
 		if (!viewInfoEditable.value) {
 			onUpdateView('day');
 		}
 
-		onMounted(() =>
+		onMounted(() => {
+			trackMouseDown();
 			setTimeout(() => {
 				enableExpandRangeTime();
-			}, 1000)
-		);
+			}, 1000);
+		});
 
 		return {
 			viewInfoEditable,
@@ -114,6 +116,15 @@ export default defineComponent({
 				startDate: startOfYear(new Date()).toDateString(),
 				endDate: endOfYear(new Date()).toDateString(),
 				zoom: 1,
+			};
+		}
+
+		function trackMouseDown() {
+			window.onmousedown = () => {
+				mouseDown.value = true;
+			};
+			window.onmouseup = () => {
+				mouseDown.value = false;
 			};
 		}
 
@@ -134,31 +145,66 @@ export default defineComponent({
 			const layout = document.getElementById('timeline-layout');
 			const grid = layout.querySelector('.grid');
 			let appending = false;
+
+			const expandLeft = () => {
+				appending = true;
+				viewInfoEditable.value.startDate = subYears(new Date(viewInfoEditable.value.startDate), 1).toDateString();
+				setTimeout(() => {
+					appending = false;
+				}, 1000);
+			};
+
+			const expandRight = () => {
+				appending = true;
+				viewInfoEditable.value.endDate = addYears(new Date(viewInfoEditable.value.endDate), 1).toDateString();
+				setTimeout(() => {
+					appending = false;
+				}, 1000);
+			};
+
 			grid.addEventListener('scroll', () => {
-				if (appending) {
-					return;
-				}
+				if (appending) return;
+				if (mouseDown.value === true) return;
+
 				//left;
 				if (grid.scrollLeft === 0) {
-					appending = true;
-					viewInfoEditable.value.startDate = subYears(new Date(viewInfoEditable.value.startDate), 1).toDateString();
-					setTimeout(() => {
-						appending = false;
-					}, 1000);
+					expandLeft();
 				}
 				// right
 				if (grid.scrollLeft + grid.offsetWidth >= grid.scrollWidth) {
-					appending = true;
-					viewInfoEditable.value.endDate = addYears(new Date(viewInfoEditable.value.endDate), 1).toDateString();
-					setTimeout(() => {
-						appending = false;
-					}, 1000);
+					expandRight();
 				}
 			});
+
+			window.onmouseup = () => {
+				if (grid.scrollLeft === 0) {
+					expandLeft();
+				}
+				if (grid.scrollLeft + grid.offsetWidth >= grid.scrollWidth) {
+					expandRight();
+				}
+			};
 		}
 	},
 });
 </script>
+
+<style>
+:root {
+	--border-timeline: #f3f3f3;
+	--background-timeline: #ffffff;
+	--background-item-timeline: #d9d0ff;
+	--background-row-timeline: rgb(0 0 0 / 4%);
+	--background-group-timeline: rgb(255 255 255 / 85%);
+}
+body.dark {
+	--border-timeline: #484f58;
+	--background-timeline: #21262e;
+	--background-item-timeline: #3e2d8d;
+	--background-row-timeline: rgb(0 0 0 / 10%);
+	--background-group-timeline: rgb(33 38 46 / 85%);
+}
+</style>
 
 <style scoped>
 .wrap-layout {
@@ -169,8 +215,8 @@ export default defineComponent({
 	align-items: center;
 	margin-bottom: 0px;
 	padding: 8px 0px;
-	border-top: 1px solid #f0f4f9;
-	border-bottom: 1px solid #f0f4f9;
+	border-top: 1px solid var(--border-timeline);
+	border-bottom: 1px solid var(--border-timeline);
 }
 .mr-2 {
 	margin-right: 8px;
