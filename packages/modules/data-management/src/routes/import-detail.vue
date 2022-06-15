@@ -262,7 +262,7 @@ export default {
 				for (const [key, value] of Object.entries(item)) {
 					const field = this.fieldMapper.find((mappedField) => mappedField.header === key)?.field;
 					if (field) {
-						const type = this.fields.find((e) => e.field === field.field)?.type;
+						const type = this.fields.find((e) => e.field === field)?.type;
 						converted[key] = convertData(value, type);
 					} else {
 						converted[key] = value;
