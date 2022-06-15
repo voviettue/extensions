@@ -157,7 +157,7 @@ import { useI18n } from 'vue-i18n';
 import * as XLSX from 'xlsx';
 import Navigation from '../components/navigation.vue';
 import formatTitle from '@directus/format-title';
-import { convertBoolean, convertInteger, convertArray, convertJson, convertDateTime } from '../utils';
+import { convertData } from '@catex/shared';
 
 export default {
 	components: {
@@ -214,7 +214,7 @@ export default {
 	},
 	computed: {
 		fileHeader() {
-			return this.fileData.length ? Object.keys(this.fileData[1]).map((header) => header.trim()) : [];
+			return this.fileData.length ? Object.keys(this.fileData[0]).map((header) => header.trim()) : [];
 		},
 		fieldOptions() {
 			const options = this.fields.map((field) => {
@@ -260,10 +260,10 @@ export default {
 			const convertedItems = items.map((item) => {
 				const converted = {};
 				for (const [key, value] of Object.entries(item)) {
-					const { field } = this.fieldMapper.find((mappedField) => mappedField.header === key);
+					const field = this.fieldMapper.find((mappedField) => mappedField.header === key)?.field;
 					if (field) {
-						const type = this.fields.find((e) => e.field === field).type;
-						converted[key] = this.convertData(value, type);
+						const type = this.fields.find((e) => e.field === field.field)?.type;
+						converted[key] = convertData(value, type);
 					} else {
 						converted[key] = value;
 					}
@@ -395,29 +395,6 @@ export default {
 			this.resetState();
 			this.file = null;
 			document.getElementById('form-import').reset();
-		},
-		convertData(value, type) {
-			switch (type) {
-				case 'csv':
-				case 'alias':
-				case 'json':
-					value = convertJson(value);
-					if (!Array.isArray(value)) {
-						value = convertArray(value);
-					}
-					return value;
-				case 'boolean':
-					return convertBoolean(value);
-				case 'integer':
-					return convertInteger(value);
-				case 'dateTime':
-				case 'date':
-				case 'time':
-				case 'timestamp':
-					return convertDateTime(value, type);
-				default:
-					return value;
-			}
 		},
 		mapField(fieldKey, header) {
 			if (!this.fieldMapper.find((field) => field.header === header)) {

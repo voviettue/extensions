@@ -3,7 +3,7 @@ import busboy from 'busboy';
 import { IncomingHttpHeaders } from 'http';
 import csv from 'csv-parser';
 import { queue } from 'async';
-import { convertData } from './convert';
+import { convertData } from '@catex/shared';
 import { mapFields } from './mapping';
 import destroyStream from 'destroy';
 
@@ -116,8 +116,12 @@ export default defineEndpoint(async (router, { services, exceptions, database, l
 					.pipe(csv())
 					.on('data', (value: Record<string, string>) => {
 						value = mapFields(value, fieldMapper);
-						value = convertData(value, fields);
-						saveQueue.push(value);
+						const converted: Record<string, any> = {};
+						for (const { field, type } of fields) {
+							converted[field] = convertData(value[field], type);
+						}
+
+						saveQueue.push(converted);
 					})
 					.on('error', (err) => {
 						destroyStream(stream);

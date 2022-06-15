@@ -88,7 +88,7 @@
 	</private-view>
 </template>
 
-<script>
+<script lang="ts">
 import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -100,7 +100,7 @@ import { useFieldTree } from '../utils/use-field-tree';
 import * as XLSX from 'xlsx';
 import flatten from 'flat';
 import { getDateFormatted } from '../utils';
-import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SCOPE } from '../config.ts';
+import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SCOPE } from '../config';
 
 export default {
 	components: {
@@ -269,7 +269,6 @@ export default {
 
 		async function exportGoogleSheet() {
 			await gapi.load('auth2', () => {
-				console.log('Auth2 Loaded');
 				if (oAuthToken.value) return;
 
 				gapi.auth2.authorize(
@@ -283,14 +282,12 @@ export default {
 			});
 
 			gapi.load('picker', () => {
-				console.log('Picker Loaded');
 				pickerApiLoaded.value = true;
 				createPicker();
 			});
 		}
 
 		function handleAuthResult(authResult) {
-			console.log('Handle Auth result');
 			if (authResult && !authResult.error) {
 				oAuthToken.value = authResult.access_token;
 				createPicker();
@@ -300,7 +297,6 @@ export default {
 		}
 
 		function createPicker() {
-			console.log('Create Picker');
 			if (pickerApiLoaded.value && oAuthToken.value) {
 				var docsView = new google.picker.DocsView()
 					.setMimeTypes('application/vnd.google-apps.folder')
@@ -319,7 +315,6 @@ export default {
 		}
 
 		function pickerCallback(data) {
-			console.log('Picker callback');
 			if (data.action == google.picker.Action.PICKED) {
 				folderId.value = data.docs[0].id;
 				fetchCollectionData();
