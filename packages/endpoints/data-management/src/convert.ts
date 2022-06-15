@@ -20,6 +20,12 @@ export const convertData = (value: Record<string, string>, fields: any): Record<
 				case 'integer':
 					converted[k] = convertInteger(value[k]);
 					break;
+				case 'dateTime':
+				case 'date':
+				case 'time':
+				case 'timestamp':
+					converted[k] = convertDateTime(value[k], field.type);
+					break;
 				default:
 					converted[k] = value[k];
 			}
