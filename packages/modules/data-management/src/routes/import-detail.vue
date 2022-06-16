@@ -18,7 +18,7 @@
 			<sidebar-detail icon="info" :title="t('information')" close></sidebar-detail>
 		</template>
 
-		<div v-if="collection" class="padding-box">
+		<div v-if="collection && !fetchingFolder" class="padding-box">
 			<v-error
 				v-if="!folder"
 				:error="{
@@ -221,6 +221,7 @@ export default {
 			fileData: [],
 			isSubmit: false,
 			isSucceed: false,
+			fetchingFolder: false,
 			error: null,
 			totalRows: 0,
 			maxRows: 10000,
@@ -311,17 +312,31 @@ export default {
 		init() {
 			this.initFolder();
 		},
-		initFolder() {
-			this.api.get('/folders?name="Imports"').then((res) => {
+		async initFolder() {
+			this.fetchingFolder = true;
+
+			try {
+				const res = await this.api.get('/folders', {
+					params: {
+						filter: {
+							name: {
+								_eq: 'Imports',
+							},
+						},
+					},
+				});
 				const folders = res.data.data;
 				if (folders.length) {
 					this.folder = folders[0];
 				} else {
-					this.api.post('/folders', { name: 'Imports' }).then((res) => {
-						this.folder = res.data.data;
-					});
+					const res = await this.api.post('/folders', { name: 'Imports' });
+					this.folder = res.data.data;
 				}
-			});
+			} catch (err) {
+				//
+			}
+
+			this.fetchingFolder = false;
 		},
 		submit() {
 			this.isSubmit = true;
