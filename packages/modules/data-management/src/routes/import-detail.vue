@@ -19,133 +19,151 @@
 		</template>
 
 		<div v-if="collection" class="padding-box">
-			<form id="form-import" style="display: flex; align-items: center">
-				<div style="flex-grow: 1">
-					<component
-						:is="'interface-file'"
-						v-if="folder"
-						ref="inputFile"
-						:value="file ? file.id : null"
-						:folder="folder.id"
-						collection="directus_settings"
-						field="project_logo"
-						:disabled="isSubmit"
-						@input="onUpload"
-						@update:model-value="onUpload($event)"
-					>
-						<template #append></template>
-					</component>
-				</div>
+			<v-error
+				v-if="!folder"
+				:error="{
+					extensions: { code: 'PERMISSION' },
+					message: `You need CREATE & VIEW permissions on System Folders to perform this action`,
+				}"
+			></v-error>
+			<template v-else>
+				<form id="form-import" style="display: flex; align-items: center">
+					<div style="flex-grow: 1">
+						<component
+							:is="'interface-file'"
+							v-if="folder"
+							ref="inputFile"
+							:value="file ? file.id : null"
+							:folder="folder.id"
+							collection="directus_settings"
+							field="project_logo"
+							:disabled="isSubmit"
+							@input="onUpload"
+							@update:model-value="onUpload($event)"
+						>
+							<template #append></template>
+						</component>
+					</div>
 
-				<v-button
-					v-tooltip="createAllowed ? '' : t('not_allowed')"
-					:disabled="!canImport"
-					style="margin-left: 20px"
-					:loading="isSubmit"
-					@click="submit()"
-				>
-					Import
-				</v-button>
-			</form>
-
-			<br />
-
-			<template v-if="error">
-				<v-error v-if="error" :error="error" />
-				<br />
-			</template>
-
-			<div v-if="items.length" style="padding: 10px 0; display: flex; align-items: center">
-				<span>Mapped fields: {{ fieldMapper.filter((field) => field.field !== null).length }}/{{ fields.length }}</span>
-				<span style="margin-left: 1rem">
-					<v-checkbox v-model="hideUnmappedField" label="Hide unmapped fields"></v-checkbox>
-				</span>
-				<div
-					style="
-						flex-grow: 1;
-						display: flex;
-						align-items: center;
-						justify-content: flex-end;
-						color: var(--foreground-subdued);
-					"
-				>
-					<span>{{ itemCount }}</span>
-					<span>&nbsp;|&nbsp;</span>
-					<span>{{ `Page ${page}/${totalPage}` }}</span>
-					<v-button icon secondary size="sm" :disabled="page === 1" style="margin-left: 10px" @click="page = page - 1">
-						<v-icon name="keyboard_arrow_left" />
-					</v-button>
 					<v-button
-						icon
-						secondary
-						size="sm"
-						:disabled="page === totalPage"
-						style="margin-left: 10px"
-						@click="page = page + 1"
+						v-tooltip="createAllowed ? '' : t('not_allowed')"
+						:disabled="!canImport"
+						style="margin-left: 20px"
+						:loading="isSubmit"
+						@click="submit()"
 					>
-						<v-icon name="keyboard_arrow_right" />
+						Import
 					</v-button>
+				</form>
+				<br />
+				<template v-if="error">
+					<v-error :error="error" />
+					<br />
+				</template>
+				<div v-if="items.length" style="padding: 10px 0; display: flex; align-items: center">
+					<span>
+						Mapped fields: {{ fieldMapper.filter((field) => field.field !== null).length }}/{{ fields.length }}
+					</span>
+					<span style="margin-left: 1rem">
+						<v-checkbox v-model="hideUnmappedField" label="Hide unmapped fields"></v-checkbox>
+					</span>
+					<div
+						style="
+							flex-grow: 1;
+							display: flex;
+							align-items: center;
+							justify-content: flex-end;
+							color: var(--foreground-subdued);
+						"
+					>
+						<span>{{ itemCount }}</span>
+						<span>&nbsp;|&nbsp;</span>
+						<span>{{ `Page ${page}/${totalPage}` }}</span>
+						<v-button
+							icon
+							secondary
+							size="sm"
+							:disabled="page === 1"
+							style="margin-left: 10px"
+							@click="page = page - 1"
+						>
+							<v-icon name="keyboard_arrow_left" />
+						</v-button>
+						<v-button
+							icon
+							secondary
+							size="sm"
+							:disabled="page === totalPage"
+							style="margin-left: 10px"
+							@click="page = page + 1"
+						>
+							<v-icon name="keyboard_arrow_right" />
+						</v-button>
+					</div>
 				</div>
-			</div>
-
-			<div v-if="items.length" class="v-table table">
-				<table style="width: 100%">
-					<thead class="table-header">
-						<tr>
-							<td
-								v-for="header in tableFields"
-								:key="header"
-								:class="[
-									fieldMapper.find((field) => field.header === header).field === null ? 'unmapped-field-col' : '',
-								]"
-							>
-								<v-select
-									:items="fieldOptions"
-									item-value="field"
-									item-text="name"
-									inline
-									:model-value="fieldMapper.find((field) => field.header === header).field"
-									@update:model-value="(value) => mapField(value, header)"
-								/>
-							</td>
-						</tr>
-						<tr class="original-header-row">
-							<td v-for="(field, index) in tableFields" :key="`original-header-${index}`">{{ field }}</td>
-						</tr>
-					</thead>
-					<tbody>
-						<template v-for="(item, index) in items" :key="`row-${(index + 1) * page}`">
-							<tr class="table-row">
-								<td v-for="key in tableFields" :key="key">
-									<span v-if="item[key] === null || item[key] === ''" class="null">--</span>
-									<span v-else-if="typeof item[key] === 'boolean'">
-										<v-icon :name="item[key] ? 'check' : 'close'" :color="item[key] ? '#00C897' : '#B0BEC5'" />
-									</span>
-									<span v-else-if="Array.isArray(item[key])">
-										<v-chip v-for="value in item[key]" :key="value" style="margin: 2px; height: auto !important" small>
-											{{ value }}
-										</v-chip>
-									</span>
-									<span v-else>{{ item[key] }}</span>
+				<div v-if="items.length" class="v-table table">
+					<table style="width: 100%">
+						<thead class="table-header">
+							<tr>
+								<td
+									v-for="header in tableFields"
+									:key="header"
+									:class="[
+										fieldMapper.find((field) => field.header === header).field === null ? 'unmapped-field-col' : '',
+									]"
+								>
+									<v-select
+										:items="fieldOptions"
+										item-value="field"
+										item-text="name"
+										inline
+										:model-value="fieldMapper.find((field) => field.header === header).field"
+										@update:model-value="(value) => mapField(value, header)"
+									/>
 								</td>
 							</tr>
-						</template>
-					</tbody>
-				</table>
-			</div>
-			<div v-else>Select your CSV file to see preview data.</div>
-
-			<v-dialog v-model="isSucceed" @esc="resetState()">
-				<v-card>
-					<v-card-title>Import has been scheduled</v-card-title>
-					<v-card-text>
-						It'll take a few minutes to complete this import. You will be notified by email when it's done.
-					</v-card-text>
-					<v-card-actions>
-						<v-button secondary @click="clearAll()">Close</v-button>
-					</v-card-actions>
-				</v-card>
-			</v-dialog>
+							<tr class="original-header-row">
+								<td v-for="(field, index) in tableFields" :key="`original-header-${index}`">{{ field }}</td>
+							</tr>
+						</thead>
+						<tbody>
+							<template v-for="(item, index) in items" :key="`row-${(index + 1) * page}`">
+								<tr class="table-row">
+									<td v-for="key in tableFields" :key="key">
+										<span v-if="item[key] === null || item[key] === ''" class="null">--</span>
+										<span v-else-if="typeof item[key] === 'boolean'">
+											<v-icon :name="item[key] ? 'check' : 'close'" :color="item[key] ? '#00C897' : '#B0BEC5'" />
+										</span>
+										<span v-else-if="Array.isArray(item[key])">
+											<v-chip
+												v-for="value in item[key]"
+												:key="value"
+												style="margin: 2px; height: auto !important"
+												small
+											>
+												{{ value }}
+											</v-chip>
+										</span>
+										<span v-else>{{ item[key] }}</span>
+									</td>
+								</tr>
+							</template>
+						</tbody>
+					</table>
+				</div>
+				<div v-else>Select your CSV file to see preview data.</div>
+				<v-dialog v-model="isSucceed" @esc="resetState()">
+					<v-card>
+						<v-card-title>Import has been scheduled</v-card-title>
+						<v-card-text>
+							It'll take a few minutes to complete this import. You will be notified by email when it's done.
+						</v-card-text>
+						<v-card-actions>
+							<v-button secondary @click="clearAll()">Close</v-button>
+						</v-card-actions>
+					</v-card>
+				</v-dialog>
+			</template>
 		</div>
 	</private-view>
 </template>
