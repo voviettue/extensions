@@ -60,8 +60,7 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 				return String(value).substring(0, fieldSchema?.schema?.max_length || undefined);
 
 			case 'time':
-				const parsedTime = parse(value, 'HH:mm:ss', new Date());
-				return isValid(parsedTime) ? value : null;
+				return isValid(parse(value, 'HH:mm:ss', new Date())) ? value : null;
 
 			case 'datetime':
 			case 'date':
@@ -126,7 +125,7 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 			const fieldSchemas = await getSchemaFields(collection);
 			const lookupMaps = getLookupMaps(collection, lookupFields, schema);
 
-			for (var map of lookupMaps) {
+			for (const map of lookupMaps) {
 				if (!input?.[map.relationField]) continue;
 
 				const item = await getItem(input[map.relationField], map);
