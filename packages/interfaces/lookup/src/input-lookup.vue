@@ -38,8 +38,8 @@
 import { defineComponent, ref, watch, inject, computed } from 'vue';
 import { useApi, useStores } from '@directus/extensions-sdk';
 import get from 'lodash/get';
+import has from 'lodash/has';
 import round from 'lodash/round';
-import isNil from 'lodash/isNil';
 import isEqual from 'lodash/isEqual';
 import cloneDeep from 'lodash/cloneDeep';
 import { getDefaultInterfaceForType } from './composables/get-default-interface-for-type';
@@ -172,12 +172,8 @@ export default defineComponent({
 
 			loading.value = true;
 			try {
-				let item = await getItem();
-				if (relationValue.value instanceof Object) {
-					item = { ...item, ...relationValue.value };
-				}
-				const result = get(item, props.lookupField);
-				emitValue(result);
+				const value = await getValue();
+				emitValue(value);
 			} catch {
 				emitValue(null);
 			} finally {
@@ -185,16 +181,47 @@ export default defineComponent({
 			}
 		}
 
-		async function getItem() {
-			const id = relationId.value;
+		async function getValue() {
+			let value = null;
+			const path = props.relationField + '.' + props.lookupField;
+			const keys = path.split('.');
+			const findKeys = [];
+
+			try {
+				for (let i = 0; i < keys.length; i++) {
+					if (has(values.value, keys.slice(0, i + 1))) {
+						findKeys.push(keys[i]);
+						value = get(values.value, findKeys);
+						continue;
+					}
+					break;
+				}
+
+				if (findKeys.length === keys.length) return value;
+
+				const field = fieldsStore.getField(props.collection, findKeys.join('.'));
+				const collection = field?.schema?.foreign_key_table;
+				const pk = field?.schema?.foreign_key_column;
+				const id = value instanceof Object ? value?.[pk] : value;
+				const fields = keys.slice(findKeys.length).join('.');
+				let item = await getItem(collection, id, fields);
+				if (value instanceof Object) {
+					item = { ...item, ...value };
+				}
+				return get(item, fields);
+			} catch {
+				return null;
+			}
+		}
+
+		async function getItem(collection, id, fields) {
 			if (!id) return {};
 
 			try {
 				const url =
-					relatedCollection.startsWith('directus_') === true
-						? relatedCollection.replace('directus_', '') + `/${id}`
-						: `items/${relatedCollection}/${id}`;
-				const fields = props.lookupField;
+					collection.startsWith('directus_') === true
+						? collection.replace('directus_', '') + `/${id}`
+						: `items/${collection}/${id}`;
 				const res = await api.get(url, {
 					params: { fields },
 				});
@@ -205,17 +232,15 @@ export default defineComponent({
 		}
 
 		function cast(value: any) {
-			// if (value === null || value === '' || value === {} || value === []) return undefined;
+			if (value === null || value === undefined || value === '' || value === {} || value === []) return undefined;
 
 			switch (schemaField?.type) {
 				case 'decimal':
 				case 'float':
-					if (isNil(value)) return null;
 					return value == 0 ? 0 : round(value, schemaField?.schema?.numeric_scale) || null;
 
 				case 'int':
 				case 'bigInteger':
-					if (isNil(value)) return null;
 					return value == 0 ? 0 : round(value) || null;
 
 				case 'json':
@@ -234,7 +259,6 @@ export default defineComponent({
 
 				case 'string':
 				case 'text':
-					if (isNil(value)) return null;
 					return String(value).substring(0, schemaField?.schema.max_length || null);
 
 				default:

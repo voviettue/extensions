@@ -1,5 +1,6 @@
 import { defineHook } from '@directus/extensions-sdk';
 import get from 'lodash/get';
+import has from 'lodash/has';
 import round from 'lodash/round';
 import { parse, isValid } from 'date-fns';
 import { LookupMap } from './types';
@@ -9,7 +10,6 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 	const interfaceName = 'input-lookup';
 	let _lookupFields: any = null;
 	let _schemaFields: any = null;
-	let _items: any = {};
 
 	const getLookupFields = async (collection: string) => {
 		if (_lookupFields === null) {
@@ -22,7 +22,7 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 	const getSchemaFields = async (collection: string): Promise<Field[]> => {
 		if (_schemaFields === null) {
 			const fieldsService = new services.FieldsService({ knex: database, schema: await getSchema() });
-			_schemaFields = await fieldsService.readAll(collection);
+			_schemaFields = await fieldsService.readAll();
 		}
 		return _schemaFields.filter((schema: any) => !collection || schema.collection === collection);
 	};
@@ -114,29 +114,71 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 		return mapper;
 	};
 
-	const getItem = async (value: any, map: LookupMap, ctx: any) => {
-		const id = value instanceof Object ? value?.[map.lookupCollectionPK] : value;
-		const key = `${map.lookupCollection}.${id}.${map.lookupField}`;
-		const itemService = new services.ItemsService(map.lookupCollection, {
+	const getValue = async (input: any, event: any, map: LookupMap, ctx: any) => {
+		let value = null;
+		const path = map.relationField + '.' + map.lookupField;
+		const keys = path.split('.');
+		const findKeys = [];
+
+		try {
+			for (let i = 0; i < keys.length; i++) {
+				if (has(input, keys.slice(0, i + 1))) {
+					findKeys.push(keys[i]);
+					value = get(input, findKeys);
+					continue;
+				}
+				break;
+			}
+
+			if (findKeys.length === keys.length) return value;
+
+			const field = await getField(event.collection, findKeys.join('.'));
+			const collection = field?.schema?.foreign_key_table;
+			const pk = field?.schema?.foreign_key_column;
+			const id = value instanceof Object ? value?.[pk] : value;
+			const fields = keys.slice(findKeys.length).join('.');
+			let item = await getItem(collection, id, [fields], ctx);
+			if (value instanceof Object) {
+				item = { ...item, ...value };
+			}
+			return get(item, fields);
+		} catch (err) {
+			logger.error(err);
+			return null;
+		}
+	};
+
+	const getField = async (collection: string, fieldPath: string): Promise<any> => {
+		const keys = fieldPath.split('.');
+		const fieldName = keys.shift();
+
+		const fields = await getSchemaFields(collection);
+		const field: any = fields.find((e: any) => e.field === fieldName);
+
+		if (keys.length > 0) {
+			return await getField(field?.schema?.foreign_key_table, keys.join('.'));
+		}
+		return field;
+	};
+
+	const getItem = async (collection: any, id: any, fields: any, ctx: any) => {
+		if (!id || !collection) return null;
+
+		const itemService = new services.ItemsService(collection, {
 			knex: ctx.database,
 			schema: await getSchema(),
 		});
 
-		if (!_items?.[key] && id) {
-			try {
-				_items[key] = await itemService.readOne(id, { fields: [map.lookupField] });
-			} catch {
-				return null;
-			}
+		try {
+			return await itemService.readOne(id, { fields });
+		} catch (err) {
+			logger.error(err);
+			return null;
 		}
-
-		const item = _items[key] ?? {};
-		const result = value instanceof Object ? { ...item, ...value } : item;
-
-		return result;
 	};
 
-	const execute = async (collection: any, input: any, ctx: any, isUpdate = false) => {
+	const execute = async (input: any, event: any, ctx: any, isUpdate = false) => {
+		const collection = event.collection;
 		const lookupFields = await getLookupFields(collection);
 		if (lookupFields.length === 0) return;
 
@@ -169,14 +211,11 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 				if (input?.[map.relationField] === undefined) continue;
 
 				input[map.field] = null;
-				const item = await getItem(input[map.relationField], map, ctx);
-				if (item) {
-					const fieldSchema = fieldSchemas.find((schema: any) => schema.field === map.field);
-					if (!fieldSchema) continue;
+				const fieldSchema = fieldSchemas.find((schema: any) => schema.field === map.field);
+				if (!fieldSchema) continue;
 
-					const value = get(item, map.lookupField);
-					input[map.field] = cast(value, fieldSchema);
-				}
+				const value = await getValue(input, event, map, ctx);
+				input[map.field] = cast(value, fieldSchema);
 			}
 		} catch (error: any) {
 			logger.error(`LOOKUP: ${error.toString()}`);
@@ -186,14 +225,12 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 	};
 
 	filter('items.create', async (input: any, event: any, ctx: any) => {
-		const collection = event.collection;
-		await execute(collection, input, ctx);
+		await execute(input, event, ctx);
 		return input;
 	});
 
 	filter('items.update', async (input: any, event: any, ctx: any) => {
-		const collection = event.collection;
-		await execute(collection, input, ctx, true);
+		await execute(input, event, ctx, true);
 		return input;
 	});
 
