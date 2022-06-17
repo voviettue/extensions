@@ -1,0 +1,23 @@
+{
+  "name": "directus-extension-interface-alias-lookup",
+  "version": "1.0.0",
+  "keywords": [
+    "directus",
+    "directus-extension",
+    "directus-custom-interface"
+  ],
+  "directus:extension": {
+    "type": "interface",
+    "path": "dist/index.js",
+    "source": "src/index.ts",
+    "host": "^9.12.2"
+  },
+  "scripts": {
+    "build": "directus-extension build"
+  },
+  "devDependencies": {
+    "@directus/extensions-sdk": "9.12.2",
+    "typescript": "^4.7.3",
+    "vue": "^3.2.37"
+  }
+}
