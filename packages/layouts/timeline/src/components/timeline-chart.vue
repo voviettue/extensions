@@ -356,11 +356,19 @@ export default defineComponent({
 		getItemStyles(item) {
 			let left = 1;
 			let right = this.dates.length + 1;
+			let startDate = item[this.startDateField] ? new Date(item[this.startDateField]) : null;
+			let endDate = item[this.endDateField] ? new Date(item[this.endDateField]) : null;
+
+			if (startDate && endDate && startDate > endDate) {
+				startDate = new Date(item[this.endDateField]);
+				endDate = new Date(item[this.startDateField]);
+			}
+
 			this.dates.forEach((date) => {
-				if (item[this.startDateField] && differenceInCalendarDays(new Date(item[this.startDateField]), date) > 0) {
+				if (startDate && differenceInCalendarDays(startDate, date) > 0) {
 					left++;
 				}
-				if (item[this.endDateField] && differenceInCalendarDays(new Date(item[this.endDateField]), date) < 0) {
+				if (endDate && differenceInCalendarDays(endDate, date) < 0) {
 					right--;
 				}
 			});
@@ -371,7 +379,7 @@ export default defineComponent({
 				`grid-column-start: ${left}`,
 				`grid-column-end: ${right}`,
 				`color: ${conditionStyle?.color || 'inherit'}`,
-				`background: ${conditionStyle?.background || 'var(--purple-25)'}`,
+				`background: ${conditionStyle?.background || 'var(--background-item-timeline)'}`,
 			];
 		},
 		scrollToToday() {
@@ -397,6 +405,7 @@ export default defineComponent({
 				const top = grid.scrollTop * -1;
 				sidebar.style.top = top + 'px';
 			});
+			sidebar.style.height = grid.clientHeight - 66 + 'px';
 		},
 		scrollTo(left) {
 			const grid = this.$refs.grid;
@@ -447,6 +456,7 @@ export default defineComponent({
 	position: relative;
 	height: calc(100vh - 180px);
 	overflow: hidden;
+	background-color: var(--background-timeline);
 }
 .grid {
 	position: relative;
@@ -459,12 +469,12 @@ export default defineComponent({
 	position: absolute;
 	left: 0;
 	display: inline;
-	min-height: calc(100vh - 180px);
+	/* min-height: calc(100vh - 180px); */
 	max-width: 200px;
 	z-index: 4;
 	top: 0;
 	margin-top: 66px;
-	background: rgb(255 255 255 / 85%);
+	background: var(--background-group-timeline);
 }
 .grid-sidebar .group {
 	margin-top: 20px;
@@ -485,21 +495,21 @@ export default defineComponent({
 	position: absolute;
 	z-index: 1;
 	top: 0;
-	border-right: 1px solid #f3f3f3;
+	border-right: 1px solid var(--border-timeline);
 	min-height: calc(100vh - 180px);
 	padding-top: 40px;
 }
 .grid-header {
 	display: flex;
 	z-index: 5;
-	background: white;
-	border-bottom: 1px solid #f3f3f3;
-	padding: 8px 0px;
+	background: var(--background-timeline);
+	border-bottom: 1px solid var(--border-timeline);
 	position: sticky;
 	top: 0;
+	padding: 8px 0px;
 }
 .grid-header .cell {
-	border-right: 1px solid #dedede;
+	border-right: 1px solid var(--border-timeline);
 	white-space: nowrap;
 	text-overflow: ellipsis;
 	overflow: auto;
@@ -512,7 +522,7 @@ export default defineComponent({
 .grid-body .row {
 	display: flex;
 	margin-top: 20px;
-	background: rgb(0 0 0 / 4%);
+	background: var(--background-row-timeline);
 	min-height: 100px;
 	/* position: relative; */
 }
@@ -540,7 +550,7 @@ export default defineComponent({
 	align-items: center;
 	/* z-index: 3; */
 	margin: 0px 2px 0px 1px;
-	background-color: var(--purple-25);
+	background-color: var(--background-item-timeline);
 	height: 28px;
 	box-sizing: border-box;
 	padding: 2px 4px;
@@ -562,7 +572,7 @@ export default defineComponent({
 	border-radius: 100%;
 }
 .weekend {
-	background: #fafafa;
+	background: var(--background-normal-alt);
 }
 .today {
 	background: var(--blue-25);
@@ -580,11 +590,11 @@ small {
 	left: 50px;
 	top: 50px;
 	/* z-index: 5; */
-	background: white;
-	border: 1px solid #fafafa;
+	background: var(--background-timeline);
+	border: 1px solid var(--border-timeline);
 	padding: 12px;
 	border-radius: 8px;
-	box-shadow: 0 2px 4px lightgray;
+	box-shadow: 0 2px 4px var(--background-normal-alt);
 }
 .mb-5 {
 	margin-bottom: 5px;
