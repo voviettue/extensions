@@ -1,31 +1,31 @@
 {
-	"name": "directus-extension-interface-formula",
-	"version": "1.0.7",
-	"keywords": [
-		"directus",
-		"directus-extension",
-		"directus-custom-interface"
-	],
-	"directus:extension": {
-		"type": "interface",
-		"path": "dist/index.js",
-		"source": "src/index.ts",
-		"host": "^9.4.0"
-	},
-	"scripts": {
-		"build": "directus-extension build"
-	},
-	"files": [
-		"dist"
-	],
-	"devDependencies": {
-		"@directus/extensions-sdk": "9.4.0",
-		"@directus/format-title": "^9.10.0",
-		"lodash": "^4.17.21",
-		"typescript": "^4.5.4",
-		"vue": "^3.2.26"
-	},
-	"dependencies": {
-		"date-fns": "^2.28.0"
-	}
+  "name": "directus-extension-interface-formula",
+  "version": "1.0.8",
+  "keywords": [
+    "directus",
+    "directus-extension",
+    "directus-custom-interface"
+  ],
+  "directus:extension": {
+    "type": "interface",
+    "path": "dist/index.js",
+    "source": "src/index.ts",
+    "host": "^9.4.0"
+  },
+  "scripts": {
+    "build": "directus-extension build"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@directus/extensions-sdk": "9.4.0",
+    "@directus/format-title": "^9.10.0",
+    "lodash": "^4.17.21",
+    "typescript": "^4.5.4",
+    "vue": "^3.2.26"
+  },
+  "dependencies": {
+    "date-fns": "^2.28.0"
+  }
 }

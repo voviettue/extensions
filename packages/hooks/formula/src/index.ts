@@ -35,10 +35,10 @@ export default defineHook(({ action }, { logger, services, database, getSchema }
 		const record = await ctx.database.from(collection).where(pk, '=', id).first();
 		const formulaFields = await getFormulaFields(collection);
 		const schemaFields = await getSchemaFields(collection);
-		const service = new Service(schemaFields, getSchema, services, database);
+		const service = new Service(schemaFields, getSchema, services, getDatabase(ctx));
 		const payload: any = {};
 
-		for (var field of formulaFields) {
+		for (const field of formulaFields) {
 			const schemaField = schemaFields.find((e: any) => e.field === field.field);
 			if (!schemaField) continue;
 
@@ -51,12 +51,16 @@ export default defineHook(({ action }, { logger, services, database, getSchema }
 		}
 
 		if (Object.keys(payload).length) {
-			if (ctx.database.isCompleted()) {
-				await database(collection).update(payload).where(pk, id);
-			} else {
-				await ctx.database(collection).update(payload).where(pk, id);
-			}
+			const knex = getDatabase(ctx);
+			await knex(collection).update(payload).where(pk, id);
 		}
+	};
+
+	const getDatabase = (ctx: any) => {
+		if (ctx.database?.isCompleted && ctx.database.isCompleted()) {
+			return database;
+		}
+		return ctx.database;
 	};
 
 	const execute = async (collection: any, ids: any, ctx: any) => {
