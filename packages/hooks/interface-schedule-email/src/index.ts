@@ -1,7 +1,7 @@
 import { defineHook } from '@directus/extensions-sdk';
 import cron from 'node-cron';
 
-export default defineHook(({ action }, { services, database, getSchema }) => {
+export default defineHook(({ action }, { services, database, getSchema, logger }) => {
 	let hookFields: any = null;
 	let schedules: any[] = [];
 
@@ -18,10 +18,10 @@ export default defineHook(({ action }, { services, database, getSchema }) => {
 	};
 
 	const destroyAllSchedule = () => {
-		schedules.forEach((schedule) => {
+		for (let schedule of schedules) {
 			schedule.stop();
 			schedule = null;
-		});
+		}
 		schedules = [];
 	};
 
@@ -29,7 +29,7 @@ export default defineHook(({ action }, { services, database, getSchema }) => {
 		destroyAllSchedule();
 
 		const fields = await getHookFields();
-		fields.forEach(async (field: any) => {
+		for (const field of fields) {
 			const options = JSON.parse(field.options) || {};
 
 			if (!cron.validate(options?.expression) || !options?.emailTo) {
@@ -55,21 +55,28 @@ export default defineHook(({ action }, { services, database, getSchema }) => {
 					return;
 				}
 
-				const MailService = services.MailService;
-				const mailer = new MailService({ schema: schema });
-				mailer.send({
-					to: options.emailTo,
-					cc: options?.emailCC || null,
-					bcc: options?.emailBCC || null,
-					subject: options?.emailSubject,
-					html: options?.emailBody,
-				});
+				try {
+					const MailService = services.MailService;
+					const mailer = new MailService({ schema: schema });
+					mailer.send({
+						to: options.emailTo,
+						cc: options?.emailCC || null,
+						bcc: options?.emailBCC || null,
+						subject: options?.emailSubject,
+						html: options?.emailBody,
+					});
+				}
+				catch (err) {
+					logger.error(err)
+				}
 			});
 			schedules.push(schedule);
-		});
+		};
 	}
 
-	init();
+	action('server.start', () => {
+		init();
+	});
 
 	// clear cache
 	action('fields.create', () => {
