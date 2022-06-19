@@ -219,8 +219,6 @@ export default defineHook(({ filter, action }, { services, database, getSchema, 
 			}
 		} catch (error: any) {
 			logger.error(`LOOKUP: ${error.toString()}`);
-		} finally {
-			_items = {};
 		}
 	};
 
