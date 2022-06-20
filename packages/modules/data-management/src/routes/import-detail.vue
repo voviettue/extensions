@@ -411,7 +411,7 @@ export default {
 					// Auto mapField
 					this.fileHeader.forEach((header) => {
 						const formattedHeader = header.toLowerCase().replace(/\s/g, '_');
-						const field = this.fields.find((e) => e.field === formattedHeader);
+						const field = this.fields.find((e) => e.field.toLowerCase() === formattedHeader);
 						this.fieldMapper.push({ field: field ? field.field : null, header });
 					});
 				});
