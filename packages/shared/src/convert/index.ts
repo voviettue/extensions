@@ -50,7 +50,7 @@ export const convertInteger = (value: string | undefined): number | null => {
 
 export const convertDateTime = (
 	value: Date | string | undefined,
-	type?: 'dateTime' | 'date' | 'time' | 'timestamp'
+	type?: 'dateTime' | 'date' | 'timestamp'
 ): string | null => {
 	if (!value) {
 		return null;
@@ -61,8 +61,6 @@ export const convertDateTime = (
 		switch (type) {
 			case 'date':
 				return format(date, 'yyyy-MM-dd');
-			case 'time':
-				return format(date, 'HH:mm:ss');
 			default:
 				return format(date, `yyyy-MM-dd'T'HH:mm:ss`);
 		}
@@ -83,7 +81,6 @@ export const convertData = (value: any, type: string) => {
 			return convertInteger(value);
 		case 'dateTime':
 		case 'date':
-		case 'time':
 		case 'timestamp':
 			return convertDateTime(value, type);
 		default:
