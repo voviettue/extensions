@@ -119,6 +119,8 @@ export default defineEndpoint(async (router, { services, exceptions, database, l
 						const converted: Record<string, any> = {};
 						for (const { field, type } of fields) {
 							converted[field] = convertData(value[field], type);
+							// Convert empty string to null value
+							converted[field] = converted[field] === '' ? null : converted[field];
 						}
 
 						saveQueue.push(converted);
