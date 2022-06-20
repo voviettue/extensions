@@ -49,7 +49,7 @@ export const convertInteger = (value: string | undefined): number | null => {
 };
 
 export const convertDateTime = (
-	value: string | undefined,
+	value: Date | string | undefined,
 	type?: 'dateTime' | 'date' | 'time' | 'timestamp'
 ): string | null => {
 	if (!value) {
@@ -57,8 +57,7 @@ export const convertDateTime = (
 	}
 
 	try {
-		const date = parseISO(value);
-
+		const date = value instanceof Date ? value : parseISO(value);
 		switch (type) {
 			case 'date':
 				return format(date, 'yyyy-MM-dd');

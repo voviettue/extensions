@@ -65,6 +65,7 @@ describe('test convert date time', () => {
 		expect(convertDateTime('2022-06-09T16:25:00', 'time')).toBe('16:25:00');
 		expect(convertDateTime('2022-06-09T16:25:00', 'timestamp')).toBe('2022-06-09T16:25:00');
 		expect(convertDateTime('2022-06-09', 'timestamp')).toBe('2022-06-09T00:00:00');
+		expect(convertDateTime(new Date(2022, 5, 20), 'date')).toBe('2022-06-20');
 	});
 });
 
