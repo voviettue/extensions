@@ -112,13 +112,11 @@
 										fieldMapper.find((field) => field.header === header).field === null ? 'unmapped-field-col' : '',
 									]"
 								>
-									<v-select
-										:items="fieldOptions"
-										item-value="field"
-										item-text="name"
-										inline
-										:model-value="fieldMapper.find((field) => field.header === header).field"
-										@update:model-value="(value) => mapField(value, header)"
+									<select-field
+										:collection="collection.collection"
+										:disabled-fields="disabledFields"
+										:field="fieldMapper.find((field) => field.header === header).field"
+										@select-field="(value) => mapField(value, header)"
 									/>
 								</td>
 							</tr>
@@ -174,25 +172,26 @@ import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import * as XLSX from 'xlsx';
 import Navigation from '../components/navigation.vue';
+import SelectField from '../components/select-field.vue';
 import formatTitle from '@directus/format-title';
 import { convertData } from '@catex/shared';
-
 export default {
 	components: {
 		Navigation,
+		SelectField,
 	},
 	inject: ['api'],
 	setup() {
 		const stores = inject('stores');
 		const route = useRoute();
 		const collectionsStore = stores.useCollectionsStore();
-		const fieldsStore = stores.useFieldsStore();
+		const { getFieldsForCollection, getField } = stores.useFieldsStore();
 		const userStore = stores.useUserStore();
 		const permissionsStore = stores.usePermissionsStore();
 		const { t } = useI18n();
 		collectionsStore.hydrate();
 		const collection = collectionsStore.getCollection(route.params.collection);
-		const fields = fieldsStore.getFieldsForCollection(route.params.collection);
+		const fields = getFieldsForCollection(route.params.collection);
 		const hideUnmappedField = ref(false);
 
 		return {
@@ -202,6 +201,7 @@ export default {
 			formatTitle,
 			createAllowed,
 			hideUnmappedField,
+			getField,
 		};
 
 		function createAllowed() {
@@ -235,25 +235,6 @@ export default {
 		fileHeader() {
 			return this.fileData.length ? Object.keys(this.fileData[0]).map((header) => header.trim()) : [];
 		},
-		fieldOptions() {
-			const options = this.fields.map((field) => {
-				return {
-					field: field.field,
-					name: field.name,
-					required: field.meta.required,
-					disabled: !!this.fieldMapper.find((mappedField) => mappedField.field === field.field),
-				};
-			});
-
-			options.push({
-				field: null,
-				name: 'Unmapped field',
-				required: false,
-				disabled: false,
-			});
-
-			return options;
-		},
 		tableFields() {
 			if (this.hideUnmappedField) {
 				return this.fieldMapper.filter((field) => field.field !== null).map((field) => field.header);
@@ -281,7 +262,7 @@ export default {
 				for (const [key, value] of Object.entries(item)) {
 					const field = this.fieldMapper.find((mappedField) => mappedField.header === key)?.field;
 					if (field) {
-						const type = this.fields.find((e) => e.field === field)?.type;
+						const type = this.getField(this.collection.collection, field)?.type;
 						converted[key] = convertData(value, type);
 					} else {
 						converted[key] = value;
@@ -303,6 +284,9 @@ export default {
 			const end = Math.min(this.page * this.limit, this.totalRows || 0);
 			const count = this.totalRows || 0;
 			return `${start}-${end} of ${count} items`;
+		},
+		disabledFields() {
+			return this.fieldMapper.filter((field) => field.field !== null).map((field) => field.field);
 		},
 	},
 	created() {
@@ -408,11 +392,11 @@ export default {
 						blankRows: false,
 					});
 
-					// Auto mapField
+					// Auto map fields
 					this.fileHeader.forEach((header) => {
 						const formattedHeader = header.toLowerCase().replace(/\s/g, '_');
-						const field = this.fields.find((e) => e.field.toLowerCase() === formattedHeader);
-						this.fieldMapper.push({ field: field ? field.field : null, header });
+						const field = this.getField(this.collection.collection, formattedHeader);
+						this.fieldMapper.push({ field: field ? formattedHeader : null, header });
 					});
 				});
 			});
@@ -441,19 +425,6 @@ export default {
 				}
 				return field;
 			});
-		},
-		getCollectionFieldFromFileHeader(header) {
-			const { field } = this.fieldMapper.find((field) => field.header === header);
-			return this.fields.find((e) => e.field === field);
-		},
-		getCollectionFieldType(header) {
-			const field = this.getCollectionFieldFromFileHeader(header);
-
-			if (field) {
-				return field.type;
-			}
-
-			return 'string';
 		},
 	},
 };
