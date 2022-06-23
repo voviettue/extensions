@@ -8,9 +8,13 @@
 		</template>
 		<v-field-list :collection="props.collection" :disabled-fields="disabledFields" @select-field="onSelectField">
 			<template #prepend>
-				<v-list-item class="link clickable" @click="() => onSelectField(null)">
-					<v-list-item-content>Unmapped field</v-list-item-content>
+				<v-list-item clickable :disabled="field === null" @click="() => onSelectField(null)">
+					<v-list-item-content>Unmap field</v-list-item-content>
+					<v-list-item-icon>
+						<v-icon name="close" />
+					</v-list-item-icon>
 				</v-list-item>
+				<v-divider />
 			</template>
 		</v-field-list>
 	</v-menu>
