@@ -57,7 +57,7 @@ export const convertDateTime = (
 	}
 
 	try {
-		const date = value instanceof Date ? value : parseISO(value);
+		const date = value instanceof Date ? value : parseISO(String(value));
 		switch (type) {
 			case 'date':
 				return format(date, 'yyyy-MM-dd');
