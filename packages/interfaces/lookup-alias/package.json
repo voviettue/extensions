@@ -1,5 +1,5 @@
 {
-  "name": "directus-extension-interface-alias-lookup",
+  "name": "directus-extension-interface-lookup-alias",
   "version": "1.0.0",
   "keywords": [
     "directus",
@@ -19,5 +19,9 @@
     "@directus/extensions-sdk": "9.12.2",
     "typescript": "^4.7.3",
     "vue": "^3.2.37"
+  },
+  "dependencies": {
+    "joi": "^17.6.0",
+    "lodash": "^4.17.21"
   }
 }
