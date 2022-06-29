@@ -1,5 +1,5 @@
 import { defineDisplay } from '@directus/extensions-sdk';
-import DisplayComponent from './display.vue';
+import DisplayComponent from './display-duration.vue';
 
 export default defineDisplay({
 	id: 'display-duration',
@@ -9,17 +9,31 @@ export default defineDisplay({
 	component: DisplayComponent,
 	options: [
 		{
-			field: 'includeSeconds',
-			name: '$t:interfaces.datetime.include_seconds',
-			type: 'boolean',
+			field: 'format',
+			name: 'Format',
+			type: 'string',
 			meta: {
+				interface: 'select-dropdown',
 				width: 'half',
-				interface: 'boolean',
-			},
-			schema: {
-				default_value: false,
+				options: {
+					choices: [
+						{
+							text: 'hh:mm:ss',
+							value: 'hh:mm:ss',
+						},
+						{
+							text: 'hh:mm',
+							value: 'hh:mm',
+						},
+						{
+							text: 'mm:ss',
+							value: 'mm:ss',
+						},
+					],
+					allowOther: false,
+				},
 			},
 		},
 	],
-	types: ['time'],
+	types: ['time', 'integer', 'bigInteger'],
 });
