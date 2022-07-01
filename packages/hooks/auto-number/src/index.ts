@@ -12,7 +12,8 @@ export default defineHook(({ filter }, { logger }) => {
 		const fields = await getAutoNumberFields(ctx, meta.collection);
 
 		for (const field of fields) {
-			const options: AutoNumberHookOptions = withDefaults(JSON.parse(field.options));
+			const fieldOptions = JSON.parse(field.options) || {};
+			const options: AutoNumberHookOptions = withDefaults(fieldOptions);
 			const parsedPrefix = convertPlaceholder(options.prefix);
 			const latestNumber = await getLatestNumber(ctx, meta, field.field, parsedPrefix);
 			const nextNumber = getNextNumber(latestNumber, options.startNumber);
@@ -27,7 +28,7 @@ export default defineHook(({ filter }, { logger }) => {
 		const fields = await getAutoNumberFields(ctx, meta.collection);
 
 		fields.forEach((field: any) => {
-			if (input.hasOwnProperty(field.field)) {
+			if (field.field in input) {
 				delete input[field.field];
 			}
 		});
