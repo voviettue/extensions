@@ -3,14 +3,16 @@ import busboy from 'busboy';
 import { IncomingHttpHeaders } from 'http';
 import csv from 'csv-parser';
 import { queue } from 'async';
-import { convertData } from './utils';
+import { convertData } from '@catex/shared';
+import { mapFields } from './mapping';
 import destroyStream from 'destroy';
 
-export default defineEndpoint(async (router, { services, exceptions, database }) => {
-	const { ItemsService, FieldsService } = services;
+export default defineEndpoint(async (router, { services, exceptions, database, logger }) => {
+	const { ItemsService, FieldsService, UsersService, MailService } = services;
 	const { UnsupportedMediaTypeException, InvalidPayloadException } = exceptions;
+	const formData = new Map();
 
-	router.post('/import/:collection', async (req, res, next) => {
+	router.post('/import/:collection', async (req: any, res: any, next) => {
 		if (req.is('multipart/form-data') === false) {
 			throw new UnsupportedMediaTypeException(`Unsupported Content-Type header`);
 		}
@@ -27,19 +29,63 @@ export default defineEndpoint(async (router, { services, exceptions, database })
 
 		const bb = busboy({ headers });
 
+		// Handle form data
+		bb.on('field', (name, value) => {
+			formData.set(name, value);
+		});
+
+		// Handle file uploads
 		bb.on('file', async (_, file, { mimeType }) => {
 			if (mimeType !== 'text/csv') {
 				const err = new UnsupportedMediaTypeException(`Can't import files of type "${mimeType}"`);
 				return next(err);
 			}
 
-			try {
-				await importCSV(req.params.collection, req.accountability, req.schema, file);
-			} catch (err: any) {
-				return next(err);
-			}
+			const usersService = new UsersService({ schema: req.schema, accountability: req.accountability });
+			const mailService = new MailService({ schema: req.schema, accountability: req.accountability });
 
-			return res.status(200).end();
+			let user = null;
+
+			try {
+				// Response immediately, don't let user wait for the import to finish
+				res.status(200).end();
+
+				user = await usersService.readOne(req.accountability.user, { fields: ['email'] });
+
+				await importCSV(req.params.collection, req.accountability, req.schema, file);
+
+				const collectionName = formData.get('collectionName') || req.params.collection;
+
+				logger.info(`[IMPORT] ${collectionName} imported successfully`);
+
+				if (user) {
+					mailService.send({
+						to: user.email,
+						template: {
+							name: 'base',
+							data: {
+								html: `${collectionName} has been imported successfully. Please <a href="${process.env.PUBLIC_URL}/admin/content/${req.params.collection}">click here</a> to access it.`,
+							},
+						},
+						subject: `Your import has been successful`,
+					});
+				}
+			} catch (err: any) {
+				if (user) {
+					mailService.send({
+						to: user.email,
+						template: {
+							name: 'base',
+							data: {
+								html: `Error: ${err.message}`,
+							},
+						},
+						subject: `Your import has been failed`,
+					});
+				}
+
+				logger.error(`[IMPORT] ${err.message}`);
+			}
 		});
 
 		bb.on('error', (err: Error) => next(err));
@@ -48,11 +94,11 @@ export default defineEndpoint(async (router, { services, exceptions, database })
 	});
 
 	function importCSV(collection: string, accountability: any, schema: any, stream: NodeJS.ReadableStream) {
+		const fieldMapper = JSON.parse(formData.get('fieldMapper') || '[]');
+
 		return database.transaction(async (trx) => {
-			const fieldService = new FieldsService({
-				accountability: accountability,
-				schema: schema,
-			});
+			const fieldService = new FieldsService({ knex: trx, accountability, schema });
+
 			const fields = await fieldService.readAll(collection);
 
 			const service = new ItemsService(collection, {
@@ -69,8 +115,21 @@ export default defineEndpoint(async (router, { services, exceptions, database })
 				stream
 					.pipe(csv())
 					.on('data', (value: Record<string, string>) => {
-						value = convertData(value, fields);
-						saveQueue.push(value);
+						value = mapFields(value, fieldMapper);
+						const converted: Record<string, any> = {};
+						for (const { field, type } of fields) {
+							let convertedValue = convertData(value[field], type);
+							convertedValue = convertedValue === '' ? null : convertedValue;
+
+							try {
+								const parsedJson = JSON.parse(convertedValue);
+								converted[field] = parsedJson;
+							} catch {
+								converted[field] = convertedValue;
+							}
+						}
+
+						saveQueue.push(converted);
 					})
 					.on('error', (err) => {
 						destroyStream(stream);

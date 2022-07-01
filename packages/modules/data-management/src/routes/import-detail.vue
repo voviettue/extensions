@@ -1,12 +1,12 @@
 <template>
-	<private-view :title="`Import ${formatTitle(collection?.name)}`">
+	<private-view :title="`${formatTitle(collection?.name)}`">
 		<template #headline>
-			<v-breadcrumb :items="[{ name: 'Import data', to: '/data-management/import' }]" />
+			<v-breadcrumb :items="[{ name: 'Import Data', to: '/import' }]" />
 		</template>
 
 		<template #title-outer:prepend>
-			<v-button class="header-icon" rounded disabled icon secondary>
-				<v-icon name="file_upload" />
+			<v-button class="header-icon" rounded icon secondary exact to="/import">
+				<v-icon name="arrow_back" />
 			</v-button>
 		</template>
 
@@ -14,158 +14,185 @@
 			<navigation></navigation>
 		</template>
 
-		<div v-if="collection" class="padding-box">
-			<form id="form-import" style="display: flex; align-items: center">
-				<div style="flex-grow: 1">
-					<component
-						:is="'interface-file'"
-						v-if="folder"
-						ref="inputFile"
-						:value="file ? file.id : null"
-						:folder="folder.id"
-						collection="directus_settings"
-						field="project_logo"
-						:disabled="isSubmit"
-						@input="onUpload"
-						@update:model-value="onUpload($event)"
-					>
-						<template #append></template>
-					</component>
-				</div>
+		<template #sidebar>
+			<sidebar-detail icon="info" :title="t('information')" close></sidebar-detail>
+		</template>
 
-				<v-button
-					v-tooltip="createAllowed ? '' : t('not_allowed')"
-					:disabled="!canImport"
-					style="margin-left: 20px"
-					:loading="isSubmit"
-					@click="submit()"
-				>
-					Import
-				</v-button>
-				<!-- <v-upload fromLibrary fromUrl @input="onUpload" />
-        <v-input type="file" accept=".csv" @input="onChangeFile" /> -->
-			</form>
+		<div v-if="collection && !fetchingFolder" class="padding-box">
+			<v-error
+				v-if="!folder"
+				:error="{
+					extensions: { code: 'PERMISSION' },
+					message: `You need CREATE & VIEW permissions on System Folders to perform this action`,
+				}"
+			></v-error>
+			<template v-else>
+				<form id="form-import" style="display: flex; align-items: center">
+					<div style="flex-grow: 1">
+						<component
+							:is="'interface-file'"
+							v-if="folder"
+							ref="inputFile"
+							:value="file ? file.id : null"
+							:folder="folder.id"
+							collection="directus_settings"
+							field="project_logo"
+							:disabled="isSubmit"
+							@input="onUpload"
+							@update:model-value="onUpload($event)"
+						>
+							<template #append></template>
+						</component>
+					</div>
 
-			<br />
-
-			<template v-if="error">
-				<v-error v-if="error" :error="error" />
-				<br />
-			</template>
-
-			<div v-if="payload.length" style="padding: 10px 0; display: flex; align-items: center">
-				<span>Total rows: {{ payload.length }}</span>
-				<span>&nbsp;|&nbsp;</span>
-				<span>Mapped fields: {{ mappedFields.length }}/{{ fields.length }}</span>
-				<span>&nbsp;|&nbsp;</span>
-				<span>Page {{ page }}/{{ Math.ceil(payload.length / limit) }}</span>
-				<div style="flex-grow: 1; text-align: right">
-					<v-button icon secondary size="sm" :disabled="page === 1" style="margin-left: 10px" @click="page = page - 1">
-						<v-icon name="keyboard_arrow_left" />
-					</v-button>
 					<v-button
-						icon
-						secondary
-						size="sm"
-						:disabled="page === totalPage"
-						style="margin-left: 10px"
-						@click="page = page + 1"
+						v-tooltip="createAllowed ? '' : t('not_allowed')"
+						:disabled="!canImport"
+						style="margin-left: 20px"
+						:loading="isSubmit"
+						@click="submit()"
 					>
-						<v-icon name="keyboard_arrow_right" />
+						Import
 					</v-button>
+				</form>
+				<br />
+				<template v-if="error">
+					<v-error :error="error" />
+					<br />
+				</template>
+				<div v-if="items.length" style="padding: 10px 0; display: flex; align-items: center">
+					<span>
+						Mapped fields: {{ fieldMapper.filter((field) => field.field !== null).length }}/{{ fields.length }}
+					</span>
+					<span style="margin-left: 1rem">
+						<v-checkbox v-model="hideUnmappedField" label="Hide unmapped fields"></v-checkbox>
+					</span>
+					<div
+						style="
+							flex-grow: 1;
+							display: flex;
+							align-items: center;
+							justify-content: flex-end;
+							color: var(--foreground-subdued);
+						"
+					>
+						<span>{{ itemCount }}</span>
+						<span>&nbsp;|&nbsp;</span>
+						<span>{{ `Page ${page}/${totalPage}` }}</span>
+						<v-button
+							icon
+							secondary
+							size="sm"
+							:disabled="page === 1"
+							style="margin-left: 10px"
+							@click="page = page - 1"
+						>
+							<v-icon name="keyboard_arrow_left" />
+						</v-button>
+						<v-button
+							icon
+							secondary
+							size="sm"
+							:disabled="page === totalPage"
+							style="margin-left: 10px"
+							@click="page = page + 1"
+						>
+							<v-icon name="keyboard_arrow_right" />
+						</v-button>
+					</div>
 				</div>
-			</div>
-
-			<div class="v-table table">
-				<table style="width: 100%">
-					<thead class="table-header">
-						<tr class="fixed">
-							<td v-for="field in fields" :key="field.field" v-tooltip="formatTitle(field.field)">
-								{{ field.field }}
-							</td>
-						</tr>
-					</thead>
-					<tbody>
-						<template v-for="(item, index) in items" :key="`row-${(index + 1) * page}`">
-							<tr class="table-row">
-								<td v-for="field in fields" :key="`item-${index}-${field.field}`" class="cell">
-									<span v-if="Array.isArray(item[field.field])">
-										<v-chip
-											v-for="value in item[field.field]"
-											:key="`${field.field}-${value}`"
-											style="margin: 2px; height: auto !important"
-											small
-										>
-											{{ value }}
-										</v-chip>
-									</span>
-									<span v-else-if="typeof item[field.field] === 'boolean'">
-										<v-icon
-											:name="item[field.field] ? 'check' : 'close'"
-											:color="item[field.field] ? '#00C897' : '#B0BEC5'"
-										/>
-									</span>
-									<template v-else>
-										<pre v-if="textFormatTypes.includes(field.meta.field)">{{ item[field.field] || '' }}</pre>
-										<pre v-else-if="typeof item[field.field] === 'object'">{{ item[field.field] || '' }}</pre>
-										<span v-else>{{ item[field.field] || '' }}</span>
-									</template>
-								</td>
-							</tr>
-						</template>
-
-						<template v-if="payload.length === 0">
+				<div v-if="items.length" class="v-table table">
+					<table style="width: 100%">
+						<thead class="table-header">
 							<tr>
-								<td :colspan="fields.length">
-									<div style="color: lightgray; text-align-center; padding:10px">
-										Select your csv file to see preview data.
-									</div>
+								<td
+									v-for="header in tableFields"
+									:key="header"
+									:class="[
+										fieldMapper.find((field) => field.header === header).field === null ? 'unmapped-field-col' : '',
+									]"
+								>
+									<select-field
+										:collection="collection.collection"
+										:disabled-fields="disabledFields"
+										:field="fieldMapper.find((field) => field.header === header).field"
+										@select-field="(value) => mapField(value, header)"
+									/>
 								</td>
 							</tr>
-						</template>
-					</tbody>
-				</table>
-			</div>
-
-			<v-dialog v-model="isSucceed" @esc="resetState()">
-				<v-card>
-					<v-card-title>{{ formatTitle('import_success') }}</v-card-title>
-					<v-card-text>Import {{ payload.length }} items succeed.</v-card-text>
-					<v-card-actions>
-						<v-button secondary @click="clearAll()">Continue Import</v-button>
-						<v-button kind="success" :to="`/content/${collectionName}`">View data</v-button>
-					</v-card-actions>
-				</v-card>
-			</v-dialog>
+							<tr class="original-header-row">
+								<td v-for="(field, index) in tableFields" :key="`original-header-${index}`">{{ field }}</td>
+							</tr>
+						</thead>
+						<tbody>
+							<template v-for="(item, index) in items" :key="`row-${(index + 1) * page}`">
+								<tr class="table-row">
+									<td v-for="key in tableFields" :key="key">
+										<span v-if="item[key] === null || item[key] === ''" class="null">--</span>
+										<span v-else-if="typeof item[key] === 'boolean'">
+											<v-icon :name="item[key] ? 'check' : 'close'" :color="item[key] ? '#00C897' : '#B0BEC5'" />
+										</span>
+										<span v-else-if="Array.isArray(item[key])">
+											<v-chip
+												v-for="value in item[key]"
+												:key="value"
+												style="margin: 2px; height: auto !important"
+												small
+											>
+												{{ value }}
+											</v-chip>
+										</span>
+										<span v-else>{{ item[key] }}</span>
+									</td>
+								</tr>
+							</template>
+						</tbody>
+					</table>
+				</div>
+				<div v-else>Select your CSV file to see preview data.</div>
+				<v-dialog v-model="isSucceed" @esc="resetState()">
+					<v-card>
+						<v-card-title>Import has been scheduled</v-card-title>
+						<v-card-text>
+							It'll take a few minutes to complete this import. You will be notified by email when it's done.
+						</v-card-text>
+						<v-card-actions>
+							<v-button secondary @click="clearAll()">Close</v-button>
+						</v-card-actions>
+					</v-card>
+				</v-dialog>
+			</template>
 		</div>
 	</private-view>
 </template>
 
 <script>
-import { inject } from 'vue';
+import { inject, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import XLSX from 'xlsx';
+import * as XLSX from 'xlsx';
 import Navigation from '../components/navigation.vue';
+import SelectField from '../components/select-field.vue';
 import formatTitle from '@directus/format-title';
-import { convertArray, convertBoolean, convertJson } from '../utils';
-
+import { convertData } from '@catex/shared';
 export default {
 	components: {
 		Navigation,
+		SelectField,
 	},
 	inject: ['api'],
 	setup() {
 		const stores = inject('stores');
 		const route = useRoute();
 		const collectionsStore = stores.useCollectionsStore();
-		const fieldsStore = stores.useFieldsStore();
+		const { getFieldsForCollection, getField } = stores.useFieldsStore();
 		const userStore = stores.useUserStore();
 		const permissionsStore = stores.usePermissionsStore();
 		const { t } = useI18n();
 		collectionsStore.hydrate();
 		const collection = collectionsStore.getCollection(route.params.collection);
-		const fields = fieldsStore.getFieldsForCollection(route.params.collection);
+		const fields = getFieldsForCollection(route.params.collection);
+		const hideUnmappedField = ref(false);
 
 		return {
 			t,
@@ -173,6 +200,8 @@ export default {
 			fields,
 			formatTitle,
 			createAllowed,
+			hideUnmappedField,
+			getField,
 		};
 
 		function createAllowed() {
@@ -190,53 +219,74 @@ export default {
 			file: null,
 			folder: null,
 			fileData: [],
-			fileReaderError: false,
 			isSubmit: false,
 			isSucceed: false,
+			fetchingFolder: false,
 			error: null,
 			totalRows: 0,
 			maxRows: 10000,
 			limit: 50,
 			page: 1,
 			fileContent: null,
+			fieldMapper: [],
 		};
 	},
 	computed: {
-		collectionName() {
-			return this.$route.params.collection;
+		fileHeader() {
+			return this.fileData.length ? Object.keys(this.fileData[0]).map((header) => header.trim()) : [];
 		},
-		mappedFields() {
-			return this.payload.length ? Object.keys(this.payload[0]) : [];
+		tableFields() {
+			if (this.hideUnmappedField) {
+				return this.fieldMapper.filter((field) => field.field !== null).map((field) => field.header);
+			}
+
+			return this.fieldMapper.map((field) => field.header);
 		},
 		pointFields() {
 			return this.fields.filter((e) => e.schema?.data_type === 'point');
 		},
 		payload() {
 			let payload = this.fileData.map((e) => e);
-			const keys = this.fields.map((e) => e.field);
-
-			return this.convertPayload(payload).map((item) => {
-				Object.keys(item).forEach((key) => {
-					if (!keys.includes(key)) {
-						delete item[key];
-					}
-				});
-				return item;
-			});
+			return payload;
 		},
 		canImport() {
-			return !this.error && this.mappedFields.length;
+			return !this.error && this.fieldMapper.filter((field) => field.field !== null).length > 0;
 		},
 		items() {
 			const offset = this.limit * (this.page - 1);
 			const items = this.payload.filter((e, index) => index >= offset && index < offset + this.limit);
-			return items;
+
+			// Convert
+			const convertedItems = items.map((item) => {
+				const converted = {};
+				for (const [key, value] of Object.entries(item)) {
+					const field = this.fieldMapper.find((mappedField) => mappedField.header === key)?.field;
+					if (field) {
+						const type = this.getField(this.collection.collection, field)?.type;
+						converted[key] = convertData(value, type);
+					} else {
+						converted[key] = value;
+					}
+				}
+				return converted;
+			});
+
+			return convertedItems;
 		},
 		totalPage() {
 			return Math.ceil(this.payload.length / this.limit);
 		},
 		textFormatTypes() {
 			return ['code', 'textarea', 'wysiyyg', 'markdown'];
+		},
+		itemCount() {
+			const start = (this.page - 1) * this.limit + 1;
+			const end = Math.min(this.page * this.limit, this.totalRows || 0);
+			const count = this.totalRows || 0;
+			return `${start}-${end} of ${count} items`;
+		},
+		disabledFields() {
+			return this.fieldMapper.filter((field) => field.field !== null).map((field) => field.field);
 		},
 	},
 	created() {
@@ -246,39 +296,44 @@ export default {
 		init() {
 			this.initFolder();
 		},
-		initFolder() {
-			this.api.get('/folders?name="Imports"').then((res) => {
+		async initFolder() {
+			this.fetchingFolder = true;
+
+			try {
+				const res = await this.api.get('/folders', {
+					params: {
+						filter: {
+							name: {
+								_eq: 'Imports',
+							},
+						},
+					},
+				});
 				const folders = res.data.data;
 				if (folders.length) {
 					this.folder = folders[0];
 				} else {
-					this.api.post('/folders', { name: 'Imports' }).then((res) => {
-						this.folder = res.data.data;
-					});
+					const res = await this.api.post('/folders', { name: 'Imports' });
+					this.folder = res.data.data;
 				}
-			});
+			} catch (err) {
+				//
+			}
+
+			this.fetchingFolder = false;
 		},
 		submit() {
 			this.isSubmit = true;
 			const collection = this.collection.collection;
 			const formData = new FormData();
 			formData.append('file', new Blob([this.fileContent], { type: 'text/csv' }));
+			formData.append('collectionName', formatTitle(this.collection.name));
+			formData.append('fieldMapper', JSON.stringify(this.fieldMapper));
 			this.api
 				.post(`/data-management/import/${collection}`, formData)
-				.then((res) => (this.isSucceed = true))
+				.then(() => (this.isSucceed = true))
 				.catch((err) => (this.error = err))
 				.finally(() => (this.isSubmit = false));
-		},
-		fetchFields() {
-			const collection = collection.collection;
-			this.api.get(`/fields/${collection}?limit=-1&sort[]=sort`).then((res) => {
-				const editableFields = res.data.data.filter((e) => !e.meta.readonly);
-				this.fields = editableFields.sort((a, b) => {
-					const left = a.meta.sort || -1;
-					const right = b.meta.sort || -1;
-					return left - right;
-				});
-			});
 		},
 		onUpload(fileId) {
 			this.resetState();
@@ -336,6 +391,13 @@ export default {
 						defval: '',
 						blankRows: false,
 					});
+
+					// Auto map fields
+					this.fileHeader.forEach((header) => {
+						const formattedHeader = header.toLowerCase().replace(/\s/g, '_');
+						const field = this.getField(this.collection.collection, formattedHeader);
+						this.fieldMapper.push({ field: field ? formattedHeader : null, header });
+					});
 				});
 			});
 		},
@@ -344,59 +406,31 @@ export default {
 			this.error = null;
 			this.isSucceed = false;
 			this.fileData = [];
+			this.fieldMapper = [];
 		},
 		clearAll() {
 			this.resetState();
 			this.file = null;
 			document.getElementById('form-import').reset();
 		},
-		convertPayload(payload) {
-			payload.forEach((item, index) => {
-				// handle Point field
-				this.pointFields.forEach((pointField) => {
-					const name = pointField.field;
-					if (item[`${name}.type`] && item[`${name}.coordinates`]) {
-						item[name] = {
-							type: item[`${name}.type`],
-							coordinates: convertJson(item[`${name}.coordinates`]),
-						};
-					}
-				});
+		mapField(fieldKey, header) {
+			if (!this.fieldMapper.find((field) => field.header === header)) {
+				this.fieldMapper.push({ header, field: fieldKey });
+				return;
+			}
 
-				Object.keys(item).forEach((key, index) => {
-					const field = this.fields.find((e) => e.field === key);
-					if (!field) {
-						return;
-					}
-					if (item[key] === '') {
-						item[key] = null;
-					}
-
-					switch (field.type) {
-						case 'csv':
-						case 'alias':
-						case 'json':
-							item[key] = convertJson(item[key]);
-							if (!Array.isArray(item[key])) {
-								item[key] = convertArray(item[key]);
-							}
-							break;
-						case 'boolean':
-							item[key] = convertBoolean(item[key]);
-
-						default:
-							break;
-					}
-				});
+			this.fieldMapper = this.fieldMapper.map((field) => {
+				if (field.header === header) {
+					field.field = fieldKey;
+				}
+				return field;
 			});
-
-			return payload;
 		},
 	},
 };
 </script>
 
-<style style="scss" scoped>
+<style scoped>
 .padding-box {
 	padding: var(--content-padding);
 	padding-top: 0;
@@ -425,5 +459,22 @@ thead td {
 
 :deep(.v-icon.edit) {
 	display: none !important;
+}
+
+:deep(.inline-display) {
+	position: relative;
+}
+
+.original-header-row td {
+	color: var(--foreground-subdued);
+	font-family: var(--font-monospace);
+}
+
+.unmapped-field-col {
+	color: var(--danger);
+}
+
+.null {
+	color: var(--border-normal);
 }
 </style>

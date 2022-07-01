@@ -4,6 +4,7 @@ import ImportComponent from './routes/import.vue';
 import ExportComponent from './routes/export.vue';
 import ImportDetailComponent from './routes/import-detail.vue';
 import ExportDetailComponent from './routes/export-detail.vue';
+import RoutePass from './utils/router-passthrough';
 
 export default defineModule({
 	id: 'data-management',
@@ -12,18 +13,24 @@ export default defineModule({
 	routes: [
 		{
 			path: '',
-			redirect: '/data-management/import',
+			redirect: '/import',
 		},
 		{
-			path: 'import',
-			component: ImportComponent,
+			path: '/import',
+			component: RoutePass,
+			children: [
+				{
+					path: '',
+					component: ImportComponent,
+				},
+				{
+					path: ':collection',
+					component: ImportDetailComponent,
+				},
+			],
 		},
 		{
-			path: '/import/:collection',
-			component: ImportDetailComponent,
-		},
-		{
-			path: 'export',
+			path: '/export',
 			component: ExportComponent,
 		},
 		{

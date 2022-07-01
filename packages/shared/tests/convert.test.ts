@@ -1,4 +1,11 @@
-import { convertInteger, convertBoolean, convertArray, convertJson } from './utils';
+import {
+	convertInteger,
+	convertBoolean,
+	convertArray,
+	convertJson,
+	convertDateTime,
+	convertData,
+} from '../src/convert';
 
 describe('test convert integer', () => {
 	test('should convert integer', () => {
@@ -47,5 +54,26 @@ describe('test convert json', () => {
 		expect(convertJson('1x')).toBe('1x');
 		expect(convertJson('')).toBe('');
 		expect(convertJson(undefined)).toBe(undefined);
+	});
+});
+
+describe('test convert date time', () => {
+	test('should convert date time', () => {
+		expect(convertDateTime('abc')).toBe(null);
+		expect(convertDateTime('2022-06-09T16:25:00')).toBe('2022-06-09T16:25:00');
+		expect(convertDateTime('2022-06-09T16:25:00', 'date')).toBe('2022-06-09');
+		expect(convertDateTime('2022-06-09T16:25:00', 'timestamp')).toBe('2022-06-09T16:25:00');
+		expect(convertDateTime('2022-06-09', 'timestamp')).toBe('2022-06-09T00:00:00');
+		expect(convertDateTime(new Date(2022, 5, 20), 'date')).toBe('2022-06-20');
+		expect(convertDateTime('20200208', 'date')).toBe('2020-02-08');
+	});
+});
+
+describe('test convert data', () => {
+	test('should convert data', () => {
+		expect(convertData('1', 'csv')).toEqual(['1']);
+		expect(convertData('1,2,3', 'csv')).toEqual(['1', '2', '3']);
+		expect(convertData('{"a": 1, "b": 2}', 'json')).toEqual({ a: 1, b: 2 });
+		expect(convertData('{"a": 1, "b": 2}', 'alias')).toEqual('{"a": 1, "b": 2}');
 	});
 });
