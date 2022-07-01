@@ -1,23 +1,26 @@
 {
-	"name": "directus-extension-display-number",
-	"version": "1.0.0",
-	"keywords": [
-		"directus",
-		"directus-extension",
-		"directus-custom-display"
-	],
-	"directus:extension": {
-		"type": "display",
-		"path": "dist/index.js",
-		"source": "src/index.ts",
-		"host": "^9.6.0"
-	},
-	"scripts": {
-		"build": "directus-extension build"
-	},
-	"devDependencies": {
-		"@directus/extensions-sdk": "9.6.0",
-		"typescript": "^4.6.2",
-		"vue": "^3.2.31"
-	}
+  "name": "directus-extension-display-number",
+  "version": "1.0.0",
+  "keywords": [
+    "directus",
+    "directus-extension",
+    "directus-custom-display"
+  ],
+  "directus:extension": {
+    "type": "display",
+    "path": "dist/index.js",
+    "source": "src/index.ts",
+    "host": "^9.6.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "directus-extension build"
+  },
+  "devDependencies": {
+    "@directus/extensions-sdk": "9.6.0",
+    "typescript": "^4.6.2",
+    "vue": "^3.2.31"
+  }
 }
