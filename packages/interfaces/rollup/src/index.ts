@@ -1,4 +1,4 @@
-import InterfaceComponent from './interface.vue';
+import InterfaceComponent from './input-rollup.vue';
 import { computed, watch } from 'vue';
 import { defineInterface } from '@directus/extensions-sdk';
 import { useStores } from '@directus/extensions-sdk';
