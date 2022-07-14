@@ -83,7 +83,7 @@ export default defineComponent({
 		},
 		filter: {
 			type: Object as PropType<Filter>,
-			default: () => ({}),
+			default: () => null,
 		},
 	},
 	emits: ['input'],
@@ -262,7 +262,6 @@ export default defineComponent({
 			const value = get(values.value, path ?? relatedCollectionPK);
 			const id = value instanceof Object ? value?.[relatedCollectionPK] : value;
 
-			// console.log({ path, relatedCollectionPK, value, id });
 			if (!id) {
 				items.value = [];
 				await getModifiedData();
@@ -278,7 +277,7 @@ export default defineComponent({
 			}
 
 			const fields = [relatedCollectionPK, props.rollupField, props.sortBy].filter((val: any) => val);
-			const filter = Object.keys(props.filter).length > 0 ? cloneDeep(props.filter) : { _and: [] };
+			const filter = props.filter ? cloneDeep(props.filter) : { _and: [] };
 
 			if (relationInfo.type === 'm2m') {
 				const reverseRelation = `$FOLLOW(${relationInfo.junctionField.collection},${relationInfo.junctionField.field})`;
@@ -341,7 +340,7 @@ export default defineComponent({
 			}
 		}
 
-		async function getValueFromPath(item: any, path: string) {
+		async function getValueFromPath(item, path) {
 			let value = null;
 			const keys = path.split('.');
 			const findKeys = [];
@@ -362,7 +361,7 @@ export default defineComponent({
 				const collection = field?.schema?.foreign_key_table;
 				const pk = field?.schema?.foreign_key_column;
 				const id = value instanceof Object ? value?.[pk] : value;
-				const fields = keys.slice(findKeys.length);
+				const fields = keys.slice(findKeys.length).join('.');
 				let record = await fetchItem(collection, id, fields);
 				if (value instanceof Object) {
 					record = { ...record, ...value };
@@ -377,8 +376,6 @@ export default defineComponent({
 			const data: Item = get(values.value, props.relationField);
 			const pkField = relationInfo.relatedPrimaryKeyField.field;
 
-			// console.log(data, relationInfo, filterKeyFields);
-
 			if (!data?.create) return;
 
 			if (relationInfo.type === 'm2m') {
@@ -391,9 +388,6 @@ export default defineComponent({
 					);
 					let item = { ...record, ...value };
 					item = await mergeRelationDataFromFilter(item);
-
-					// console.log({ value, item });
-
 					if (filterItems([item], props.filter).length) {
 						items.value.push(item);
 					}
@@ -463,8 +457,6 @@ export default defineComponent({
 				for (let id of data.delete) {
 					items.value = items.value.filter((e) => e[relationInfo.relatedPrimaryKeyField.field] !== id);
 				}
-
-				// console.log(data, relationInfo, items.value, props.filter, filterKeyFields);
 			}
 		}
 	},
