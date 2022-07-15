@@ -41,12 +41,12 @@ export default defineComponent({
 			async (newValue) => {
 				switch (props.type) {
 					case 'time':
-						localValue.value = displayTimeDuration(newValue.toString());
+						localValue.value = displayTimeDuration(newValue);
 						break;
 
 					case 'integer':
 					case 'bigInteger':
-						localValue.value = displayNumberDuration(newValue.toString());
+						localValue.value = displayNumberDuration(newValue);
 						break;
 				}
 			},
@@ -55,10 +55,10 @@ export default defineComponent({
 
 		return { onBlur, onUpdate, localValue };
 
-		function displayTimeDuration(val: string) {
+		function displayTimeDuration(val: string | number) {
 			if (val === null) return;
 
-			const timeArr = val.split(':');
+			const timeArr = val.toString().split(':');
 			switch (props.format) {
 				case 'hh:mm:ss':
 					return `${timeArr[0]}:${timeArr[1]}:${timeArr[2]}`;
@@ -69,12 +69,13 @@ export default defineComponent({
 			}
 		}
 
-		function displayNumberDuration(val: string) {
+		function displayNumberDuration(val: string | number) {
 			if (val === null) return;
 
-			const hours = Math.floor(parseInt(val) / (3600 * 1000));
-			const minutes = Math.floor((parseInt(val) / 1000 - hours * 3600) / 60);
-			const seconds = parseInt(val) / 1000 - hours * 3600 - minutes * 60;
+			const time = val.toString();
+			const hours = Math.floor(parseInt(time) / (3600 * 1000));
+			const minutes = Math.floor((parseInt(time) / 1000 - hours * 3600) / 60);
+			const seconds = parseInt(time) / 1000 - hours * 3600 - minutes * 60;
 
 			switch (props.format) {
 				case 'hh:mm:ss':
@@ -88,13 +89,8 @@ export default defineComponent({
 
 		function onBlur() {
 			const { hours, minutes, seconds } = destructDuration(localValue.value) || {};
-
-			// console.log(hours, minutes, seconds, props.type, props.format,
-			// 	formatString(hours, minutes, seconds),
-			// 	parseDuration(hours, minutes, seconds)
-			// );
-
 			localValue.value = displayTimeDuration(formatString(hours, minutes, seconds));
+
 			emit('input', parseDuration(hours, minutes, seconds));
 		}
 
