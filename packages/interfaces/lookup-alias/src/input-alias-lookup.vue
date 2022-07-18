@@ -32,6 +32,7 @@ import get from 'lodash/get';
 import set from 'lodash/set';
 import has from 'lodash/has';
 import cloneDeep from 'lodash/cloneDeep';
+import isEqual from 'lodash/isEqual';
 import useAliasFields from './composables/use-alias-fields';
 import { get as getWithArray } from './utils/get-with-arrays';
 import { useApi, useStores } from '@directus/extensions-sdk';
@@ -99,7 +100,8 @@ export default defineComponent({
 		const filterKeyFields = getFields(props.filter);
 
 		if (relationInfo) {
-			if (values.value?.[watchFieldName]) {
+			let oldValue = cloneDeep(values.value?.[watchFieldName]);
+			if (oldValue) {
 				getItems();
 			}
 
@@ -107,6 +109,8 @@ export default defineComponent({
 			watch(
 				() => values.value?.[watchFieldName],
 				() => {
+					if (isEqual(oldValue, values.value?.[watchFieldName])) return;
+					oldValue = cloneDeep(values.value?.[watchFieldName]);
 					getItems();
 				}
 			);
@@ -125,7 +129,6 @@ export default defineComponent({
 			const value = get(values.value, path ?? primaryKeyField?.field);
 			const id = value instanceof Object ? value?.[primaryField?.field] : value;
 
-			// console.log({ path, primaryKeyField, value, id });
 			if (!id) {
 				items.value = [];
 				await getModifiedData();
