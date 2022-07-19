@@ -3,14 +3,20 @@
 		<v-notice v-if="!relationInfo" type="warning">
 			{{ `Invalid interface options.` }}
 		</v-notice>
-		<v-table v-else :key="`items-${items.length}`" collection="classes" :headers="headers" :items="items" :limit="1">
+		<v-table
+			v-else
+			:key="`items-${items.length}`"
+			v-model:headers="headers"
+			collection="classes"
+			show-resize
+			fixed-header
+			must-sort
+			:items="items"
+			:limit="1"
+		>
 			<template v-for="header in headers" :key="header.value" #[`item.${header.value}`]="{ item }">
 				<render-display
-					:value="
-						!aliasFields || item[header.value] !== undefined
-							? getWithArray(item, header.value)
-							: getAliasedValue(item, header.value)
-					"
+					:value="getWithArray(item, header.value)"
 					:display="header.field?.meta?.display || 'raw'"
 					:options="header.field?.meta?.display_options"
 					:interface="header.field?.meta?.interface"
@@ -20,12 +26,14 @@
 					:field="header.value"
 				/>
 			</template>
+
+			<!-- <template #header-context-menu></template> -->
 		</v-table>
 	</div>
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, inject, watch, computed, ref } from 'vue';
+import { defineComponent, PropType, inject, watch, ref } from 'vue';
 import { Filter, Item } from '@directus/shared/types';
 import { getEndpoint } from '@directus/shared/utils';
 import get from 'lodash/get';
@@ -82,20 +90,7 @@ export default defineComponent({
 		const watchFieldName = props.lookupField ? props.lookupField.split('.').shift() : primaryField?.field;
 		const items = ref([]);
 
-		const headers = computed(() => {
-			return viewFields.map((fieldName: any) => {
-				const field = fieldsStore.getField(relationInfo?.relatedCollection?.collection, fieldName ?? '');
-				return {
-					align: 'left',
-					description: null,
-					field: field,
-					sortable: true,
-					text: field?.name,
-					value: fieldName,
-					width: null,
-				};
-			});
-		});
+		const headers = ref(getHeaders());
 
 		const filterKeyFields = getFields(props.filter);
 
@@ -117,6 +112,21 @@ export default defineComponent({
 		}
 
 		return { relationInfo, headers, items, getWithArray, useAliasFields };
+
+		function getHeaders() {
+			return viewFields.map((fieldName: any) => {
+				const field = fieldsStore.getField(relationInfo?.relatedCollection?.collection, fieldName ?? '');
+				return {
+					align: 'left',
+					description: null,
+					field: field,
+					sortable: true,
+					text: field?.name,
+					value: fieldName,
+					width: 200,
+				};
+			});
+		}
 
 		async function getItems() {
 			if (!relationInfo) return null;
