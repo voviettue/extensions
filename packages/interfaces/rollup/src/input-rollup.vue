@@ -168,7 +168,7 @@ export default defineComponent({
 
 			switch (func) {
 				case 'counta': // Count all including empty or null values
-					input = input.map((el: any) => el[props.rollupField]);
+					input = input.map((el: any) => el[props.rollupField]).filter((el: any) => el != undefined);
 					break;
 
 				case 'countd': // Count unique values
@@ -264,15 +264,15 @@ export default defineComponent({
 
 			if (!id) {
 				items.value = [];
-				await getModifiedData();
+				await getModifiedData().then(() => {
+					if (items.value?.length > 0) {
+						emitValue(calculate(items.value, props.function) ?? currentFieldObj.schema?.default_value);
+					} else {
+						emitValue(currentFieldObj.schema?.default_value);
+					}
 
-				if (items.value?.length > 0) {
-					emitValue(calculate(items.value, props.function) ?? currentFieldObj.schema?.default_value);
-				} else {
-					emitValue(currentFieldObj.schema?.default_value);
-				}
-
-				loading.value = false;
+					loading.value = false;
+				});
 				return;
 			}
 
@@ -298,12 +298,13 @@ export default defineComponent({
 				.get(getEndpoint(collection), { params: { fields, filter } })
 				.then(async (res) => {
 					items.value = res?.data?.data ?? [];
-					await getModifiedData();
-					if (items.value?.length > 0) {
-						emitValue(calculate(items.value, props.function) ?? currentFieldObj.schema?.default_value);
-					} else {
-						emitValue(currentFieldObj.schema?.default_value);
-					}
+					await getModifiedData().then(() => {
+						if (items.value?.length > 0) {
+							emitValue(calculate(items.value, props.function) ?? currentFieldObj.schema?.default_value);
+						} else {
+							emitValue(currentFieldObj.schema?.default_value);
+						}
+					});
 				})
 				.catch(() => {
 					items.value = [];
@@ -424,7 +425,7 @@ export default defineComponent({
 
 			if (relationInfo.type === 'o2m') {
 				for (let payload of data.create) {
-					const item = mergeRelationDataFromFilter(payload);
+					const item = await mergeRelationDataFromFilter(payload);
 					if (filterItems([item], props.filter).length) {
 						items.value.push(item);
 					}
