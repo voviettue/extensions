@@ -7,24 +7,30 @@
 			v-else
 			:key="`items-${items.length}`"
 			v-model:headers="headers"
+			class="table"
 			collection="classes"
-			show-resize
 			fixed-header
 			must-sort
 			:items="items"
 			:limit="1"
 		>
 			<template v-for="header in headers" :key="header.value" #[`item.${header.value}`]="{ item }">
-				<render-display
-					:value="getWithArray(item, header.value)"
-					:display="header.field?.meta?.display || 'raw'"
-					:options="header.field?.meta?.display_options"
-					:interface="header.field?.meta?.interface"
-					:interface-options="header.field?.meta?.options"
-					:type="header.field.type"
-					:collection="header.field.collection"
-					:field="header.value"
-				/>
+				<div>
+					<render-display
+						:value="
+							!aliasFields || item[header.value] !== undefined
+								? getWithArray(item, header.value)
+								: getAliasedValue(item, header.value)
+						"
+						:display="header.field?.meta?.display || 'raw'"
+						:options="header.field?.meta?.display_options"
+						:interface="header.field?.meta?.interface"
+						:interface-options="header.field?.meta?.options"
+						:type="header.field.type"
+						:collection="header.field.collection"
+						:field="header.value"
+					/>
+				</div>
 			</template>
 
 			<!-- <template #header-context-menu></template> -->
@@ -33,7 +39,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, PropType, inject, watch, ref } from 'vue';
+import { defineComponent, PropType, inject, watch, ref, computed } from 'vue';
 import { Filter, Item } from '@directus/shared/types';
 import { getEndpoint } from '@directus/shared/utils';
 import get from 'lodash/get';
@@ -41,7 +47,10 @@ import set from 'lodash/set';
 import has from 'lodash/has';
 import cloneDeep from 'lodash/cloneDeep';
 import isEqual from 'lodash/isEqual';
+import pick from 'lodash/pick';
+import merge from 'lodash/merge';
 import useAliasFields from './composables/use-alias-fields';
+import adjustFieldsForDisplays from './utils/adjust-fields-for-displays';
 import { get as getWithArray } from './utils/get-with-arrays';
 import { useApi, useStores } from '@directus/extensions-sdk';
 import { RelationM2M } from './composables/use-relation-m2m';
@@ -91,8 +100,19 @@ export default defineComponent({
 		const items = ref([]);
 
 		const headers = ref(getHeaders());
-
 		const filterKeyFields = getFields(props.filter);
+		const fieldsWithRelational = adjustFieldsForDisplays(
+			fieldsStore,
+			viewFields,
+			relationInfo.relatedCollection.collection
+		);
+		const { aliasFields, aliasQuery } = useAliasFields(fieldsWithRelational);
+		const fieldsWithRelationalAliased = computed(() => {
+			if (!aliasFields.value) return fieldsWithRelational;
+			return fieldsWithRelational.map((field) =>
+				aliasFields.value?.[field] ? aliasFields.value[field].fullAlias : field
+			);
+		});
 
 		if (relationInfo) {
 			let oldValue = cloneDeep(values.value?.[watchFieldName]);
@@ -111,7 +131,7 @@ export default defineComponent({
 			);
 		}
 
-		return { relationInfo, headers, items, getWithArray, useAliasFields };
+		return { relationInfo, headers, items, aliasFields, getWithArray, getAliasedValue };
 
 		function getHeaders() {
 			return viewFields.map((fieldName: any) => {
@@ -123,7 +143,7 @@ export default defineComponent({
 					sortable: true,
 					text: field?.name,
 					value: fieldName,
-					width: 200,
+					width: null,
 				};
 			});
 		}
@@ -145,7 +165,6 @@ export default defineComponent({
 				return;
 			}
 
-			const fields = viewFields ?? [primaryKeyField.field];
 			const filter = props.filter ? cloneDeep(props.filter) : { _and: [] };
 
 			if (relationInfo.type === 'm2m') {
@@ -165,7 +184,7 @@ export default defineComponent({
 
 			api
 				.get(getEndpoint(collection), {
-					params: { fields, filter },
+					params: { fields: fieldsWithRelationalAliased.value, alias: aliasQuery.value, filter },
 				})
 				.then(async (res) => {
 					items.value = res?.data?.data ?? [];
@@ -327,6 +346,39 @@ export default defineComponent({
 				}
 			}
 		}
+
+		function getAliasedValue(item: Record<string, any>, field: string) {
+			let value: any = null;
+			if (aliasFields.value![field]) {
+				value = getWithArray(item, aliasFields.value![field].fullAlias, null);
+			} else {
+				const matchingAliasFields = Object.values(aliasFields.value!).filter(
+					(aliasField) => aliasField.fieldName === field
+				);
+				const matchingKeys = matchingAliasFields.map((aliasField) => aliasField.fieldAlias);
+				const matchingPaths = matchingAliasFields.map((aliasField) => aliasField.fullAlias);
+				value = Object.entries(pick(item, matchingPaths)).reduce((acc, [key, value]) => {
+					if (matchingKeys.includes(key)) merge(acc, value);
+					return acc;
+				}, {});
+			}
+
+			if (value == {}) return null;
+			if (Array.isArray(value)) {
+				if (value.length == 0) return null;
+				if (value.length == 1 && value[0] == null) return null;
+			}
+			return value;
+		}
 	},
 });
 </script>
+
+<style scoped>
+.table :deep(tr) {
+	display: table-row !important;
+}
+.table :deep(td) {
+	display: table-cell !important;
+}
+</style>

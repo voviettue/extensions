@@ -95,7 +95,7 @@ export default defineComponent({
 					type: 'string',
 					name: 'Lookup Field',
 					meta: {
-						width: 'half',
+						width: 'full',
 						interface: 'select-dropdown',
 						options: {
 							choices: choices,
