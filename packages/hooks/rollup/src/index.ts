@@ -1,5 +1,5 @@
 import { defineHook } from '@directus/extensions-sdk';
-import merge from 'lodash/merge';
+import cloneDeep from 'lodash/cloneDeep';
 import round from 'lodash/round';
 import sum from 'lodash/sum';
 import mean from 'lodash/mean';
@@ -37,9 +37,17 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 			const field = rollupFields[i];
 
 			const { relationField, rollupField, function: rollupFunction, sortBy, filter } = JSON.parse(field?.options) || {};
-			const relation = relations.find((relation: any) => relation?.meta?.one_field == relationField);
-			const relatedCollection = relation?.collection;
-			const relatedCollectionFK = relation?.field;
+
+			// Default set to o2m
+			let relation = relations.find((relation: any) => relation?.meta?.one_field == relationField);
+
+			// Check if junction field existed, change to m2m
+			if (relation?.meta?.junction_field) {
+				relation = schema.relations.find(
+					(m2mRelation: any) =>
+						m2mRelation.collection === relation?.collection && m2mRelation.field === relation?.meta?.junction_field
+				);
+			}
 
 			if (!relationField || !rollupField || !rollupFunction) {
 				logger.warn(`ROLLUP: Invalid option: ${collection}.${field.field}`);
@@ -54,12 +62,12 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 			mapper.push({
 				field: field.field,
 				relationField: relationField,
-				rollupCollection: relatedCollection,
-				rollupCollectionFK: relatedCollectionFK,
 				rollupField: rollupField,
 				rollupFunction: rollupFunction,
 				sortBy: sortBy,
 				filter: filter,
+				type: relation?.meta?.junction_field ? 'm2m' : 'o2m',
+				relation: relation,
 			});
 		}
 
@@ -67,7 +75,7 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 	};
 
 	const cast = (value: any, fieldSchema: any) => {
-		if (value === null) return null;
+		if (value === null || isNaN(value)) return null;
 		if (typeof value == 'object') value = JSON.stringify(value);
 		if (typeof value == 'undefined') return null;
 
@@ -96,8 +104,7 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 				return value.toString().substring(0, fieldSchema?.schema?.max_length);
 
 			case 'time':
-				const parsedTime = parse(value, 'HH:mm:ss', new Date());
-				return isValid(parsedTime) ? value : null;
+				return isValid(parse(value, 'HH:mm:ss', new Date())) ? value : null;
 
 			case 'datetime':
 			case 'date':
@@ -114,7 +121,7 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 
 		switch (func) {
 			case 'counta': // Count all including empty or null values
-				input = input.map((el: any) => el[rollupField]);
+				input = input.map((el: any) => el[rollupField]).filter((el: any) => el != undefined);
 				break;
 
 			case 'countd': // Count unique values
@@ -132,7 +139,7 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 			case 'avg':
 			case 'min':
 			case 'max':
-				input = input.map((el: any) => el[rollupField]).filter((el: any) => el != null && el != '');
+				input = input.map((el: any) => el[rollupField]).filter((el: any) => el != null && el != '' && !isNaN(el));
 				break;
 		}
 
@@ -147,7 +154,7 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 				return sum(input);
 
 			case 'avg':
-				return mean(input);
+				return input.length === 0 ? undefined : mean(input);
 
 			case 'min':
 				return min(input);
@@ -164,19 +171,19 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 	}
 
 	const execute = async (obj: any, ctx: any) => {
-		const rollupFields = await getRollupFields(obj.collection);
+		const collection = obj.collection;
+		const rollupFields = await getRollupFields(collection);
 
 		if (rollupFields.length === 0) return;
 
 		try {
 			const keys = obj?.key ? [obj.key] : obj.keys;
-			const collection = obj.collection;
 			const pk = ctx.schema.collections[collection].primary;
 			const schema = await getSchema();
 			const fieldSchemas = await getSchemaFields(collection);
 			const mapper = getMappingFields(collection, rollupFields, schema);
 
-			for (var i in keys) {
+			for (const i in keys) {
 				const knex = ctx.database?.isCompleted && ctx.database.isCompleted() ? database : ctx.database;
 				const key = keys[i];
 				const payload: any = {};
@@ -184,20 +191,35 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 
 				if (!record) continue;
 
-				for (var i in mapper) {
-					const option = mapper[i];
+				for (const j in mapper) {
+					const option = mapper[j];
 					payload[option.field] = null;
 
 					if (record) {
-						const rollupCollectionItemsService = new services.ItemsService(option.rollupCollection, {
-							knex: knex,
-							schema: await getSchema(),
-						});
-						const filter = { [option.rollupCollectionFK]: { _eq: key } };
-						const items = await rollupCollectionItemsService.readByQuery({
-							filter: merge(option.filter, filter),
-							limit: -1,
-						});
+						const rollupCollectionItemsService = new services.ItemsService(
+							option.type === 'm2m' ? option.relation.related_collection : option.relation.collection,
+							{
+								knex: knex,
+								schema: await getSchema(),
+							}
+						);
+						const filter = option.filter ? cloneDeep(option.filter) : { _and: [] };
+						if (option.type === 'm2m') {
+							const reverseRelation = `$FOLLOW(${option.relation.collection},${option.relation.field})`;
+							filter['_and'].push({
+								[reverseRelation]: {
+									_some: {
+										[option.relation.meta.junction_field]: { _eq: key },
+									},
+								},
+							});
+						}
+
+						if (option.type === 'o2m') {
+							filter['_and'].push({ [`${option.relation.field}`]: key });
+						}
+
+						const items = await rollupCollectionItemsService.readByQuery({ filter, limit: -1 });
 
 						if (items) {
 							const fieldSchema = fieldSchemas.find((schema: any) => schema.field === option.field);
@@ -223,6 +245,11 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 		}
 	};
 
+	const clearCache = () => {
+		_rollupFields = null;
+		_schemaFields = null;
+	};
+
 	action('items.create', async (obj: any, ctx: any) => {
 		await execute(obj, ctx);
 	});
@@ -232,17 +259,14 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 	});
 
 	action('fields.create', () => {
-		_rollupFields = null;
-		_schemaFields = null;
+		clearCache();
 	});
 
 	action('fields.update', () => {
-		_rollupFields = null;
-		_schemaFields = null;
+		clearCache();
 	});
 
 	action('fields.delete', () => {
-		_rollupFields = null;
-		_schemaFields = null;
+		clearCache();
 	});
 });

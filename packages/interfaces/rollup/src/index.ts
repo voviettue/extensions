@@ -1,8 +1,8 @@
-import InterfaceComponent from './interface.vue';
+import InterfaceComponent from './input-rollup.vue';
 import { computed, watch } from 'vue';
 import { defineInterface } from '@directus/extensions-sdk';
 import { useStores } from '@directus/extensions-sdk';
-import formatTitle from '@directus/format-title';
+import { useRelation } from './composables/use-relation';
 
 export default defineInterface({
 	id: 'input-rollup',
@@ -27,8 +27,8 @@ export default defineInterface({
 	],
 	recommendedDisplays: ['formatted-value'],
 	options: ({ collection, field }) => {
-		const { useRelationsStore, useFieldsStore } = useStores();
-		const relationsStore = useRelationsStore();
+		const stores = useStores();
+		const { useFieldsStore } = stores;
 		const fieldsStore = useFieldsStore();
 
 		watch(
@@ -41,23 +41,33 @@ export default defineInterface({
 			{ deep: true }
 		);
 
-		// Support O2M collections
-		const collectionRelations = relationsStore
-			.getRelationsForCollection(collection)
-			.filter((relation: any) => relation.related_collection === collection && relation?.meta?.one_field !== null);
-		const relatedCollectionOptions = collectionRelations.map((el: any) => {
-			const text = `${formatTitle(el.collection.replace('directus_', 'system_'))} (${
-				el.meta?.one_field ?? 'undefined'
-			})`;
-			const value = `${el.meta?.one_field}`;
+		const relatedCollectionOptions = getFieldTree(collection, 2);
+		function getFieldTree(collectionName: string | undefined, level = 0, parentValue = null) {
+			let choices: any = [];
+			if (!collectionName) return choices;
+			const fields = fieldsStore.getFieldsForCollection(collectionName);
+			choices = fields
+				.filter(
+					(e: any) => e?.group !== true && (e?.meta?.special?.includes('o2m') || e?.meta?.special?.includes('m2m'))
+				)
+				.map((e: any) => {
+					const value = parentValue ? `${parentValue}.${e.field}` : e.field;
+					return {
+						text: `${e.name} (${value})`,
+						value: value,
+						children:
+							level > 1 && e?.schema?.foreign_key_table
+								? getFieldTree(e?.schema?.foreign_key_table, level - 1, e.field)
+								: null,
+					};
+				});
 
-			return { text, value };
-		});
+			return choices;
+		}
 
 		const selectedRelatedCollection = computed(() => {
-			return collectionRelations.find(
-				(relation: any) => relation?.meta?.one_field == field.meta?.options?.relationField
-			)?.collection;
+			const relationInfo = useRelation(collection || '', field.meta?.options?.relationField, stores);
+			return relationInfo?.relatedCollection?.collection;
 		});
 		const relatedCollectionFields = computed(() => {
 			return fieldsStore.getFieldsForCollection(selectedRelatedCollection.value);
