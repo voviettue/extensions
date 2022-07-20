@@ -19,11 +19,11 @@ type UsableAliasFields = {
 	};
 };
 
-export default function useAliasFields(fields: Ref<string[]>): UsableAliasFields {
+export default function useAliasFields(fields: string[]): UsableAliasFields {
 	const aliasFields = computed(() => {
-		if (!fields.value || fields.value.length === 0) return null;
+		if (!fields || fields.length === 0) return null;
 
-		const fieldsToAlias = fields.value.filter((field: string) => field.includes('.'));
+		const fieldsToAlias = fields.filter((field: string) => field.includes('.'));
 		if (fieldsToAlias.length === 0) return null;
 
 		return fieldsToAlias.reduce((acc, currentField) => {
