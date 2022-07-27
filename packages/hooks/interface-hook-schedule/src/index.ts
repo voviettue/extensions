@@ -91,7 +91,7 @@ export default defineHook(({ action }, { services, exceptions, database, getSche
 				}
 			});
 			schedules.push(schedule);
-		};
+		}
 	}
 
 	action('server.start', () => {

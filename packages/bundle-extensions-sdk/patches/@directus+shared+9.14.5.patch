@@ -1,0 +1,308 @@
+diff --git a/node_modules/@directus/shared/dist/cjs/utils/.DS_Store b/node_modules/@directus/shared/dist/cjs/utils/.DS_Store
+new file mode 100644
+index 0000000..c035c11
+Binary files /dev/null and b/node_modules/@directus/shared/dist/cjs/utils/.DS_Store differ
+diff --git a/node_modules/@directus/shared/dist/cjs/utils/adjust-date.d.ts.map b/node_modules/@directus/shared/dist/cjs/utils/adjust-date.d.ts.map
+index 271b959..ecefa75 100644
+--- a/node_modules/@directus/shared/dist/cjs/utils/adjust-date.d.ts.map
++++ b/node_modules/@directus/shared/dist/cjs/utils/adjust-date.d.ts.map
+@@ -1 +1 @@
+-{"version":3,"file":"adjust-date.d.ts","sourceRoot":"","sources":["../../../src/utils/adjust-date.ts"],"names":[],"mappings":"AAGA;;;;;GAKG;AACH,wBAAgB,UAAU,CAAC,IAAI,EAAE,IAAI,EAAE,UAAU,EAAE,MAAM,GAAG,IAAI,GAAG,SAAS,CA4D3E"}
+\ No newline at end of file
++{"version":3,"file":"adjust-date.d.ts","sourceRoot":"","sources":["../../../src/utils/adjust-date.ts"],"names":[],"mappings":"AAoBA;;;;;GAKG;AACH,wBAAgB,UAAU,CAAC,IAAI,EAAE,IAAI,EAAE,UAAU,EAAE,MAAM,GAAG,IAAI,GAAG,SAAS,CAoE3E"}
+\ No newline at end of file
+diff --git a/node_modules/@directus/shared/dist/cjs/utils/adjust-date.js b/node_modules/@directus/shared/dist/cjs/utils/adjust-date.js
+index a6235ef..a16f72e 100644
+--- a/node_modules/@directus/shared/dist/cjs/utils/adjust-date.js
++++ b/node_modules/@directus/shared/dist/cjs/utils/adjust-date.js
+@@ -12,9 +12,14 @@ const lodash_1 = require("lodash");
+ function adjustDate(date, adjustment) {
+     var _a;
+     date = (0, lodash_1.clone)(date);
+-    const match = /^((?:-|\+)?\d*?\.?\d+?) *?(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|months?|mth|mo|years?|yrs?|y)?$/i.exec(adjustment.trim());
+-    if (!match || !match[1])
++    const subtract = adjustment.startsWith('-');
++    if (subtract || adjustment.startsWith('+')) {
++        adjustment = adjustment.substring(1);
++    }
++    const match = /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|months?|mth|mo|years?|yrs?|y)?$/i.exec(adjustment);
++    if (!match || !match[1]) {
+         return;
++    }
+     const amount = parseFloat(match[1]);
+     const type = ((_a = match[2]) !== null && _a !== void 0 ? _a : 'days').toLowerCase();
+     switch (type) {
+@@ -23,44 +28,44 @@ function adjustDate(date, adjustment) {
+         case 'yrs':
+         case 'yr':
+         case 'y':
+-            return (0, date_fns_1.addYears)(date, amount);
++            return subtract ? (0, date_fns_1.subYears)(date, amount) : (0, date_fns_1.addYears)(date, amount);
+         case 'months':
+         case 'month':
+         case 'mth':
+         case 'mo':
+-            return (0, date_fns_1.addMonths)(date, amount);
++            return subtract ? (0, date_fns_1.subMonths)(date, amount) : (0, date_fns_1.addMonths)(date, amount);
+         case 'weeks':
+         case 'week':
+         case 'w':
+-            return (0, date_fns_1.addWeeks)(date, amount);
++            return subtract ? (0, date_fns_1.subWeeks)(date, amount) : (0, date_fns_1.addWeeks)(date, amount);
+         case 'days':
+         case 'day':
+         case 'd':
+-            return (0, date_fns_1.addDays)(date, amount);
++            return subtract ? (0, date_fns_1.subDays)(date, amount) : (0, date_fns_1.addDays)(date, amount);
+         case 'hours':
+         case 'hour':
+         case 'hrs':
+         case 'hr':
+         case 'h':
+-            return (0, date_fns_1.addHours)(date, amount);
++            return subtract ? (0, date_fns_1.subHours)(date, amount) : (0, date_fns_1.addHours)(date, amount);
+         case 'minutes':
+         case 'minute':
+         case 'mins':
+         case 'min':
+         case 'm':
+-            return (0, date_fns_1.addMinutes)(date, amount);
++            return subtract ? (0, date_fns_1.subMinutes)(date, amount) : (0, date_fns_1.addMinutes)(date, amount);
+         case 'seconds':
+         case 'second':
+         case 'secs':
+         case 'sec':
+         case 's':
+-            return (0, date_fns_1.addSeconds)(date, amount);
++            return subtract ? (0, date_fns_1.subSeconds)(date, amount) : (0, date_fns_1.addSeconds)(date, amount);
+         case 'milliseconds':
+         case 'millisecond':
+         case 'msecs':
+         case 'msec':
+         case 'ms':
+-            return (0, date_fns_1.addMilliseconds)(date, amount);
++            return subtract ? (0, date_fns_1.subMilliseconds)(date, amount) : (0, date_fns_1.addMilliseconds)(date, amount);
+         default:
+             return undefined;
+     }
+diff --git a/node_modules/@directus/shared/dist/cjs/utils/array-helpers.d.ts b/node_modules/@directus/shared/dist/cjs/utils/array-helpers.d.ts
+new file mode 100644
+index 0000000..a66896c
+--- /dev/null
++++ b/node_modules/@directus/shared/dist/cjs/utils/array-helpers.d.ts
+@@ -0,0 +1,7 @@
++export declare function isIn<T extends readonly string[]>(value: string, array: T): value is T[number];
++export declare function isTypeIn<T extends {
++    type?: string;
++}, E extends string>(object: T, array: readonly E[]): object is Extract<T, {
++    type?: E;
++}>;
++//# sourceMappingURL=array-helpers.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/@directus/shared/dist/cjs/utils/array-helpers.d.ts.map b/node_modules/@directus/shared/dist/cjs/utils/array-helpers.d.ts.map
+new file mode 100644
+index 0000000..27835ac
+--- /dev/null
++++ b/node_modules/@directus/shared/dist/cjs/utils/array-helpers.d.ts.map
+@@ -0,0 +1 @@
++{"version":3,"file":"array-helpers.d.ts","sourceRoot":"","sources":["../../../src/utils/array-helpers.ts"],"names":[],"mappings":"AAAA,wBAAgB,IAAI,CAAC,CAAC,SAAS,SAAS,MAAM,EAAE,EAAE,KAAK,EAAE,MAAM,EAAE,KAAK,EAAE,CAAC,GAAG,KAAK,IAAI,CAAC,CAAC,MAAM,CAAC,CAE7F;AAED,wBAAgB,QAAQ,CAAC,CAAC,SAAS;IAAE,IAAI,CAAC,EAAE,MAAM,CAAA;CAAE,EAAE,CAAC,SAAS,MAAM,EACrE,MAAM,EAAE,CAAC,EACT,KAAK,EAAE,SAAS,CAAC,EAAE,GACjB,MAAM,IAAI,OAAO,CAAC,CAAC,EAAE;IAAE,IAAI,CAAC,EAAE,CAAC,CAAA;CAAE,CAAC,CAIpC"}
+\ No newline at end of file
+diff --git a/node_modules/@directus/shared/dist/cjs/utils/array-helpers.js b/node_modules/@directus/shared/dist/cjs/utils/array-helpers.js
+new file mode 100644
+index 0000000..d7fe290
+--- /dev/null
++++ b/node_modules/@directus/shared/dist/cjs/utils/array-helpers.js
+@@ -0,0 +1,13 @@
++"use strict";
++Object.defineProperty(exports, "__esModule", { value: true });
++exports.isTypeIn = exports.isIn = void 0;
++function isIn(value, array) {
++    return array.includes(value);
++}
++exports.isIn = isIn;
++function isTypeIn(object, array) {
++    if (!object.type)
++        return false;
++    return array.includes(object.type);
++}
++exports.isTypeIn = isTypeIn;
+diff --git a/node_modules/@directus/shared/dist/cjs/utils/index.d.ts b/node_modules/@directus/shared/dist/cjs/utils/index.d.ts
+index c585c45..3f14ec1 100644
+--- a/node_modules/@directus/shared/dist/cjs/utils/index.d.ts
++++ b/node_modules/@directus/shared/dist/cjs/utils/index.d.ts
+@@ -2,6 +2,7 @@ export * from './abbreviate-number';
+ export * from './add-field-flag';
+ export * from './adjust-date';
+ export * from './apply-options-data';
++export * from './array-helpers';
+ export * from './deep-map';
+ export * from './define-extension';
+ export * from './generate-joi';
+@@ -14,7 +15,6 @@ export * from './get-output-type-for-function';
+ export * from './get-relation-type';
+ export * from './get-simple-hash';
+ export * from './is-dynamic-variable';
+-export * from './is-extension';
+ export * from './merge-filters';
+ export * from './move-in-array';
+ export * from './parse-filter';
+diff --git a/node_modules/@directus/shared/dist/cjs/utils/index.d.ts.map b/node_modules/@directus/shared/dist/cjs/utils/index.d.ts.map
+index ad78b12..f12b349 100644
+--- a/node_modules/@directus/shared/dist/cjs/utils/index.d.ts.map
++++ b/node_modules/@directus/shared/dist/cjs/utils/index.d.ts.map
+@@ -1 +1 @@
+-{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/utils/index.ts"],"names":[],"mappings":"AAAA,cAAc,qBAAqB,CAAC;AACpC,cAAc,kBAAkB,CAAC;AACjC,cAAc,eAAe,CAAC;AAC9B,cAAc,sBAAsB,CAAC;AACrC,cAAc,YAAY,CAAC;AAC3B,cAAc,oBAAoB,CAAC;AACnC,cAAc,gBAAgB,CAAC;AAC/B,cAAc,uBAAuB,CAAC;AACtC,cAAc,gBAAgB,CAAC;AAC/B,cAAc,4BAA4B,CAAC;AAC3C,cAAc,iCAAiC,CAAC;AAChD,cAAc,0BAA0B,CAAC;AACzC,cAAc,gCAAgC,CAAC;AAC/C,cAAc,qBAAqB,CAAC;AACpC,cAAc,mBAAmB,CAAC;AAClC,cAAc,uBAAuB,CAAC;AACtC,cAAc,gBAAgB,CAAC;AAC/B,cAAc,iBAAiB,CAAC;AAChC,cAAc,iBAAiB,CAAC;AAChC,cAAc,gBAAgB,CAAC;AAC/B,cAAc,cAAc,CAAC;AAC7B,cAAc,aAAa,CAAC;AAC5B,cAAc,YAAY,CAAC;AAC3B,cAAc,+BAA+B,CAAC;AAC9C,cAAc,oBAAoB,CAAC"}
+\ No newline at end of file
++{"version":3,"file":"index.d.ts","sourceRoot":"","sources":["../../../src/utils/index.ts"],"names":[],"mappings":"AAAA,cAAc,qBAAqB,CAAC;AACpC,cAAc,kBAAkB,CAAC;AACjC,cAAc,eAAe,CAAC;AAC9B,cAAc,sBAAsB,CAAC;AACrC,cAAc,iBAAiB,CAAC;AAChC,cAAc,YAAY,CAAC;AAC3B,cAAc,oBAAoB,CAAC;AACnC,cAAc,gBAAgB,CAAC;AAC/B,cAAc,uBAAuB,CAAC;AACtC,cAAc,gBAAgB,CAAC;AAC/B,cAAc,4BAA4B,CAAC;AAC3C,cAAc,iCAAiC,CAAC;AAChD,cAAc,0BAA0B,CAAC;AACzC,cAAc,gCAAgC,CAAC;AAC/C,cAAc,qBAAqB,CAAC;AACpC,cAAc,mBAAmB,CAAC;AAClC,cAAc,uBAAuB,CAAC;AACtC,cAAc,iBAAiB,CAAC;AAChC,cAAc,iBAAiB,CAAC;AAChC,cAAc,gBAAgB,CAAC;AAC/B,cAAc,cAAc,CAAC;AAC7B,cAAc,aAAa,CAAC;AAC5B,cAAc,YAAY,CAAC;AAC3B,cAAc,+BAA+B,CAAC;AAC9C,cAAc,oBAAoB,CAAC"}
+\ No newline at end of file
+diff --git a/node_modules/@directus/shared/dist/cjs/utils/index.js b/node_modules/@directus/shared/dist/cjs/utils/index.js
+index 51b23b1..e7afb93 100644
+--- a/node_modules/@directus/shared/dist/cjs/utils/index.js
++++ b/node_modules/@directus/shared/dist/cjs/utils/index.js
+@@ -14,6 +14,7 @@ __exportStar(require("./abbreviate-number"), exports);
+ __exportStar(require("./add-field-flag"), exports);
+ __exportStar(require("./adjust-date"), exports);
+ __exportStar(require("./apply-options-data"), exports);
++__exportStar(require("./array-helpers"), exports);
+ __exportStar(require("./deep-map"), exports);
+ __exportStar(require("./define-extension"), exports);
+ __exportStar(require("./generate-joi"), exports);
+@@ -26,7 +27,6 @@ __exportStar(require("./get-output-type-for-function"), exports);
+ __exportStar(require("./get-relation-type"), exports);
+ __exportStar(require("./get-simple-hash"), exports);
+ __exportStar(require("./is-dynamic-variable"), exports);
+-__exportStar(require("./is-extension"), exports);
+ __exportStar(require("./merge-filters"), exports);
+ __exportStar(require("./move-in-array"), exports);
+ __exportStar(require("./parse-filter"), exports);
+diff --git a/node_modules/@directus/shared/dist/cjs/utils/node/generate-extensions-entry.d.ts b/node_modules/@directus/shared/dist/cjs/utils/node/generate-extensions-entry.d.ts
+index 228f8b7..ae4963c 100644
+--- a/node_modules/@directus/shared/dist/cjs/utils/node/generate-extensions-entry.d.ts
++++ b/node_modules/@directus/shared/dist/cjs/utils/node/generate-extensions-entry.d.ts
+@@ -1,3 +1,3 @@
+-import { AppExtensionType, Extension } from '../../types';
+-export declare function generateExtensionsEntry(type: AppExtensionType, extensions: Extension[]): string;
++import { AppExtensionType, Extension, HybridExtensionType } from '../../types';
++export declare function generateExtensionsEntry(type: AppExtensionType | HybridExtensionType, extensions: Extension[]): string;
+ //# sourceMappingURL=generate-extensions-entry.d.ts.map
+\ No newline at end of file
+diff --git a/node_modules/@directus/shared/dist/cjs/utils/node/generate-extensions-entry.d.ts.map b/node_modules/@directus/shared/dist/cjs/utils/node/generate-extensions-entry.d.ts.map
+index bd86d23..e783132 100644
+--- a/node_modules/@directus/shared/dist/cjs/utils/node/generate-extensions-entry.d.ts.map
++++ b/node_modules/@directus/shared/dist/cjs/utils/node/generate-extensions-entry.d.ts.map
+@@ -1 +1 @@
+-{"version":3,"file":"generate-extensions-entry.d.ts","sourceRoot":"","sources":["../../../../src/utils/node/generate-extensions-entry.ts"],"names":[],"mappings":"AACA,OAAO,EAAgB,gBAAgB,EAAE,SAAS,EAAE,MAAM,aAAa,CAAC;AAExE,wBAAgB,uBAAuB,CAAC,IAAI,EAAE,gBAAgB,EAAE,UAAU,EAAE,SAAS,EAAE,GAAG,MAAM,CAY/F"}
+\ No newline at end of file
++{"version":3,"file":"generate-extensions-entry.d.ts","sourceRoot":"","sources":["../../../../src/utils/node/generate-extensions-entry.ts"],"names":[],"mappings":"AAEA,OAAO,EAAgB,gBAAgB,EAAE,SAAS,EAAmB,mBAAmB,EAAE,MAAM,aAAa,CAAC;AAG9G,wBAAgB,uBAAuB,CAAC,IAAI,EAAE,gBAAgB,GAAG,mBAAmB,EAAE,UAAU,EAAE,SAAS,EAAE,GAAG,MAAM,CAoBrH"}
+\ No newline at end of file
+diff --git a/node_modules/@directus/shared/dist/cjs/utils/node/generate-extensions-entry.js b/node_modules/@directus/shared/dist/cjs/utils/node/generate-extensions-entry.js
+index 1f36633..ce5938d 100644
+--- a/node_modules/@directus/shared/dist/cjs/utils/node/generate-extensions-entry.js
++++ b/node_modules/@directus/shared/dist/cjs/utils/node/generate-extensions-entry.js
+@@ -5,11 +5,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.generateExtensionsEntry = void 0;
+ const path_1 = __importDefault(require("path"));
++const constants_1 = require("../../constants");
++const array_helpers_1 = require("../array-helpers");
+ function generateExtensionsEntry(type, extensions) {
+     const filteredExtensions = extensions.filter((extension) => extension.type === type);
+     return `${filteredExtensions
+         .map((extension, i) => `import e${i} from './${path_1.default
+-        .relative('.', path_1.default.resolve(extension.path, extension.entrypoint))
++        .relative('.', path_1.default.resolve(extension.path, (0, array_helpers_1.isTypeIn)(extension, constants_1.HYBRID_EXTENSION_TYPES) ? extension.entrypoint.app : extension.entrypoint))
+         .split(path_1.default.sep)
+         .join(path_1.default.posix.sep)}';\n`)
+         .join('')}export default [${filteredExtensions.map((_, i) => `e${i}`).join(',')}];`;
+diff --git a/node_modules/@directus/shared/dist/cjs/utils/node/get-extensions.d.ts.map b/node_modules/@directus/shared/dist/cjs/utils/node/get-extensions.d.ts.map
+index e2a3c05..86d5942 100644
+--- a/node_modules/@directus/shared/dist/cjs/utils/node/get-extensions.d.ts.map
++++ b/node_modules/@directus/shared/dist/cjs/utils/node/get-extensions.d.ts.map
+@@ -1 +1 @@
+-{"version":3,"file":"get-extensions.d.ts","sourceRoot":"","sources":["../../../../src/utils/node/get-extensions.ts"],"names":[],"mappings":"AAEA,OAAO,EACN,cAAc,EAEd,gBAAgB,EAChB,oBAAoB,EACpB,aAAa,EACb,MAAM,aAAa,CAAC;AAyErB,wBAAsB,oBAAoB,CACzC,IAAI,EAAE,MAAM,EACZ,KAAK,EAAE,SAAS,oBAAoB,EAAE,GACpC,OAAO,CAAC,gBAAgB,EAAE,CAAC,CAY7B;AAED,wBAAsB,kBAAkB,CAAC,IAAI,EAAE,MAAM,EAAE,KAAK,EAAE,SAAS,aAAa,EAAE,GAAG,OAAO,CAAC,cAAc,EAAE,CAAC,CAwCjH"}
+\ No newline at end of file
++{"version":3,"file":"get-extensions.d.ts","sourceRoot":"","sources":["../../../../src/utils/node/get-extensions.ts"],"names":[],"mappings":"AAEA,OAAO,EACN,cAAc,EAEd,gBAAgB,EAChB,oBAAoB,EACpB,aAAa,EACb,MAAM,aAAa,CAAC;AA8ErB,wBAAsB,oBAAoB,CACzC,IAAI,EAAE,MAAM,EACZ,KAAK,EAAE,SAAS,oBAAoB,EAAE,GACpC,OAAO,CAAC,gBAAgB,EAAE,CAAC,CAY7B;AAED,wBAAsB,kBAAkB,CAAC,IAAI,EAAE,MAAM,EAAE,KAAK,EAAE,SAAS,aAAa,EAAE,GAAG,OAAO,CAAC,cAAc,EAAE,CAAC,CAwCjH"}
+\ No newline at end of file
+diff --git a/node_modules/@directus/shared/dist/cjs/utils/node/get-extensions.js b/node_modules/@directus/shared/dist/cjs/utils/node/get-extensions.js
+index 00f90bb..508fe3d 100644
+--- a/node_modules/@directus/shared/dist/cjs/utils/node/get-extensions.js
++++ b/node_modules/@directus/shared/dist/cjs/utils/node/get-extensions.js
+@@ -11,7 +11,7 @@ const list_folders_1 = require("./list-folders");
+ const constants_1 = require("../../constants");
+ const pluralize_1 = require("../pluralize");
+ const validate_extension_manifest_1 = require("../validate-extension-manifest");
+-const is_extension_1 = require("../is-extension");
++const array_helpers_1 = require("../array-helpers");
+ async function resolvePackageExtensions(extensionNames, root, types) {
+     var _a;
+     const extensions = [];
+@@ -22,8 +22,8 @@ async function resolvePackageExtensions(extensionNames, root, types) {
+             throw new Error(`The extension manifest of "${extensionName}" is not valid.`);
+         }
+         const extensionOptions = extensionManifest[constants_1.EXTENSION_PKG_KEY];
+-        if (types.includes(extensionOptions.type)) {
+-            if (extensionOptions.type === constants_1.PACK_EXTENSION_TYPE) {
++        if ((0, array_helpers_1.isIn)(extensionOptions.type, types)) {
++            if ((0, array_helpers_1.isTypeIn)(extensionOptions, constants_1.PACKAGE_EXTENSION_TYPES)) {
+                 const extensionChildren = Object.keys((_a = extensionManifest.dependencies) !== null && _a !== void 0 ? _a : {}).filter((dep) => constants_1.EXTENSION_NAME_REGEX.test(dep));
+                 const extension = {
+                     path: extensionPath,
+@@ -37,7 +37,7 @@ async function resolvePackageExtensions(extensionNames, root, types) {
+                 extensions.push(extension);
+                 extensions.push(...(await resolvePackageExtensions(extension.children || [], extension.path, types)));
+             }
+-            else if ((0, is_extension_1.isExtensionObject)(extensionOptions, constants_1.HYBRID_EXTENSION_TYPES)) {
++            else if ((0, array_helpers_1.isTypeIn)(extensionOptions, constants_1.HYBRID_EXTENSION_TYPES)) {
+                 extensions.push({
+                     path: extensionPath,
+                     name: extensionName,
+@@ -88,7 +88,7 @@ async function getLocalExtensions(root, types) {
+             const extensionNames = await (0, list_folders_1.listFolders)(typePath);
+             for (const extensionName of extensionNames) {
+                 const extensionPath = path_1.default.join(typePath, extensionName);
+-                if (!(0, is_extension_1.isHybridExtension)(extensionType)) {
++                if (!(0, array_helpers_1.isIn)(extensionType, constants_1.HYBRID_EXTENSION_TYPES)) {
+                     extensions.push({
+                         path: extensionPath,
+                         name: extensionName,
+diff --git a/node_modules/@directus/shared/dist/cjs/utils/validate-extension-manifest.d.ts.map b/node_modules/@directus/shared/dist/cjs/utils/validate-extension-manifest.d.ts.map
+index 9a18f3c..44aaf1c 100644
+--- a/node_modules/@directus/shared/dist/cjs/utils/validate-extension-manifest.d.ts.map
++++ b/node_modules/@directus/shared/dist/cjs/utils/validate-extension-manifest.d.ts.map
+@@ -1 +1 @@
+-{"version":3,"file":"validate-extension-manifest.d.ts","sourceRoot":"","sources":["../../../src/utils/validate-extension-manifest.ts"],"names":[],"mappings":"AACA,OAAO,EAAE,iBAAiB,EAAE,oBAAoB,EAAE,MAAM,UAAU,CAAC;AAGnE,wBAAgB,yBAAyB,CACxC,iBAAiB,EAAE,oBAAoB,GACrC,iBAAiB,IAAI,iBAAiB,CA4CxC"}
+\ No newline at end of file
++{"version":3,"file":"validate-extension-manifest.d.ts","sourceRoot":"","sources":["../../../src/utils/validate-extension-manifest.ts"],"names":[],"mappings":"AAMA,OAAO,EAAE,iBAAiB,EAAE,oBAAoB,EAAE,MAAM,UAAU,CAAC;AAGnE,wBAAgB,yBAAyB,CACxC,iBAAiB,EAAE,oBAAoB,GACrC,iBAAiB,IAAI,iBAAiB,CA4CxC"}
+\ No newline at end of file
+diff --git a/node_modules/@directus/shared/dist/cjs/utils/validate-extension-manifest.js b/node_modules/@directus/shared/dist/cjs/utils/validate-extension-manifest.js
+index e51d774..447b186 100644
+--- a/node_modules/@directus/shared/dist/cjs/utils/validate-extension-manifest.js
++++ b/node_modules/@directus/shared/dist/cjs/utils/validate-extension-manifest.js
+@@ -2,7 +2,7 @@
+ Object.defineProperty(exports, "__esModule", { value: true });
+ exports.validateExtensionManifest = void 0;
+ const constants_1 = require("../constants");
+-const is_extension_1 = require("./is-extension");
++const array_helpers_1 = require("./array-helpers");
+ function validateExtensionManifest(extensionManifest) {
+     if (!extensionManifest.name || !extensionManifest.version) {
+         return false;
+@@ -14,15 +14,15 @@ function validateExtensionManifest(extensionManifest) {
+     if (!extensionOptions.type) {
+         return false;
+     }
+-    if (!(0, is_extension_1.isExtensionPackage)(extensionOptions.type)) {
++    if (!(0, array_helpers_1.isIn)(extensionOptions.type, constants_1.EXTENSION_PACKAGE_TYPES)) {
+         return false;
+     }
+-    if (extensionOptions.type === constants_1.PACK_EXTENSION_TYPE) {
++    if ((0, array_helpers_1.isIn)(extensionOptions.type, constants_1.PACKAGE_EXTENSION_TYPES)) {
+         if (!extensionOptions.host) {
+             return false;
+         }
+     }
+-    else if ((0, is_extension_1.isHybridExtension)(extensionOptions.type)) {
++    else if ((0, array_helpers_1.isIn)(extensionOptions.type, constants_1.HYBRID_EXTENSION_TYPES)) {
+         if (!extensionOptions.path ||
+             !extensionOptions.source ||
+             typeof extensionOptions.path === 'string' ||

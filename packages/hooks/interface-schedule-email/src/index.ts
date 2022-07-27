@@ -65,13 +65,12 @@ export default defineHook(({ action }, { services, database, getSchema, logger }
 						subject: options?.emailSubject,
 						html: options?.emailBody,
 					});
-				}
-				catch (err) {
-					logger.error(err)
+				} catch (err) {
+					logger.error(err);
 				}
 			});
 			schedules.push(schedule);
-		};
+		}
 	}
 
 	action('server.start', () => {
