@@ -12,6 +12,7 @@ program
 	.command('build')
 	.description('Bundle a Directus extension to a single entrypoint')
 	.option('-w, --watch', 'watch and rebuild on changes')
+	.option('-n, --name <name...>', 'build specific extenions by name')
 	.action(build);
 
 program.parse(process.argv);

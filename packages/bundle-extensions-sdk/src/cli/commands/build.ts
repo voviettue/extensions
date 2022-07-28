@@ -4,10 +4,13 @@ import { build as directusBuild } from '@directus/extensions-sdk/cli';
 
 type BuildOptions = {
 	watch?: boolean;
+	name?: string[];
 };
 
 export default async function build(options: BuildOptions) {
 	const watch = options.watch ?? false;
+	const name = options.name ?? [];
+
 	const packagePath = path.resolve('package.json');
 
 	if (!pathExistsSync(packagePath)) {
@@ -23,8 +26,12 @@ export default async function build(options: BuildOptions) {
 		process.exit(1);
 	}
 
-	for (const e of extensionOptions) {
-		directusBuild({
+	const filteredExtensionOptions = name.length
+		? extensionOptions.filter((e) => name.includes(e.name))
+		: extensionOptions;
+
+	for (const e of filteredExtensionOptions) {
+		await directusBuild({
 			type: e.type,
 			input: e.source,
 			output: e.path,
