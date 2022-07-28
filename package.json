@@ -20,7 +20,8 @@
     "packages/modules/*",
     "packages/panels/*",
     "packages/layouts/*",
-    "packages/shared"
+    "packages/shared",
+    "packages/auto-number"
   ],
   "dependencies": {
     "glob": "^7.2.0"
