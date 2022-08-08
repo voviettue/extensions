@@ -5,6 +5,7 @@ const defaultRules = {
 	'no-debugger': process.env.NODE_ENV !== 'development' ? 'error' : 'off',
 	// Enforce prettier formatting
 	'prettier/prettier': 'error',
+	'vue/multi-word-component-names': 'off',
 };
 
 module.exports = {
@@ -70,6 +71,7 @@ module.exports = {
 						extendDefaults: true,
 						types: {
 							'{}': false,
+							Function: false,
 						},
 					},
 				],

@@ -1,0 +1,94 @@
+{
+  "name": "@giga-extensions/pro",
+  "version": "1.0.0",
+  "directus:extension": [
+    {
+      "name": "data-management-modules",
+      "type": "module",
+      "path": "dist/data-management-modules.js",
+      "source": "src/data-management/modules/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "data-management-endpoints",
+      "type": "endpoint",
+      "path": "dist/data-management-endpoints.js",
+      "source": "src/data-management/endpoints/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "mixpanel-hooks",
+      "type": "hook",
+      "path": "dist/mixpanel-hooks.js",
+      "source": "src/mixpanel/hooks/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "timeline-layouts",
+      "type": "layout",
+      "path": "dist/timeline-layouts.js",
+      "source": "src/timeline/layouts/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "kanban-layouts",
+      "type": "layout",
+      "path": "dist/kanban-layouts.js",
+      "source": "src/kanban/layouts/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "workspace-modules",
+      "type": "module",
+      "path": "dist/workspace-modules.js",
+      "source": "src/workspace/modules/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "workspace-endpoints",
+      "type": "endpoint",
+      "path": "dist/workspace-endpoints.js",
+      "source": "src/workspace/endpoints/index.ts",
+      "host": "^9.15.0"
+    }
+  ],
+  "scripts": {
+    "build": "gigapress-extension build",
+    "dev": "gigapress-extension build --watch",
+    "test": "jest",
+    "cleanup": "rimraf ./dist"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@directus/extensions-sdk": "9.15.0",
+    "@directus/format-title": "^9.15.0",
+    "@directus/shared": "^9.15.1",
+    "@gigapress/bundle-extensions-sdk": "workspace:*",
+    "@gigapress/shared": "workspace:*",
+    "@types/async": "^3.2.15",
+    "@types/busboy": "^1.5.0",
+    "@types/destroy": "^1.0.0",
+    "@types/jest": "^28.1.6",
+    "async": "^3.2.4",
+    "busboy": "^1.6.0",
+    "csv-parser": "^3.0.0",
+    "date-fns": "^2.29.1",
+    "destroy": "^1.2.0",
+    "jest": "^28.1.3",
+    "lodash": "^4.17.21",
+    "rimraf": "^3.0.2",
+    "sass": "^1.54.3",
+    "ts-jest": "^28.0.7",
+    "typescript": "^4.5.4",
+    "vue": "^3.2.26",
+    "vuedraggable": "^2.24.3"
+  },
+  "dependencies": {
+    "flat": "^5.0.2",
+    "mixpanel": "^0.16.0",
+    "stripe": "^10.0.0",
+    "xlsx": "^0.18.5"
+  }
+}

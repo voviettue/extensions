@@ -1,0 +1,206 @@
+{
+  "name": "@giga-extensions/base",
+  "version": "1.0.0",
+  "directus:extension": [
+    {
+      "name": "auto-number-hooks",
+      "type": "hook",
+      "path": "dist/auto-number-hooks.js",
+      "source": "src/auto-number/hooks/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "auto-number-interfaces",
+      "type": "interface",
+      "path": "dist/auto-number-interfaces.js",
+      "source": "src/auto-number/interfaces/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "formula-hooks",
+      "type": "hook",
+      "path": "dist/formula-hooks.js",
+      "source": "src/formula/hooks/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "formula-interfaces",
+      "type": "interface",
+      "path": "dist/formula-interfaces.js",
+      "source": "src/formula/interfaces/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "lookup-interfaces-lookup",
+      "type": "interface",
+      "path": "dist/lookup-interfaces-lookup.js",
+      "source": "src/lookup/interfaces/lookup/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "lookup-interfaces-lookup-alias",
+      "type": "interface",
+      "path": "dist/lookup-interfaces-lookup-alias.js",
+      "source": "src/lookup/interfaces/lookup-alias/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "lookup-hooks",
+      "type": "hook",
+      "path": "dist/lookup-hooks.js",
+      "source": "src/lookup/hooks/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "rollup-interfaces",
+      "type": "interface",
+      "path": "dist/rollup-interfaces.js",
+      "source": "src/rollup/interfaces/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "rollup-hooks",
+      "type": "hook",
+      "path": "dist/rollup-hooks.js",
+      "source": "src/rollup/hooks/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "monetary-interfaces",
+      "type": "interface",
+      "path": "dist/monetary-interfaces.js",
+      "source": "src/monetary/interfaces/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "monetary-displays",
+      "type": "display",
+      "path": "dist/monetary-displays.js",
+      "source": "src/monetary/displays/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "duration-interfaces",
+      "type": "interface",
+      "path": "dist/duration-interfaces.js",
+      "source": "src/duration/interfaces/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "duration-displays",
+      "type": "display",
+      "path": "dist/duration-displays.js",
+      "source": "src/duration/displays/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "number-displays",
+      "type": "display",
+      "path": "dist/number-displays.js",
+      "source": "src/number/displays/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "iframe-panels",
+      "type": "panel",
+      "path": "dist/iframe-panels.js",
+      "source": "src/iframe/panels/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "action-hooks-hook-action",
+      "type": "hook",
+      "path": "dist/action-hooks-hook-action.js",
+      "source": "src/action/hooks/hook-action/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "action-interfaces-hook-action",
+      "type": "interface",
+      "path": "dist/action-interfaces-hook-action.js",
+      "source": "src/action/interfaces/hook-action/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "filter-hooks-hook-filter",
+      "type": "hook",
+      "path": "dist/filter-hooks-hook-filter.js",
+      "source": "src/filter/hooks/hook-filter/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "filter-interfaces-hook-filter",
+      "type": "interface",
+      "path": "dist/filter-interfaces-hook-filter.js",
+      "source": "src/filter/interfaces/hook-filter/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "schedule-hooks-hook-schedule",
+      "type": "hook",
+      "path": "dist/schedule-hooks-hook-schedule.js",
+      "source": "src/schedule/hooks/hook-schedule/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "schedule-interfaces-hook-schedule",
+      "type": "interface",
+      "path": "dist/schedule-interfaces-hook-schedule.js",
+      "source": "src/schedule/interfaces/hook-schedule/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "schedule-mail-interfaces",
+      "type": "interface",
+      "path": "dist/schedule-mail-interfaces.js",
+      "source": "src/schedule-mail/interfaces/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "schedule-mail-hooks",
+      "type": "hook",
+      "path": "dist/schedule-mail-hooks.js",
+      "source": "src/schedule-mail/hooks/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "currency-interfaces",
+      "type": "interface",
+      "path": "dist/currency-interfaces.js",
+      "source": "src/currency/interfaces/index.ts",
+      "host": "^9.15.0"
+    }
+  ],
+  "scripts": {
+    "build": "gigapress-extension build",
+    "dev": "gigapress-extension build --watch",
+    "test": "jest",
+    "cleanup": "rimraf ./dist"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@directus/extensions-sdk": "9.15.0",
+    "@directus/format-title": "^9.15.0",
+    "@directus/shared": "^9.15.1",
+    "@gigapress/bundle-extensions-sdk": "workspace:*",
+    "@gigapress/shared": "workspace:*",
+    "@types/jest": "^28.1.6",
+    "@types/node-cron": "^3.0.2",
+    "date-fns": "^2.29.1",
+    "jest": "^28.1.3",
+    "joi": "^17.6.0",
+    "lodash": "^4.17.21",
+    "node-cron": "^3.0.1",
+    "rimraf": "^3.0.2",
+    "ts-jest": "^28.0.7",
+    "typescript": "^4.5.4",
+    "uuid": "^8.3.2",
+    "vue": "^3.2.26"
+  },
+  "dependencies": {
+    "cron-parser": "^4.6.0",
+    "cronstrue": "^2.11.0"
+  }
+}
