@@ -20,8 +20,7 @@
     "build:esm": "tsc --project tsconfig.json --module ES2015 --outDir ./dist/esm",
     "build:cjs": "tsc --project tsconfig.json --module CommonJS --outDir ./dist/cjs",
     "cleanup": "rimraf ./dist",
-    "test": "jest",
-    "prepublishOnly": "npm run cleanup && npm run build"
+    "test": "jest"
   },
   "author": "",
   "license": "ISC",

@@ -19,6 +19,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@directus/extensions-sdk": "9.15.0",
     "@types/fs-extra": "^9.0.13",
     "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
@@ -27,8 +28,5 @@
   "dependencies": {
     "commander": "^9.4.0",
     "fs-extra": "^10.1.0"
-  },
-  "peerDependencies": {
-    "@directus/extensions-sdk": "^9.15.0"
   }
 }

@@ -1,11 +1,13 @@
 {
   "name": "gigapress-extensions-monorepo",
+  "private": true,
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
     "format": "prettier --write \"**/*.{js,ts,vue,md,yaml}\"",
+    "add-suffix": "esno ./scripts/add-suffix.ts",
     "prepare": "husky install"
   },
   "author": "",
@@ -17,6 +19,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-vue": "^9.1.0",
+    "esno": "^0.16.3",
     "husky": "^8.0.1",
     "lint-staged": "^13.0.0",
     "prettier": "^2.6.2"
