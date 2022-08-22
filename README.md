@@ -66,6 +66,42 @@ Commands:
   help [command]   display help for command
 ```
 
+## Local development
+
+Assuming your project structure looks like this:
+
+```
+catex
+├── terminal
+├── extensions
+```
+
+Firstly, install extensions for the terminal project.
+
+```bash
+cd catex/terminal/api
+pnpm install ../../extensions/base
+pnpm install ../../extensions/pro
+pnpm install ../../extensions/front-office
+```
+
+Actually, we're linking the extensions to the terminal project, so any changes from the extensions will be reflected in
+the terminal project.
+
+Next, we have to add the path to extensions into `fs.allow` in `vite.config.js` to prevent the error 403 when serving
+the extensions' files via `/@fs/`. Read more about `fs.allow`
+[here](https://vitejs.dev/config/server-options.html#server-fs-allow).
+
+```js
+	// vite.config.js
+	fs: {
+-		allow: [searchForWorkspaceRoot(process.cwd()), '/admin/'],
++		allow: [searchForWorkspaceRoot(process.cwd()), '/admin/', '/path/to/catex/extensions/'],
+	},
+```
+
+Finally, restart the app and api.
+
 **FAQ**
 
 Q:What if you want to only build some specific extensions?
