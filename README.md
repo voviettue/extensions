@@ -1,5 +1,13 @@
 # GigaPress's Extensions Monorepo
 
+## Contents
+
+- [Prerequisite](#prerequisite)
+- [Installation](#installation)
+- [The CLI](#the-cli)
+- [Local development](#local-development)
+- [FAQ](#faq)
+
 ## Prerequisite
 
 - [pnpm](https://pnpm.io/) as a node package manager
@@ -102,11 +110,11 @@ the extensions' files via `/@fs/`. Read more about `fs.allow`
 
 Finally, restart the app and api.
 
-**FAQ**
+## FAQ
 
-Q:What if you want to only build some specific extensions?
+Q: What if you want to build some specific extensions?
 
-A:You can use the `--name` option to only build those extensions.
+A: You can use the `--name` option to only build those extensions.
 
 ```
 gigapress-extensions build --name x-hooks --name x-interfaces
