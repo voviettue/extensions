@@ -18,6 +18,7 @@ Install dependencies and link the workspace's packages.
 
 ```bash
 pnpm install
+pnpm -r build
 ```
 
 ## The CLI
@@ -26,7 +27,7 @@ There are some different things in how we develop extensions since we're buildin
 Directus extensions into a single bundle (package).
 
 1. The `directus:extension` in `package.json` is an array instead of an object as standard extensions.
-2. Instead of using `directus-extensions build`, we use `gigapress-extensions build` - a CLI tool that utilize the
+2. Instead of using `directus-extension build`, we use `gigapress-extension build` - a CLI tool that utilize the
    functions of `@directus/extensions-skd` package.
 
 **package.json**
@@ -54,8 +55,8 @@ Here is an example of how we define a bundle extension.
 		// other extensions
 	],
 	"script": {
-		"build": "gigapress-extensions build",
-		"dev": "gigapress-extensions build --watch"
+		"build": "gigapress-extension build",
+		"dev": "gigapress-extension build --watch"
 	}
 }
 ```
@@ -79,9 +80,11 @@ Commands:
 Assuming your project structure looks like this:
 
 ```
+/Users/thien/projects/catex/extensions
+
 catex
-├── terminal
 ├── extensions
+├── terminal
 ```
 
 Firstly, install extensions for the terminal project.
@@ -104,7 +107,7 @@ the extensions' files via `/@fs/`. Read more about `fs.allow`
 	// vite.config.js
 	fs: {
 -		allow: [searchForWorkspaceRoot(process.cwd()), '/admin/'],
-+		allow: [searchForWorkspaceRoot(process.cwd()), '/admin/', '/path/to/catex/extensions/'],
++		allow: [searchForWorkspaceRoot(process.cwd()), '/admin/', '/Users/thien/projects/catex/extensions'],
 	},
 ```
 
@@ -117,5 +120,5 @@ Q: What if you want to build some specific extensions?
 A: You can use the `--name` option to only build those extensions.
 
 ```
-gigapress-extensions build --name x-hooks --name x-interfaces
+gigapress-extension build --name x-hooks --name x-interfaces
 ```
