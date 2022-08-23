@@ -29,6 +29,13 @@ build:
     - pnpm install
   script:
     - pnpm -r build
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - packages/**/dist
+    exclude:
+      - packages/**/node_modules/**/*
+    when: on_success
   only:
     refs:
       - branches
