@@ -94,8 +94,9 @@ export default defineComponent({
 			props.lookupField,
 			stores
 		);
+
 		const primaryKeyField = relationInfo?.relatedPrimaryKeyField;
-		const viewFields = props.viewFields ?? [primaryKeyField?.field];
+		const viewFields: any = props.viewFields ?? [primaryKeyField?.field];
 		const watchFieldName = props.lookupField ? props.lookupField.split('.').shift() : primaryField?.field;
 		const items = ref([]);
 
@@ -104,7 +105,7 @@ export default defineComponent({
 		const fieldsWithRelational = adjustFieldsForDisplays(
 			fieldsStore,
 			viewFields,
-			relationInfo.relatedCollection.collection
+			relationInfo?.relatedCollection?.collection
 		);
 		const { aliasFields, aliasQuery } = useAliasFields(fieldsWithRelational);
 		const fieldsWithRelationalAliased = computed(() => {
@@ -114,22 +115,20 @@ export default defineComponent({
 			);
 		});
 
-		if (relationInfo) {
-			let oldValue = cloneDeep(values.value?.[watchFieldName]);
-			if (oldValue) {
+		let oldValue = cloneDeep(values.value?.[watchFieldName]);
+		if (oldValue) {
+			getItems();
+		}
+
+		// eslint-disable-next-line vue/no-watch-after-await
+		watch(
+			() => values.value?.[watchFieldName],
+			() => {
+				if (isEqual(oldValue, values.value?.[watchFieldName])) return;
+				oldValue = cloneDeep(values.value?.[watchFieldName]);
 				getItems();
 			}
-
-			// eslint-disable-next-line vue/no-watch-after-await
-			watch(
-				() => values.value?.[watchFieldName],
-				() => {
-					if (isEqual(oldValue, values.value?.[watchFieldName])) return;
-					oldValue = cloneDeep(values.value?.[watchFieldName]);
-					getItems();
-				}
-			);
-		}
+		);
 
 		return { relationInfo, headers, items, aliasFields, getWithArray, getAliasedValue };
 

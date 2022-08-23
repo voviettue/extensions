@@ -86,10 +86,9 @@ export default defineComponent({
 		const optionsFields = computed(() => {
 			const relationInfo = useRelation(props.collection, optionsValues.value?.lookupField, stores);
 			const lookupCollection = relationInfo?.relatedCollection?.collection;
-
 			const choices = getFieldTree(props.collection, 2);
 
-			return [
+			const options = [
 				{
 					field: 'lookupField',
 					type: 'string',
@@ -104,7 +103,10 @@ export default defineComponent({
 						},
 					},
 				},
-				{
+			];
+
+			if (relationInfo) {
+				options.push({
 					field: 'viewFields',
 					type: 'string',
 					name: 'Fields',
@@ -116,9 +118,8 @@ export default defineComponent({
 							placeholder: 'Select review fields',
 						},
 					},
-				},
-
-				{
+				});
+				options.push({
 					field: 'filter',
 					type: 'json',
 					name: 'Filter',
@@ -128,8 +129,10 @@ export default defineComponent({
 							collectionName: lookupCollection,
 						},
 					},
-				},
-			];
+				});
+			}
+
+			return options;
 		});
 
 		return {
@@ -148,7 +151,13 @@ export default defineComponent({
 				.map((e) => {
 					const value = parentValue ? `${parentValue}.${e.field}` : e.field;
 					return {
-						disabled: !e?.meta?.special?.includes('o2m') && !e?.meta?.special?.includes('m2m'),
+						// disabled: level == 0,
+						disabled:
+							e?.meta?.hidden === true ||
+							(parentValue === null &&
+								!e?.meta?.special?.includes('o2m') &&
+								!e?.meta?.special?.includes('m2m') &&
+								!e?.meta?.special?.includes('m2o')),
 						text: `${e.name} (${value})`,
 						value: value,
 						children:
