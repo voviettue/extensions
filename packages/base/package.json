@@ -183,6 +183,13 @@
       "path": "dist/display-interfaces.js",
       "source": "src/percentage/displays/index.ts",
       "host": "^9.15.0"
+    },
+    {
+      "name": "embed-code-interfaces",
+      "type": "interface",
+      "path": "dist/embed-code-interfaces.js",
+      "source": "src/embed-code/interfaces/index.ts",
+      "host": "^9.15.0"
     }
   ],
   "scripts": {
@@ -211,7 +218,8 @@
     "ts-jest": "^28.0.7",
     "typescript": "^4.5.4",
     "uuid": "^8.3.2",
-    "vue": "^3.2.26"
+    "vue": "^3.2.26",
+    "vue-router": "^4.1.3"
   },
   "dependencies": {
     "cron-parser": "^4.6.0",
