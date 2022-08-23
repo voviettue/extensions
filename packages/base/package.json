@@ -1,6 +1,6 @@
 {
   "name": "@giga-extensions/base",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "directus:extension": [
     {
       "name": "auto-number-hooks",
@@ -168,6 +168,20 @@
       "type": "interface",
       "path": "dist/currency-interfaces.js",
       "source": "src/currency/interfaces/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "percentage-interfaces",
+      "type": "interface",
+      "path": "dist/percentage-interfaces.js",
+      "source": "src/percentage/interfaces/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "percentage-displays",
+      "type": "display",
+      "path": "dist/display-interfaces.js",
+      "source": "src/percentage/displays/index.ts",
       "host": "^9.15.0"
     }
   ],
