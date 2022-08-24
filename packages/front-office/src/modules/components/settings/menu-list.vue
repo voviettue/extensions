@@ -15,80 +15,58 @@
 			@update:model-value="setSort"
 		>
 			<template #item="{ element }">
-				<menu-item
-					:menu="element"
-					:menu-list="itemMenus"
-					@refresh="$emit('refresh')"
-					@set-nested-sort="setNestedSort"
-				/>
+				<menu-item :menu="element" :menu-list="itemMenus" @refresh="refresh" @set-nested-sort="setNestedSort" />
 			</template>
 		</draggable>
 
-		<v-button class="add-new" half-width :to="`/front-office/settings/project/${primaryKey}/menu/+`">
+		<v-button class="add-new" half-width :to="`/front-office/settings/project/${projectId}/menu/+`">
 			Create New
 		</v-button>
 	</div>
-	<router-view name="add_menu" @close="$emit('refresh')"></router-view>
+	<router-view name="add_menu" @refresh="refresh"></router-view>
+	<router-view name="update_menu" @refresh="refresh"></router-view>
 </template>
 
 <script lang="ts">
-import { ref, watch } from 'vue';
+import { computed } from 'vue';
 
-import { useApi } from '@directus/extensions-sdk';
 import MenuItem from './menu-item.vue';
 import Draggable from 'vuedraggable';
-import cloneDeep from 'lodash/cloneDeep';
+import { useFrontOfficeStore } from '../../stores/front-office';
 
 export default {
 	components: { Draggable, MenuItem },
 	props: {
-		menus: {
-			type: Array,
-			default: null,
-		},
-		primaryKey: {
+		projectId: {
 			type: [String, Number],
 			required: true,
 		},
 	},
-	emits: ['refresh'],
-	setup(props, { emit }) {
-		const collection = 'cms_menus';
-		const api = useApi();
-		const itemMenus = ref();
+	setup() {
+		const frontOfficeStore = useFrontOfficeStore();
+		const itemMenus = computed(() => frontOfficeStore.menuList);
 
-		watch(
-			() => props.menus,
-			() => {
-				itemMenus.value = cloneDeep(props.menus || []).sort((a: any, b: any) => (a.sort ?? 1000) - (b.sort ?? 1000));
-			},
-			{ immediate: true }
-		);
-
-		return { itemMenus, setSort, setNestedSort, close };
+		return { itemMenus, setSort, setNestedSort, refresh };
 
 		async function setSort(values: any) {
-			itemMenus.value = values.map((item: any, index: number) => {
+			const updates = values.map((item: any, index: number) => {
 				return {
-					id: item.id,
+					...item,
 					sort: index,
 					parent: null,
 				};
 			});
-			await massUpdate(itemMenus.value);
+			await frontOfficeStore.updateMenuItems(updates);
+			await refresh();
 		}
 
 		async function setNestedSort(updates: any) {
-			await massUpdate(updates);
+			await frontOfficeStore.updateMenuItems(updates);
+			await refresh();
 		}
 
-		async function massUpdate(values: any) {
-			const apis = values.map((k: any) => {
-				return api.patch(`/items/${collection}/${k.id}`, k);
-			});
-			await Promise.allSettled(apis);
-
-			emit('refresh');
+		async function refresh() {
+			await frontOfficeStore.getMenuList();
 		}
 	},
 };

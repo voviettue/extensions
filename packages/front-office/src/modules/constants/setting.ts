@@ -39,7 +39,7 @@ export const formFields = [
 		name: 'Project Logo',
 		type: 'uuid',
 		meta: {
-			width: 'full',
+			width: 'half',
 			interface: 'file-image',
 			group: 'project_setup',
 		},
@@ -50,7 +50,7 @@ export const formFields = [
 		name: 'Homepage',
 		type: 'integer',
 		meta: {
-			width: 'full',
+			width: 'half',
 			interface: 'select-dropdown-m2o',
 			options: {
 				template: '{{name}}',

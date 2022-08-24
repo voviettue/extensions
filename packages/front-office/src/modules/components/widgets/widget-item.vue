@@ -11,19 +11,30 @@
 			:animation="150"
 			:fallback-on-body="true"
 			:invert-swap="true"
-			@update:model-value="onGroupSortChange"
+			@update:model-value="updateParent"
 		>
 			<template #header>
 				<div class="header full">
 					<v-icon class="drag-handle" name="drag_indicator" @click.stop />
 					<span class="name">{{ widget.name }}</span>
 					<v-icon v-if="widget.hidden" v-tooltip="`Hidden widget`" name="visibility_off" class="hidden-icon" small />
-					<widget-options :widget="widget" :update-visiable="updateVisiable" :delete-widget="deleteWidget" />
+					<widget-options
+						:widget="widget"
+						:update-visiable="updateVisiable"
+						:delete-widget="deleteWidget"
+						class="option"
+					/>
 				</div>
 			</template>
 
 			<template #item="{ element }">
-				<widget-item :widget="element" :list-widget="listWidget" />
+				<widget-item
+					:widget="element"
+					:list-widget="listWidget"
+					:update-visiable="updateVisiable"
+					:delete-widget="deleteWidget"
+					:class="getClass(element)"
+				/>
 			</template>
 		</draggable>
 		<v-input v-else class="widget" readonly>
@@ -51,10 +62,11 @@
 	</div>
 </template>
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, defineEmits } from 'vue';
 import WidgetOptions from './widget-options.vue';
 import formFields from '../../widgets';
 import Draggable from 'vuedraggable';
+import { useApi } from '@directus/extensions-sdk';
 
 interface Props {
 	widget: Record<string, any>;
@@ -62,6 +74,8 @@ interface Props {
 	updateVisiable: () => void;
 	deleteWidget: () => void;
 }
+const emit = defineEmits(['reload']);
+const api = useApi();
 const props = withDefaults(defineProps<Props>(), {
 	widget: () => ({
 		customCss: null,
@@ -78,13 +92,46 @@ const props = withDefaults(defineProps<Props>(), {
 });
 const nestedWidgets = computed(() => {
 	return props.listWidget
-		?.filter((item) => props.menu?.id == item.parent)
+		?.filter((item) => props.widget?.id === item.parent)
 		.sort((a: any, b: any) => (a.sort ?? 1000) - (b.sort ?? 1000));
 });
 const config = computed(() => formFields.find((e) => e.id === props.widget.widget));
 
-function onGroupSortChange() {
-	//
+async function updateParent(widgets) {
+	try {
+		const data = widgets.map((item, index) => {
+			return {
+				...item,
+				sort: index,
+				parent: props.widget.id,
+			};
+		});
+		const apis = data.map((k: any) => {
+			return api.patch(`/items/cms_widgets/${k.id}`, k);
+		});
+		await Promise.allSettled(apis);
+		emit('reload');
+	} catch {
+		//
+	}
+}
+function getClass(el: Record<string, any>) {
+	switch (el.width) {
+		case 'full':
+			return 'grid-full';
+		case 'half':
+			return 'grid-half';
+		case '1':
+			return 'grid-one';
+		case '2':
+			return 'grid-two';
+		case '3':
+			return 'grid-three';
+		case '4':
+			return 'grid-four';
+		case '5':
+			return 'grid-five';
+	}
 }
 </script>
 
@@ -222,9 +269,9 @@ function onGroupSortChange() {
 
 .widget-grid {
 	position: relative;
-	display: grid;
-	grid-gap: 8px;
-	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	// display: grid;
+	// grid-gap: 8px;
+	// grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 
 	& + & {
 		margin-top: 8px;
@@ -249,7 +296,7 @@ function onGroupSortChange() {
 
 .full,
 .fill {
-	grid-column: 1 / span 2;
+	grid-column: 1 / span 6;
 }
 
 .v-input.hidden {
@@ -330,6 +377,33 @@ function onGroupSortChange() {
 
 	> * {
 		opacity: 0;
+	}
+}
+.widget-grid {
+	width: 100%;
+	display: grid;
+	grid-template-columns: repeat(6, minmax(0, 1fr));
+	gap: 12px;
+	.grid-full {
+		grid-column: span 6 / span 6;
+	}
+	.grid-half {
+		grid-column: span 3 / span 6;
+	}
+	.grid-one {
+		grid-column: span 1 / span 6;
+	}
+	.grid-two {
+		grid-column: span 2 / span 6;
+	}
+	.grid-three {
+		grid-column: span 3 / span 6;
+	}
+	.grid-four {
+		grid-column: span 4 / span 6;
+	}
+	.grid-five {
+		grid-column: span 5 / span 6;
 	}
 }
 </style>

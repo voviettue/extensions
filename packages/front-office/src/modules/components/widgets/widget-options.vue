@@ -35,7 +35,7 @@
 import { useStores } from '@directus/extensions-sdk';
 const { useUserStore } = useStores();
 const { isAdmin } = useUserStore();
-withDefaults(defineProps<{ widget: Record<string, any>; updateVisiable: Function; deleteWidget: Function }>(), {
+withDefaults(defineProps<{ widget: Record<string, any>; updateVisiable: () => void; deleteWidget: () => void }>(), {
 	widget: () => ({
 		customCss: null,
 		hidden: false,

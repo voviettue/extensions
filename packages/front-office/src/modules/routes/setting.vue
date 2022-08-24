@@ -20,7 +20,7 @@
 			<navigation></navigation>
 		</template>
 
-		<menu-list :menus="item?.menus" :primary-key="item?.id" @refresh="refresh" />
+		<menu-list :menus="item?.menus" :project-id="item?.id" />
 
 		<v-form v-model="edits" :loading="loading" :initial-values="item" :fields="formFields" :primary-key="item?.id" />
 	</private-view>
@@ -101,7 +101,7 @@ export default {
 			try {
 				let response = await api.patch(getEndpoint(collection), edits.value);
 
-				notify({ title: 'Item Updated' });
+				notify({ title: 'Settings updated' });
 
 				item.value = { ...response.data.data };
 				edits.value = {};

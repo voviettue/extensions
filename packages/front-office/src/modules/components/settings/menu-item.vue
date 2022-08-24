@@ -22,7 +22,6 @@
 						:no-delete="nestedMenus.length > 0"
 						:no-duplicate="nestedMenus.length > 0"
 						@toggle-visibility="toggleVisibility"
-						@open-detail="isOpenDetail = true"
 						@duplicate="duplicateMenuItem"
 						@delete="deleteActive = true"
 					/>
@@ -45,7 +44,11 @@
 			</template>
 
 			<template #input>
-				<div v-tooltip="`${menu.name}`" class="label" @click="isOpenDetail = true">
+				<div
+					v-tooltip="`${menu.name}`"
+					class="label"
+					@click="$router.push(`/front-office/settings/project/${menu.project}/menu/${menu.id}`)"
+				>
 					<div class="label-inner">
 						<v-icon v-if="!!menu.icon" class="drag-handle" :name="menu.icon" @click.stop />
 						<span class="name">{{ menu.label }}</span>
@@ -60,7 +63,6 @@
 					<menu-item-select-menu
 						:item="menu"
 						@toggle-visibility="toggleVisibility"
-						@open-detail="isOpenDetail = true"
 						@duplicate="duplicateMenuItem"
 						@delete="deleteActive = true"
 					/>
@@ -79,8 +81,6 @@
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
-
-		<menu-detail :is-open="isOpenDetail" :menu="menu" @close="close" />
 	</div>
 </template>
 
@@ -88,21 +88,20 @@
 import { ref, computed } from 'vue';
 import { useApi } from '@directus/extensions-sdk';
 import MenuItemSelectMenu from './menu-item-select-menu.vue';
-import MenuDetail from './menu-detail.vue';
 import formatTitle from '@directus/format-title';
 import listMenuConfig from '../../menus';
 import Draggable from 'vuedraggable';
 
 export default {
-	components: { Draggable, MenuItemSelectMenu, MenuDetail },
+	components: { Draggable, MenuItemSelectMenu },
 	props: {
 		menu: {
 			type: Object,
 			default: null,
 		},
 		menuList: {
-			type: Array<Record<string, any>>,
-			default: [],
+			type: Array,
+			default: () => [],
 		},
 	},
 	emits: ['refresh', 'setNestedSort'],
@@ -110,7 +109,6 @@ export default {
 		const collection = 'cms_menus';
 		const api = useApi();
 
-		const isOpenDetail = ref<boolean>(false);
 		const { deleteActive, deleting, deleteMenuItem } = useDeleteMenuItem();
 
 		const hidden = computed(() => props.menu?.hidden === true);
@@ -129,7 +127,6 @@ export default {
 			onGroupSortChange,
 			hidden,
 			formatTitle,
-			isOpenDetail,
 			toggleVisibility,
 			deleteActive,
 			deleting,
@@ -142,12 +139,12 @@ export default {
 			let updateValues: Array<Record<string, any>> = [];
 			if (items.length == 0) {
 				updateValues = nestedMenus.value.map((item: any) => {
-					return { id: item.id, parent: null };
+					return { ...item, parent: null };
 				});
 			} else {
 				updateValues = items.map((item: any, index: number) => {
 					return {
-						id: item.id,
+						...item,
 						parent: props.menu.id,
 						sort: index,
 					};
@@ -207,7 +204,6 @@ export default {
 		}
 
 		function close() {
-			isOpenDetail.value = false;
 			emit('refresh');
 		}
 	},

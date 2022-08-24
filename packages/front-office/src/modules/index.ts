@@ -8,6 +8,7 @@ import NewQueryComponent from './components/queries/query-create.vue';
 import QueryDetailsComponent from './components/queries/query-details.vue';
 import NewWidgetComponent from './components/widgets/widget-create.vue';
 import NewMenuComponent from './components/settings/menu-create.vue';
+import MenuDetailComponent from './components/settings/menu-detail.vue';
 
 export default defineModule({
 	id: 'front-office',
@@ -24,9 +25,16 @@ export default defineModule({
 			children: [
 				{
 					path: 'project/:projectId/menu/+',
-					name: 'setting-menu-add-menu',
+					name: 'setting-menu-create',
 					components: {
 						add_menu: NewMenuComponent,
+					},
+				},
+				{
+					path: 'project/:projectId/menu/:menuId',
+					name: 'setting-menu-detail',
+					components: {
+						update_menu: MenuDetailComponent,
 					},
 				},
 			],

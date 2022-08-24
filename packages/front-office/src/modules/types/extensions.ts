@@ -23,6 +23,7 @@ export interface WidgetConfig {
 	name: string;
 	icon: string;
 	options: ExtensionOptions;
+	beforeSave?: (values: Record<string, any>) => Record<string, any>;
 }
 
 export interface QueryConfig {

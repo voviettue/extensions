@@ -5,7 +5,7 @@
 		</template>
 
 		<v-list>
-			<v-list-item clickable @click="$emit('openDetail')">
+			<v-list-item clickable @click="$router.push(`/front-office/settings/project/${item.project}/menu/${item.id}`)">
 				<v-list-item-icon><v-icon name="edit" /></v-list-item-icon>
 				<v-list-item-content>Edit</v-list-item-content>
 			</v-list-item>

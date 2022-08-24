@@ -1,12 +1,17 @@
 <template>
-	<v-drawer :title="`Editing Item in ${formatTitle(collection)}`" :model-value="isOpen" persistent @cancel="close">
+	<v-drawer
+		:title="`Editing Item in ${formatTitle(collection)}`"
+		:model-value="true"
+		persistent
+		@cancel="$router.push('/front-office/settings')"
+	>
 		<div class="edit-menu-container">
 			<div class="list-menu-config">
 				<button
 					v-for="menuConfig of listMenuConfig"
 					:key="menuConfig.id"
 					class="menu-config-item"
-					:class="menuSelected?.id === menuConfig.id ? 'active' : 'gray'"
+					:class="selectedMenu?.id === menuConfig.id ? 'active' : 'gray'"
 					@click="toggleMenuConfig(menuConfig)"
 				>
 					<div class="preview">
@@ -16,7 +21,7 @@
 				</button>
 
 				<transition-expand>
-					<div v-if="menuSelected" class="group">
+					<div v-if="selectedMenu" class="group">
 						<v-form
 							v-model="modelValue"
 							class="field-fault"
@@ -47,39 +52,34 @@
 	</v-drawer>
 </template>
 <script lang="ts">
-import { ref, Ref, computed } from 'vue';
+import { ref, Ref, computed, onBeforeMount, watch } from 'vue';
 import { useApi } from '@directus/extensions-sdk';
+import { useRoute, useRouter } from 'vue-router';
 import formatTitle from '@directus/format-title';
 import { useValidate } from '../../composables/use-validate';
 import listMenuConfig from '../../menus';
 import { ExtensionOptionsContext, MenuConfig } from '../../types/extensions';
 import { formFields } from '../../constants/menu';
 import ExtensionOptions from '../shared/extension-options.vue';
+import { useNotification } from '../../composables/use-notification';
+import snakeCase from 'lodash/snakeCase';
 
 export default {
 	components: { ExtensionOptions },
-	props: {
-		menu: {
-			type: Object,
-			default: null,
-		},
-		isOpen: {
-			type: Boolean,
-			default: false,
-		},
-	},
-	emits: ['close'],
+	emits: ['refresh'],
 	setup(props, { emit }) {
 		const collection = 'cms_menus';
 		const api = useApi();
+		const { notify } = useNotification();
+
 		const { validateItem } = useValidate();
+		const route = useRoute();
+		const router = useRouter();
 
 		const isLoading = ref<boolean>(false);
 		const validationErrors: Ref<Record<string, any>[]> = ref([]);
-		const modelValue: Ref<Record<string, any>> = ref({ ...props.menu });
-		const menuSelected: Ref<MenuConfig | null> = ref(
-			listMenuConfig.find((menu: MenuConfig) => menu.id == props.menu.menu) as MenuConfig
-		);
+		const modelValue: Ref<Record<string, any>> = ref({ options: {} });
+		const selectedMenu: Ref<MenuConfig | null> = ref(null);
 
 		const initialValues = ref({
 			name: null,
@@ -89,14 +89,27 @@ export default {
 			parent: null,
 		});
 
+		watch(
+			() => modelValue.value.label,
+			(val: any) => {
+				modelValue.value.name = snakeCase(val);
+			}
+		);
+
 		const optionsFields = computed(() => {
-			const options = menuSelected.value?.options ?? [];
+			const options = selectedMenu.value?.options ?? [];
 			if (typeof options === 'function') {
 				const ctx = { values: modelValue.value } as ExtensionOptionsContext;
 				return options(ctx);
 			}
 
 			return options;
+		});
+
+		onBeforeMount(async () => {
+			await getMenuDetail();
+
+			selectedMenu.value = listMenuConfig.find((menu: MenuConfig) => menu.id == modelValue.value.menu) as MenuConfig;
 		});
 
 		return {
@@ -110,14 +123,23 @@ export default {
 			optionsFields,
 			modelValue,
 			validationErrors,
-			menuSelected,
+			selectedMenu,
 			toggleMenuConfig,
 			initialValues,
 		};
 
 		function toggleMenuConfig(menu: MenuConfig) {
-			menuSelected.value = menu.id !== menuSelected.value?.id ? menu : null;
-			modelValue.value.menu = menuSelected.value?.id || '';
+			selectedMenu.value = menu.id !== selectedMenu.value?.id ? menu : null;
+			modelValue.value.menu = selectedMenu.value?.id || '';
+		}
+
+		async function getMenuDetail() {
+			try {
+				const menuDetailResponse = await api.get(`/items/${collection}/${route.params.menuId}`);
+				modelValue.value = { ...menuDetailResponse?.data?.data } || {};
+			} catch {
+				//
+			}
 		}
 
 		async function saveSettingMenu() {
@@ -129,17 +151,15 @@ export default {
 
 			isLoading.value = true;
 			try {
-				await api.patch(`/items/${collection}/${props.menu?.id}`, modelValue.value);
+				await api.patch(`/items/${collection}/${route.params.menuId}`, modelValue.value);
 
-				close();
+				notify({ title: 'Menu updated' });
+				router.push('/front-office/settings');
 			} catch {
 				//
 			}
 			isLoading.value = false;
-		}
-
-		function close() {
-			emit('close');
+			emit('refresh');
 		}
 	},
 };

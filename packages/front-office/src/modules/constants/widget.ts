@@ -77,4 +77,17 @@ export const formFields = [
 			interface: 'input',
 		},
 	},
+	{
+		field: 'customCss',
+		name: 'Custom CSS',
+		type: 'text',
+		meta: {
+			interface: 'input-code',
+			options: {
+				language: 'css',
+				lineNumber: true,
+				template: '.widget {\n\tbackground: white;\n\tcolor: red;\n}',
+			},
+		},
+	},
 ];
