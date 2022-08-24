@@ -80,34 +80,58 @@ Commands:
 Assuming your project structure looks like this:
 
 ```
-/Users/thien/projects/catex/extensions
+pwd
+/Users/thien/projects/catex
+```
 
+```
 catex
 ├── extensions
 ├── terminal
 ```
 
-Firstly, install extensions for the terminal project.
+Firstly, links all packages. For example, I want to link package `@giga-extensions/base` (Do the same way for other
+packages).
 
 ```bash
-cd catex/terminal/api
-pnpm install ../../extensions/base
-pnpm install ../../extensions/pro
-pnpm install ../../extensions/front-office
+cd ~/projects/catex/extensions/packages/base
+pnpm link --global
 ```
 
-Actually, we're linking the extensions to the terminal project, so any changes from the extensions will be reflected in
-the terminal project.
+Then, link all packages to the terminal project.
+
+```bash
+cd ~/projects/catex/terminal/api
+pnpm link --global \
+	@giga-extensions/base \
+	@giga-extensions/pro \
+	@giga-extensions/front-office
+```
+
+After linking the packages, there are some changes in `api/package.json`.
+
+```json
+	"@directus/specs": "workspace:*",
++	"@giga-extensions/base": "^1.0.1",
++	"@giga-extensions/front-office": "^1.0.0",
++	"@giga-extensions/pro": "^1.0.0",
+	"@godaddy/terminus": "^4.10.2",
+```
+
+We're linking the extensions to the terminal project, so any changes from the extensions will be reflected in the
+terminal project.
 
 Next, we have to add the path to extensions into `fs.allow` in `vite.config.js` to prevent the error 403 when serving
 the extensions' files via `/@fs/`. Read more about `fs.allow`
 [here](https://vitejs.dev/config/server-options.html#server-fs-allow).
 
+However, The easier way is to allow all files by setting `fs.strict: false`
+
 ```js
 	// vite.config.js
 	fs: {
--		allow: [searchForWorkspaceRoot(process.cwd()), '/admin/'],
-+		allow: [searchForWorkspaceRoot(process.cwd()), '/admin/', '/Users/thien/projects/catex/extensions'],
+		strict: false,
+		allow: [searchForWorkspaceRoot(process.cwd()), '/admin/'],
 	},
 ```
 
