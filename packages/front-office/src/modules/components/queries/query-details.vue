@@ -17,6 +17,9 @@
 			<v-button v-tooltip.bottom="'Save'" rounded icon :disabled="!isAdmin" @click="saveQuery">
 				<v-icon name="check" />
 			</v-button>
+			<v-button v-tooltip.bottom="'Execute'" rounded icon :disabled="!isAdmin" @click="execute">
+				<v-icon name="play" />
+			</v-button>
 		</template>
 
 		<div class="padding-box query-detail-container">
@@ -88,6 +91,14 @@ const optionsFields = computed(() => {
 
 	return options;
 });
+
+async function execute() {
+	try {
+		const response = await api.patch(`/front-office/queries/${route.params.id}/execute`);
+	} catch {
+		//
+	}
+}
 
 async function getDetailPage() {
 	try {

@@ -9,7 +9,7 @@ export default defineQuery({
 	options: ({ values }) => {
 		const collection = values?.options?.collection || '';
 
-		if (selectedCollection !== collection) {
+		if (!!selectedCollection && selectedCollection !== collection) {
 			values.options.fields = undefined;
 			values.options.filter = undefined;
 		}
