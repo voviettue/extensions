@@ -29,6 +29,7 @@
 
 			<template #item="{ element }">
 				<widget-item
+					v-tooltip="`${element.name}`"
 					:widget="element"
 					:list-widget="listWidget"
 					:update-visiable="updateVisiable"
@@ -37,7 +38,7 @@
 				/>
 			</template>
 		</draggable>
-		<v-input v-else class="widget" readonly>
+		<v-input v-else v-tooltip="`${widget.name}`" class="widget" readonly>
 			<template #prepend>
 				<v-icon class="drag-handle" name="drag_indicator" @click.stop />
 			</template>
