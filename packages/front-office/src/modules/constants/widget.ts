@@ -69,6 +69,15 @@ export const formFields = [
 		},
 	},
 	{
+		field: 'hidden',
+		name: 'Hidden',
+		type: 'boolean',
+		meta: {
+			width: 'half',
+			interface: 'Boolean',
+		},
+	},
+	{
 		field: 'htmlClass',
 		name: 'HTML Class',
 		type: 'string',

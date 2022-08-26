@@ -12,10 +12,10 @@ export default defineWidget({
 			meta: {
 				required: true,
 				interface: 'input',
-				width: 'half',
+				width: 'full',
 				options: {
 					trim: true,
-					placeholder: 'Text String',
+					placeholder: 'Enter text to be displayed',
 				},
 			},
 		},
@@ -171,12 +171,25 @@ export default defineWidget({
 			},
 		},
 		{
-			field: 'border',
-			name: 'Border',
+			field: 'borderColor',
+			name: 'Border Color',
 			type: 'string',
 			meta: {
 				interface: 'select-color',
 				width: 'half',
+			},
+		},
+		{
+			field: 'borderWidth',
+			name: 'Border Width',
+			type: 'number',
+			meta: {
+				interface: 'input',
+				width: 'half',
+				options: {
+					trim: true,
+					placeholder: 'Enter border width size in px',
+				},
 			},
 		},
 	],
