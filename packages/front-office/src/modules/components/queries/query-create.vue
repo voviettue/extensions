@@ -33,7 +33,7 @@
 						v-model="modelValue"
 						primary-key="+"
 						class="field-fault"
-						:fields="formFields"
+						:fields="fields"
 						:initial-values="initialValues"
 						:validation-errors="validationErrors"
 					></v-form>
@@ -111,6 +111,12 @@ const optionsFields = computed(() => {
 
 	return options;
 });
+const fields = computed(() => {
+	const excludeField = ['output'];
+	return formFields?.filter((e: any) => {
+		return !excludeField.includes(e.field);
+	});
+});
 
 function onChangeQuery(query: QueryConfig) {
 	querySelected.value = query.id !== querySelected.value?.id ? query : null;
@@ -124,6 +130,11 @@ async function handleCreateQuery() {
 	if (validationErrors.value.length) return;
 
 	isLoading.value = true;
+
+	if (modelValue.value?.query === 'json') {
+		modelValue.value.output = modelValue.value?.options;
+	}
+
 	try {
 		await api.post('/items/cms_queries', modelValue.value);
 		router.push('/front-office/queries');

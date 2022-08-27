@@ -1,0 +1,50 @@
+<template>
+	<sidebar-detail icon="star" :title="t('Query logs')">
+		<div class="log-items">
+			<query-log-item
+				v-for="log in itemLogs"
+				:key="log.id"
+				class="log-item"
+				:log="log"
+				:selected="!!logSelected && logSelected.id === log.id"
+				@click="onSelectLog(log)"
+			></query-log-item>
+		</div>
+	</sidebar-detail>
+</template>
+
+<script setup lang="ts">
+import { Ref, ref, computed, onMounted } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
+import { useFrontOfficeStore } from '../../stores/front-office';
+import QueryLogItem from './query-log-item.vue';
+
+const { t } = useI18n();
+const route = useRoute();
+const frontOfficeStore = useFrontOfficeStore();
+
+const logSelected: Ref<Record<string, any>> = ref({});
+
+const itemLogs: Ref<Record<string, any>[]> = computed(() => frontOfficeStore.logList);
+
+function onSelectLog(log: any) {
+	logSelected.value = log !== logSelected.value ? log : null;
+}
+
+onMounted(async () => {
+	if (!route.params.id) return;
+
+	const query = {
+		params: { filter: { _and: [{ action: { _eq: 'execute ' } }, { item: { _eq: route.params.id } }] } },
+	};
+
+	await frontOfficeStore.getLogListByQuery(query);
+});
+</script>
+
+<style scoped>
+.sidebar-detail :deep(.content) {
+	padding: 0;
+}
+</style>

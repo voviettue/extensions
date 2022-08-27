@@ -2,6 +2,7 @@ import axios from 'axios';
 import { defineEndpoint } from '@directus/extensions-sdk';
 import { Accountability, SchemaOverview } from '@directus/shared/types';
 import { Action } from '@directus/shared/types';
+
 export default defineEndpoint({
 	id: 'front-office/queries',
 	handler: async (router, { services, exceptions }) => {
@@ -41,13 +42,18 @@ export default defineEndpoint({
 					await Promise.all([
 						queryItemsService.updateOne(query.id, { output: result }),
 						activityService.createOne({
-							action: Action.QUERY,
+							action: 'execute',
 							user: req.accountability!.user,
 							collection: query?.options?.collection || '',
 							ip: req.accountability!.ip,
 							user_agent: req.accountability!.userAgent,
 							item: req.params.id,
-							comment: result,
+							comment: {
+								message: `[${query.name}] Execution started from user request`,
+								data: result,
+								type: query?.query,
+								name: query?.name,
+							},
 						}),
 					]);
 				}
@@ -58,36 +64,41 @@ export default defineEndpoint({
 			}
 
 			await activityService.createOne({
-				action: Action.QUERY,
+				action: 'execute',
 				user: req.accountability!.user,
 				collection: query?.options?.collection || '',
 				ip: req.accountability!.ip,
 				user_agent: req.accountability!.userAgent,
 				item: req.params.id,
-				comment: error,
+				comment: {
+					message: `[${query?.name}] Execution failed with status ${error.status} ${error.code}`,
+					erorr: error,
+					type: query?.query,
+					name: query?.name,
+				},
 			});
 
 			return res.status(error.status).json({ status: error.status, message: error.message });
 		});
 
 		router.get('/test', async (req: any, res: any) => {
-			res.json({ data: 'OK' });
+			res.json({ data: 'OK1' });
 		});
 
 		router.post('/test', async (req: any, res: any) => {
-			res.json({ data: 'OK' });
+			res.json({ data: 'OK2' });
 		});
 
 		router.put('/test', async (req: any, res: any) => {
-			res.json({ data: 'OK' });
+			res.json({ data: 'OK3' });
 		});
 
 		router.patch('/test', async (req: any, res: any) => {
-			res.json({ data: 'OK' });
+			res.json({ data: 'OK4' });
 		});
 
 		router.delete('/test', async (req: any, res: any) => {
-			res.json({ data: 'OK' });
+			res.json({ data: 'OK5' });
 		});
 
 		async function apiQueryExecute(query: any) {
@@ -96,9 +107,10 @@ export default defineEndpoint({
 					throw new InvalidPayloadException('Invalid params');
 				}
 
+				// -TODO
 				const headers = query.options?.headers.reduce((acc: any, { key, value }) => ({ ...acc, [key]: value }), {});
 				const params = query.options?.query.reduce((acc: any, { key, value }) => ({ ...acc, [key]: value }), {});
-				const body = JSON.parse(query.options?.request_body);
+				const body = query.options?.request_body;
 
 				let options = {};
 				if (query.options.method !== 'delete') {

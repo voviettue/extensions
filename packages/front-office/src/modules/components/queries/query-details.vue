@@ -13,13 +13,34 @@
 		<template #navigation>
 			<navigation></navigation>
 		</template>
+
 		<template #actions>
-			<v-button v-tooltip.bottom="'Save'" rounded icon :disabled="!isAdmin" @click="saveQuery">
+			<v-button
+				v-tooltip.bottom="'Save'"
+				icon
+				rounded
+				:disabled="!isAdmin"
+				:loading="actionProcessing === 'saveQuery'"
+				@click="saveQuery"
+			>
 				<v-icon name="check" />
 			</v-button>
-			<v-button v-tooltip.bottom="'Execute'" rounded icon :disabled="!isAdmin" @click="execute">
-				<v-icon name="play" />
+			<v-button
+				v-if="modelValue.query !== 'json'"
+				v-tooltip.bottom="'Execute'"
+				rounded
+				icon
+				:disabled="!isAdmin"
+				:loading="actionProcessing === 'execute'"
+				@click="execute"
+			>
+				<v-icon name="play_arrow" />
 			</v-button>
+		</template>
+
+		<template #sidebar>
+			<sidebar-detail icon="info" :title="t('information')" close></sidebar-detail>
+			<query-log-sidebar></query-log-sidebar>
 		</template>
 
 		<div class="padding-box query-detail-container">
@@ -54,7 +75,10 @@ import { formFields } from '../../constants/query';
 import { ExtensionOptionsContext } from '../../types/extensions';
 import queryConfigList from '../../queries';
 import snakeCase from 'lodash/snakeCase';
+import { useFrontOfficeStore } from '../../stores/front-office';
 import ExtensionOptionsComponent from '../shared/extension-options.vue';
+import QueryLogSidebar from './query-log-sidebar.vue';
+import { useI18n } from 'vue-i18n';
 
 const api = useApi();
 const route = useRoute();
@@ -62,10 +86,13 @@ const router = useRouter();
 const { useUserStore } = useStores();
 const { isAdmin } = useUserStore();
 const { validateItem } = useValidate();
+const { t } = useI18n();
+const frontOfficeStore = useFrontOfficeStore();
 
 const modelValue: Ref<Record<string, any>> = ref({ options: {} });
 const validationErrors: Ref<Record<string, any>[]> = ref([]);
 const isLoading = ref(false);
+const actionProcessing = ref('');
 const initialValues = ref({
 	name: '',
 	timeout: 10000,
@@ -94,18 +121,28 @@ const optionsFields = computed(() => {
 
 async function execute() {
 	try {
-		const response = await api.patch(`/front-office/queries/${route.params.id}/execute`);
+		actionProcessing.value = 'execute';
+		const responseExecute = await api.patch(`/front-office/queries/${route.params.id}/execute`);
+		modelValue.value.output = responseExecute?.data?.data;
 	} catch {
 		//
+	} finally {
+		actionProcessing.value = '';
 	}
+
+	await getLogs();
 }
 
 async function getDetailPage() {
 	try {
+		actionProcessing.value = 'getDetailPage';
 		const resQueryDetails = await api.get(`/items/cms_queries/${route.params.id}`);
 		modelValue.value = { ...resQueryDetails?.data?.data } || {};
+		modelValue.value.output = modelValue.value?.output && JSON.parse(modelValue.value.output);
 	} catch {
 		//
+	} finally {
+		actionProcessing.value = '';
 	}
 }
 
@@ -115,7 +152,11 @@ async function saveQuery() {
 	validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
 	if (validationErrors.value.length) return;
 
-	isLoading.value = true;
+	actionProcessing.value = 'saveQuery';
+
+	if (modelValue.value?.query === 'json') {
+		modelValue.value.output = modelValue.value?.options;
+	}
 
 	try {
 		await api.patch(`/items/cms_queries/${route.params.id}`, modelValue.value);
@@ -123,8 +164,18 @@ async function saveQuery() {
 	} catch {
 		//
 	} finally {
-		isLoading.value = false;
+		actionProcessing.value = '';
 	}
+}
+
+async function getLogs() {
+	if (!route.params.id) return;
+
+	const query = {
+		params: { filter: { _and: [{ action: { _eq: 'execute ' } }, { item: { _eq: route.params.id } }] } },
+	};
+
+	await frontOfficeStore.getLogListByQuery(query);
 }
 
 onBeforeMount(async () => {
