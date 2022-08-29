@@ -1,44 +1,45 @@
 {
-	"name": "@giga-extensions/front-office",
-	"version": "1.0.0",
-	"keywords": [
-		"directus",
-		"directus-extension",
-		"directus-custom-module"
-	],
-	"directus:extension": [
-		{
-			"name": "front-office-modules",
-			"type": "module",
-			"path": "dist/front-office-modules.js",
-			"source": "src/modules/index.ts",
-			"host": "^9.15.0"
-		},
-		{
-			"name": "front-office-endpoints-queries",
-			"type": "endpoint",
-			"path": "dist/front-office-endpoint-queries.js",
-			"source": "src/endpoints/queries/index.ts",
-			"host": "^9.15.0"
-		}
-	],
-	"scripts": {
-		"build": "gigapress-extension build",
-		"dev": "gigapress-extension build --watch"
-	},
-	"files": [
-		"dist"
-	],
-	"devDependencies": {
-		"@directus/extensions-sdk": "9.15.0",
-		"@directus/format-title": "^9.15.0",
-		"@directus/shared": "^9.15.1",
-		"@gigapress/bundle-extensions-sdk": "workspace:*",
-		"lodash": "^4.17.21",
-		"pinia": "^2.0.18",
-		"typescript": "^4.7.4",
-		"vue": "^3.2.37",
-		"vue-router": "^4.1.3",
-		"axios": "^0.27.2"
-	}
+  "name": "@giga-extensions/front-office",
+  "version": "1.0.0",
+  "keywords": [
+    "directus",
+    "directus-extension",
+    "directus-custom-module"
+  ],
+  "directus:extension": [
+    {
+      "name": "front-office-modules",
+      "type": "module",
+      "path": "dist/front-office-modules.js",
+      "source": "src/modules/index.ts",
+      "host": "^9.15.0"
+    },
+    {
+      "name": "front-office-endpoints-queries",
+      "type": "endpoint",
+      "path": "dist/front-office-endpoint-queries.js",
+      "source": "src/endpoints/queries/index.ts",
+      "host": "^9.15.0"
+    }
+  ],
+  "scripts": {
+    "build": "gigapress-extension build",
+    "dev": "gigapress-extension build --watch"
+  },
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@directus/extensions-sdk": "9.15.0",
+    "@directus/format-title": "^9.15.0",
+    "@directus/shared": "^9.15.1",
+    "@gigapress/bundle-extensions-sdk": "workspace:*",
+    "lodash": "^4.17.21",
+    "pinia": "^2.0.18",
+    "typescript": "^4.7.4",
+    "vue": "^3.2.37",
+    "vue-router": "^4.1.3",
+    "vuedraggable": "4.1.0",
+    "axios": "^0.27.2"
+  }
 }
