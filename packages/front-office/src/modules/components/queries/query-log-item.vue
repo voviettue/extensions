@@ -45,7 +45,7 @@ function formatDate(timestamp: string) {
 
 <style scoped>
 .log-item {
-	padding: 0.75rem 1rem;
+	padding: 0.75rem 1.25rem;
 	border-bottom: 1px solid var(--border-normal);
 	background-color: v-bind('logTheme.backgroundColor');
 }
