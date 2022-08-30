@@ -18,7 +18,7 @@ async function deleteLogs(req: any, res: any, ctx: ApiExtensionContext) {
 			},
 		});
 	} catch (e: any) {
-		return new BaseException(e.message, e.status, e?.code);
+		throw new BaseException(e.message, e.status, e?.code);
 	}
 }
 
@@ -76,6 +76,7 @@ async function queryExecute(req: any, res: any, ctx: ApiExtensionContext) {
 		return { data: data };
 	} catch (e: any) {
 		error = e;
+		error.errMessage = e.message;
 	}
 
 	await activityService.createOne({
@@ -93,7 +94,7 @@ async function queryExecute(req: any, res: any, ctx: ApiExtensionContext) {
 		},
 	});
 
-	return new BaseException(error.message, error.status, error?.code);
+	throw new BaseException(error.message, error.status, error?.code);
 }
 
 async function executeQueryApi(query: any, ctx: ApiExtensionContext) {
@@ -112,22 +113,21 @@ async function executeQueryApi(query: any, ctx: ApiExtensionContext) {
 
 		const body = query.options?.request_body;
 
-		let options = {};
-		if (query.options.method !== 'delete') {
-			options = {
-				method: query.options.method,
-				url: query.options.url,
-				params: params,
-				data: body,
-				headers: headers,
-				timeout: query.timeout,
-			};
-		}
+		const options = {
+			method: query.options.method,
+			url: query.options.url,
+			params: params,
+			data: body,
+			headers: headers,
+			timeout: query.timeout,
+		};
 
 		const { data } = await axios(options);
 		return data;
 	} catch (e: any) {
-		throw new InvalidPayloadException(e?.message);
+		const message = (e.response.data.errors && e.response.data.errors[0]?.message) || '';
+		const statusCode = e.response.status;
+		throw new BaseException(message, statusCode, e?.code);
 	}
 }
 

@@ -10,6 +10,8 @@
 				@click="onSelectLog(log)"
 			></query-log-item>
 
+			<v-info v-if="itemLogs.length === 0" icon="star" title="No Query Logs"></v-info>
+
 			<v-button v-if="itemLogs.length > 0" :full-width="true" secondary class="action-clear" @click="deleteLogs">
 				<v-icon name="delete" />
 				<span>Clear All</span>

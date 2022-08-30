@@ -2,7 +2,7 @@
 	<div>
 		<v-info v-if="listQueries.length === 0" icon="web" title="No Query">
 			<template #append>
-				<v-button>Create Query</v-button>
+				<v-button to="/front-office/queries/+">Create Query</v-button>
 			</template>
 		</v-info>
 
