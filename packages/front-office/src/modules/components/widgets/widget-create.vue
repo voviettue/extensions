@@ -92,6 +92,7 @@ const initialValues = ref({
 	widget: null,
 	customCss: null,
 	options: null,
+	hidden: true,
 });
 
 watch(

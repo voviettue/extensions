@@ -4,5 +4,6 @@ import image from './image';
 import container from './container';
 import richtext from './richtext';
 import iframe from './iframe';
+import divider from './divider';
 
-export default [text, table, image, container, richtext, iframe];
+export default [text, table, image, container, richtext, iframe, divider];
