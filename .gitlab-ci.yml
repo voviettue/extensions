@@ -37,10 +37,9 @@ build:
       - packages/**/node_modules/**/*
     when: on_success
   only:
-    refs:
-      - branches
-      - tags
-      - TAG_VERSION_REGEX
+    - dev
+    - tags
+    - TAG_VERSION_REGEX
 
 .publish:
   stage: delivery
