@@ -1,6 +1,6 @@
 {
   "name": "@giga-extensions/base",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "directus:extension": [
     {
       "name": "auto-number-hooks",

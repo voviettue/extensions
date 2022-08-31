@@ -323,7 +323,8 @@ export default defineComponent({
 					WORKDAY_DIFF
 				);
 
-				if (isNaN(Number(result)) || result === Infinity) {
+				// eslint-disable-next-line use-isnan
+				if (result === NaN || result === Infinity) {
 					return null;
 				}
 
@@ -334,7 +335,8 @@ export default defineComponent({
 			}
 		},
 		cast(value) {
-			if (isNil(value) || value === '' || value === [] || value === {} || isNaN(Number(value)) || value === Infinity)
+			// eslint-disable-next-line use-isnan
+			if (isNil(value) || value === '' || value === [] || value === {} || value === NaN || value === Infinity)
 				return null;
 
 			const schema = this.currentField.schema;
