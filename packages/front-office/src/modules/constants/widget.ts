@@ -75,6 +75,7 @@ export const formFields = [
 		meta: {
 			width: 'half',
 			interface: 'Boolean',
+			default: true,
 		},
 	},
 	{

@@ -14,11 +14,11 @@
 			<v-list-item v-if="isAdmin" clickable @click="updateVisiable(widget)">
 				<template v-if="widget.hidden === true">
 					<v-list-item-icon><v-icon name="visibility_off" /></v-list-item-icon>
-					<v-list-item-content>Make Collection Visible</v-list-item-content>
+					<v-list-item-content>Make Widget Visible</v-list-item-content>
 				</template>
 				<template v-else>
 					<v-list-item-icon><v-icon name="visibility" /></v-list-item-icon>
-					<v-list-item-content>Make Collection Hidden</v-list-item-content>
+					<v-list-item-content>Make Widget Hidden</v-list-item-content>
 				</template>
 			</v-list-item>
 
