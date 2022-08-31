@@ -10,6 +10,10 @@
 			</v-button>
 		</template>
 
+		<template #sidebar>
+			<sidebar-detail icon="info" :title="t('information')" close></sidebar-detail>
+		</template>
+
 		<template #navigation>
 			<navigation></navigation>
 		</template>
@@ -28,6 +32,7 @@
 import Navigation from '../components/navigation.vue';
 import QueryList from '../components/queries/query-list.vue';
 import { useStores } from '@directus/extensions-sdk';
+import { useI18n } from 'vue-i18n';
 
 export default {
 	components: {
@@ -37,8 +42,10 @@ export default {
 	setup() {
 		const { useUserStore } = useStores();
 		const { isAdmin } = useUserStore();
+		const { t } = useI18n();
 
 		return {
+			t,
 			isAdmin,
 		};
 	},

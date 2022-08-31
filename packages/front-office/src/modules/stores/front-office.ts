@@ -6,6 +6,7 @@ export const useFrontOfficeStore = defineStore({
 	state: () => ({
 		pageList: [],
 		menuList: [],
+		logList: [],
 		api: useApi(),
 	}),
 	actions: {
@@ -30,6 +31,12 @@ export const useFrontOfficeStore = defineStore({
 				return await this.api.patch<any>(`/items/cms_menus/${item.id}`, item);
 			});
 			await Promise.allSettled(apis);
+		},
+		async getLogListByQuery(query?: any) {
+			const logListResponse = await this.api.get<any>(`/activity`, query);
+			this.logList = (logListResponse?.data?.data || []).map((e: any) => {
+				return { ...e, comment: e.comment && JSON.parse(e.comment) };
+			});
 		},
 	},
 });

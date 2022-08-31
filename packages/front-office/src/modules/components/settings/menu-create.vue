@@ -180,6 +180,7 @@ export default {
 	overflow: hidden;
 	text-align: center;
 	margin-right: 2rem;
+	margin-bottom: 2rem;
 }
 
 .preview {

@@ -165,6 +165,7 @@ async function handleChangeWidgets() {
 	overflow: hidden;
 	text-align: left;
 	margin-right: 2rem;
+	margin-bottom: 2rem;
 }
 
 .preview {
