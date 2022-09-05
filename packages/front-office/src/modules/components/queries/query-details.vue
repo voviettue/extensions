@@ -134,6 +134,10 @@ async function execute() {
 		actionProcessing.value = 'execute';
 		const responseExecute = await api.patch(`/front-office/queries/${route.params.id}/execute`);
 		modelValue.value.output = responseExecute?.data?.data;
+
+		if (modelValue.value.output) {
+			await api.patch(`/items/cms_queries/${route.params.id}`, { output: modelValue.value.output });
+		}
 	} catch {
 		//
 	} finally {
@@ -171,7 +175,7 @@ async function saveQuery() {
 
 	try {
 		await api.patch(`/items/cms_queries/${route.params.id}`, modelValue.value);
-		router.push('/front-office/queries');
+		initialValues.value = { ...modelValue.value };
 	} catch {
 		//
 	} finally {

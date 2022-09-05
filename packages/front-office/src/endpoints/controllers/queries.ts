@@ -54,23 +54,20 @@ async function queryExecute(req: any, res: any, ctx: ApiExtensionContext) {
 		}
 
 		if (data) {
-			await Promise.all([
-				queryItemsService.updateOne(query.id, { output: data }),
-				activityService.createOne({
-					action: 'execute',
-					user: req.accountability!.user,
-					collection: query?.options?.collection || '',
-					ip: req.accountability!.ip,
-					user_agent: req.accountability!.userAgent,
-					item: req.params.id,
-					comment: {
-						message: `[${query.name}] Execution started from user request`,
-						data: data,
-						type: query?.query,
-						name: query?.name,
-					},
-				}),
-			]);
+			await activityService.createOne({
+				action: 'execute',
+				user: req.accountability!.user,
+				collection: query?.options?.collection || '',
+				ip: req.accountability!.ip,
+				user_agent: req.accountability!.userAgent,
+				item: req.params.id,
+				comment: {
+					message: `[${query.name}] Execution started from user request`,
+					data: data,
+					type: query?.query,
+					name: query?.name,
+				},
+			});
 		}
 
 		return { data: data };
