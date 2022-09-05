@@ -79,9 +79,9 @@ const emit = defineEmits(['reload']);
 const api = useApi();
 const props = withDefaults(defineProps<Props>(), {
 	widget: () => ({
-		customCss: null,
+		custom_css: null,
 		hidden: false,
-		htmlClass: null,
+		html_class: null,
 		name: '',
 		options: null,
 		parent: null,

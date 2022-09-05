@@ -37,9 +37,9 @@ const { useUserStore } = useStores();
 const { isAdmin } = useUserStore();
 withDefaults(defineProps<{ widget: Record<string, any>; updateVisiable: () => void; deleteWidget: () => void }>(), {
 	widget: () => ({
-		customCss: null,
+		custom_css: null,
 		hidden: false,
-		htmlClass: null,
+		html_class: null,
 		id: 1,
 		name: 'Test',
 		options: null,

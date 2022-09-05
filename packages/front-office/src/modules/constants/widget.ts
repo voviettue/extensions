@@ -79,7 +79,7 @@ export const formFields = [
 		},
 	},
 	{
-		field: 'htmlClass',
+		field: 'html_class',
 		name: 'HTML Class',
 		type: 'string',
 		meta: {
@@ -88,7 +88,7 @@ export const formFields = [
 		},
 	},
 	{
-		field: 'customCss',
+		field: 'custom_css',
 		name: 'Custom CSS',
 		type: 'text',
 		meta: {

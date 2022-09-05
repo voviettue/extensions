@@ -85,15 +85,15 @@ export default {
 		const menuSelected: Ref<MenuConfig | null> = ref(null);
 
 		const initialValues = ref({
-			name: null,
 			label: null,
+			key: null,
 			icon: null,
 		});
 
 		watch(
 			() => modelValue.value.label,
 			(val: any) => {
-				modelValue.value.name = snakeCase(val);
+				modelValue.value.key = snakeCase(val);
 			}
 		);
 

@@ -90,7 +90,7 @@ const initialValues = ref({
 	name: null,
 	width: 'full',
 	widget: null,
-	customCss: null,
+	custom_css: null,
 	options: null,
 	hidden: true,
 });

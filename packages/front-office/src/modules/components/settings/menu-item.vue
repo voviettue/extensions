@@ -45,14 +45,14 @@
 
 			<template #input>
 				<div
-					v-tooltip="`${menu.name}`"
+					v-tooltip="`${menu.key}`"
 					class="label"
 					@click="$router.push(`/front-office/settings/project/${menu.project}/menu/${menu.id}`)"
 				>
 					<div class="label-inner">
 						<v-icon v-if="!!menu.icon" class="drag-handle" :name="menu.icon" @click.stop />
 						<span class="name">{{ menu.label }}</span>
-						<small class="type">{{ config?.name }}</small>
+						<small class="type">{{ config?.key }}</small>
 					</div>
 				</div>
 			</template>
@@ -73,7 +73,7 @@
 		<v-dialog v-model="deleteActive" @esc="deleteActive = false">
 			<v-card>
 				<v-card-title>
-					{{ `Are you sure you want to delete this menu "${menu.name}"? This action can not be undone.` }}
+					{{ `Are you sure you want to delete this menu "${menu.key}"? This action can not be undone.` }}
 				</v-card-title>
 				<v-card-actions>
 					<v-button secondary @click="deleteActive = false">Cancel</v-button>

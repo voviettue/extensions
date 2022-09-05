@@ -14,7 +14,7 @@ export const formFields = [
 		},
 	},
 	{
-		field: 'name',
+		field: 'key',
 		name: 'Key',
 		type: 'string',
 		meta: {
