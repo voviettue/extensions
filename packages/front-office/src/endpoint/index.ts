@@ -2,11 +2,12 @@ import { defineEndpoint } from '@directus/extensions-sdk';
 import queryController from '../controllers/queries';
 
 export default defineEndpoint({
-	id: 'front-office/queries',
+	id: 'front-office',
 	handler: async (router, ctx) => {
-		router.patch('/:id/execute', async (req: any, res: any) => {
+		// QUERY ROUTE
+		router.patch('/queries/:id/execute', async (req: any, res: any) => {
 			try {
-				const data = await queryController.queryExecute(req, res, ctx);
+				const data = await queryController.execute(req, res, ctx);
 
 				return res.json({ data: data });
 			} catch (error: any) {
@@ -14,7 +15,7 @@ export default defineEndpoint({
 			}
 		});
 
-		router.delete('/:id/logs', async (req: any, res: any) => {
+		router.delete('/queries/:id/logs', async (req: any, res: any) => {
 			try {
 				await queryController.deleteLogs(req, res, ctx);
 
