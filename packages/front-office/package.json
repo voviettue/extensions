@@ -15,10 +15,10 @@
       "host": "^9.15.0"
     },
     {
-      "name": "front-office-endpoints-queries",
+      "name": "front-office-endpoint",
       "type": "endpoint",
-      "path": "dist/front-office-endpoint-queries.js",
-      "source": "src/endpoints/queries/index.ts",
+      "path": "dist/front-office-endpoint.js",
+      "source": "src/endpoint/index.ts",
       "host": "^9.15.0"
     }
   ],
