@@ -19,9 +19,9 @@
 				v-tooltip.bottom="'Save'"
 				icon
 				rounded
-				:disabled="!isAdmin"
-				:loading="actionProcessing === 'saveQuery'"
-				@click="saveQuery"
+				:disabled="!isAdmin || !hasEdits"
+				:loading="actionProcessing === 'save'"
+				@click="saveAndNavigate"
 			>
 				<v-icon name="check" />
 			</v-button>
@@ -30,7 +30,7 @@
 				v-tooltip.bottom="'Execute'"
 				rounded
 				icon
-				:disabled="!isAdmin || isFormUpdated"
+				:disabled="!isAdmin"
 				:loading="actionProcessing === 'execute'"
 				@click="execute"
 			>
@@ -62,23 +62,34 @@
 				/>
 			</div>
 		</div>
+
+		<v-dialog v-model="confirmExecute" @esc="confirmExecute = false">
+			<v-card>
+				<v-card-title>Unsaved Changes</v-card-title>
+				<v-card-text>Are you sure you want to update and execute this query?</v-card-text>
+				<v-card-actions>
+					<v-button secondary @click="confirmExecute = false">Cancel</v-button>
+					<v-button @click="saveAndExecute">Update and Execute</v-button>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 	</private-view>
 </template>
 
 <script setup lang="ts">
-import Navigation from '../navigation.vue';
 import { useApi, useStores } from '@directus/extensions-sdk';
 import { useRoute, useRouter } from 'vue-router';
 import { onBeforeMount, ref, Ref, computed, watch } from 'vue';
 import { useValidate } from '../../composables/use-validate';
 import { formFields } from '../../constants/query';
+import { useI18n } from 'vue-i18n';
 import { ExtensionOptionsContext } from '../../types/extensions';
+import { useFrontOfficeStore } from '../../stores/front-office';
 import queryConfigList from '../../queries';
 import snakeCase from 'lodash/snakeCase';
-import { useFrontOfficeStore } from '../../stores/front-office';
+import Navigation from '../navigation.vue';
 import ExtensionOptionsComponent from '../shared/extension-options.vue';
 import QueryLogSidebar from './query-log-sidebar.vue';
-import { useI18n } from 'vue-i18n';
 import isEqual from 'lodash/isEqual';
 
 const api = useApi();
@@ -89,6 +100,7 @@ const { isAdmin } = useUserStore();
 const { validateItem } = useValidate();
 const { t } = useI18n();
 const frontOfficeStore = useFrontOfficeStore();
+const confirmExecute = ref(false);
 
 const modelValue: Ref<Record<string, any>> = ref({ options: {} });
 const validationErrors: Ref<Record<string, any>[]> = ref([]);
@@ -108,7 +120,7 @@ watch(
 	}
 );
 
-const isFormUpdated = computed(() => {
+const hasEdits = computed(() => {
 	let isUpdated = false;
 	const excludeField = ['output'];
 
@@ -131,6 +143,11 @@ const optionsFields = computed(() => {
 
 async function execute() {
 	try {
+		if (hasEdits.value) {
+			confirmExecute.value = true;
+			return;
+		}
+
 		actionProcessing.value = 'execute';
 		const responseExecute = await api.patch(`/front-office/queries/${route.params.id}/execute`);
 		modelValue.value.output = responseExecute?.data?.data;
@@ -161,13 +178,13 @@ async function getDetailPage() {
 	}
 }
 
-async function saveQuery() {
+async function save() {
 	validationErrors.value = [];
 	const dataForm = { ...modelValue.value, ...modelValue.value.options };
 	validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
 	if (validationErrors.value.length) return;
 
-	actionProcessing.value = 'saveQuery';
+	actionProcessing.value = 'save';
 
 	if (modelValue.value?.query === 'json') {
 		modelValue.value.output = modelValue.value?.options;
@@ -191,6 +208,21 @@ async function getLogs() {
 	};
 
 	await frontOfficeStore.getLogListByQuery(query);
+}
+
+async function saveAndExecute() {
+	await save();
+	await execute();
+	confirmExecute.value = false;
+}
+
+async function saveAndNavigate() {
+	try {
+		await save();
+		router.push('/front-office/queries');
+	} catch {
+		//
+	}
 }
 
 onBeforeMount(async () => {
