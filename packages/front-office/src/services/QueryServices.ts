@@ -6,74 +6,82 @@ import { BaseException } from '@directus/shared/exceptions';
 type CallbackFunction = 'executeItems' | 'executeApi';
 
 export class QueryService {
-	query: Query;
 	schema: SchemaOverview;
 	accountability: Accountability;
 	ctx: ApiExtensionContext;
-	callback: any;
 	activityService: any;
+	queryItemsService: any;
+	callback = {
+		items: 'executeItems',
+		api: 'executeApi',
+		json: '',
+	};
 
-	constructor(query: Query, schema: SchemaOverview, accountability: Accountability, ctx: ApiExtensionContext) {
-		this.query = query;
+	constructor(schema: SchemaOverview, accountability: Accountability, ctx: ApiExtensionContext) {
 		this.schema = schema;
 		this.accountability = accountability;
 		this.ctx = ctx;
+
 		this.activityService = new ctx.services.ItemsService('directus_activity', {
 			schema: this.schema,
 			accountability: this.accountability,
 		});
-		this.callback = {
-			items: 'executeItems',
-			api: 'executeApi',
-		};
+
+		this.queryItemsService = new ctx.services.ItemsService('cms_queries', {
+			schema: this.schema,
+			accountability: this.accountability,
+		});
 	}
 
-	async execute() {
+	async execute(queryId: number) {
 		try {
-			const callbackName: CallbackFunction = this.callback[this.query.query];
-			const data = await this[callbackName]();
+			const query: Query = await this.queryItemsService.readOne(queryId, { fields: '*' });
+			const callbackName = this.callback[query.query] as CallbackFunction;
+			const data = await this[callbackName](query);
 			return data;
 		} catch (e: any) {
 			throw new BaseException(e?.message, e?.status, e?.code);
 		}
 	}
 
-	async createLog(data: any, error: any) {
+	async createLog(queryId: number, log: any, error: any) {
+		const query: Query = await this.queryItemsService.readOne(queryId, { fields: '*' });
+
 		await this.activityService.createOne({
 			action: 'execute',
 			user: this.accountability!.user,
-			collection: this.query?.options?.collection || '',
+			collection: query?.options?.collection || '',
 			ip: this.accountability!.ip,
 			user_agent: this.accountability!.userAgent,
-			item: this.query.id,
+			item: query.id,
 			comment: {
-				message: `[${this.query.name}] Execution started from user request`,
-				data: data,
+				message: `[${query.name}] Execution started from user request`,
+				data: log,
 				error: error,
-				type: this.query.query,
-				name: this.query.name,
+				type: query.query,
+				name: query.name,
 			},
 		});
 	}
 
-	async executeItems() {
+	async executeItems(query: Query) {
 		const { InvalidPayloadException } = this.ctx.exceptions;
 		const { ItemsService } = this.ctx.services;
 
 		try {
-			if (!this.query?.options?.collection || !this.query?.options?.fields) {
+			if (!query?.options?.collection || !query?.options?.fields) {
 				throw new InvalidPayloadException('invalid params');
 			}
 
-			const itemsService = new ItemsService(this.query.options.collection, {
+			const itemsService = new ItemsService(query.options.collection, {
 				schema: this.schema,
 				accountability: this.accountability,
 			});
 
 			const data = await itemsService.readByQuery({
-				filter: this.query.options?.filter,
-				fields: this.query.options.fields,
-				limit: this.query.options?.per_page || 20,
+				filter: query.options?.filter,
+				fields: query.options.fields,
+				limit: query.options?.per_page || 20,
 			});
 
 			return data;
@@ -82,29 +90,29 @@ export class QueryService {
 		}
 	}
 
-	async executeApi(): Promise<Record<string, any>> {
+	async executeApi(query: Query): Promise<Record<string, any>> {
 		const { InvalidPayloadException } = this.ctx.exceptions;
 
 		try {
-			if (!this.query.options?.method || !this.query.options?.url) {
+			if (!query.options?.method || !query.options?.url) {
 				throw new InvalidPayloadException('Invalid params');
 			}
 
 			const headers: Record<string, any> = {};
-			this.query.options?.headers?.map((e: any) => (headers[e.key] = e.value));
+			query.options?.headers?.map((e: any) => (headers[e.key] = e.value));
 
 			const params: Record<string, any> = {};
-			this.query.options?.query?.map((e: any) => (params[e.key] = e.value));
+			query.options?.query?.map((e: any) => (params[e.key] = e.value));
 
-			const body = this.query.options?.request_body;
+			const body = query.options?.request_body;
 
 			const options = {
-				method: this.query.options.method,
-				url: this.query.options.url,
+				method: query.options.method,
+				url: query.options.url,
 				params: params,
 				data: body,
 				headers: headers,
-				timeout: this.query.timeout,
+				timeout: query.timeout,
 			};
 
 			const { data } = await axios(options);
