@@ -36,6 +36,10 @@ export default defineWidget({
 				options: {
 					choices: [
 						{
+							text: 'None',
+							value: 'none',
+						},
+						{
 							text: 'Solid',
 							value: 'solid',
 						},
@@ -108,6 +112,10 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					choices: [
+						{
+							text: 'None',
+							value: 'none',
+						},
 						{
 							text: 'Left',
 							value: 'left',
