@@ -90,8 +90,9 @@ const initialValues = ref({
 	name: null,
 	width: 'full',
 	widget: null,
-	customCss: null,
+	custom_css: null,
 	options: null,
+	hidden: true,
 });
 
 watch(
@@ -135,9 +136,11 @@ async function handleChangeWidgets() {
 	validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
 	if (validationErrors.value.length) return;
 	isLoading.value = true;
-
 	try {
-		edits.value = { ...modelValue.value, page };
+		edits.value = { ...dataForm, page };
+		if (selectedWidget.value?.beforeSave) {
+			edits.value = selectedWidget.value.beforeSave(edits.value);
+		}
 		await save();
 		router.push(`/front-office/pages/${page}`);
 	} catch {
@@ -162,6 +165,7 @@ async function handleChangeWidgets() {
 	overflow: hidden;
 	text-align: left;
 	margin-right: 2rem;
+	margin-bottom: 2rem;
 }
 
 .preview {

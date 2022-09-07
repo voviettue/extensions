@@ -17,23 +17,23 @@ export default defineQuery({
 					choices: [
 						{
 							text: 'GET',
-							value: 'GET',
+							value: 'get',
 						},
 						{
 							text: 'POST',
-							value: 'POST',
+							value: 'post',
 						},
 						{
 							text: 'PUT',
-							value: 'PUT',
+							value: 'put',
 						},
 						{
 							text: 'PATCH',
-							value: 'PATCH',
+							value: 'patch',
 						},
 						{
 							text: 'DELETE',
-							value: 'DELETE',
+							value: 'delete',
 						},
 					],
 				},

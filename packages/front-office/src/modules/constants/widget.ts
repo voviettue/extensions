@@ -69,12 +69,35 @@ export const formFields = [
 		},
 	},
 	{
-		field: 'htmlClass',
+		field: 'hidden',
+		name: 'Hidden',
+		type: 'boolean',
+		meta: {
+			width: 'half',
+			interface: 'Boolean',
+			default: true,
+		},
+	},
+	{
+		field: 'html_class',
 		name: 'HTML Class',
 		type: 'string',
 		meta: {
 			width: 'full',
 			interface: 'input',
+		},
+	},
+	{
+		field: 'custom_css',
+		name: 'Custom CSS',
+		type: 'text',
+		meta: {
+			interface: 'input-code',
+			options: {
+				language: 'css',
+				lineNumber: true,
+				template: '.widget {\n\tbackground: white;\n\tcolor: red;\n}',
+			},
 		},
 	},
 ];

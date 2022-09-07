@@ -31,7 +31,7 @@ const { edits, save, validationErrors, loading, refresh } = useItem(collection, 
 
 const initForm = ref({
 	endpoint: '',
-	name: '',
+	key: '',
 	title: '',
 	hidden: false,
 });
@@ -39,7 +39,7 @@ const initForm = ref({
 watch(
 	() => edits.value.title,
 	(val) => {
-		edits.value.name = snakeCase(val);
+		edits.value.key = snakeCase(val);
 	}
 );
 watch(

@@ -30,7 +30,7 @@ withDefaults(defineProps<{ page: Record<string, any>; updateVisiable: Function; 
 		endpoint: '',
 		hidden: false,
 		id: null,
-		name: '',
+		key: '',
 		title: '',
 	}),
 });

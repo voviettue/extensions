@@ -7,7 +7,7 @@
 
 		<v-list v-else class="draggable-list">
 			<draggable
-				:model-value="items"
+				:model-value="nestedList"
 				:force-fallback="true"
 				:group="{ name: 'widgets' }"
 				:animation="150"
@@ -22,8 +22,10 @@
 					<WidgetItem
 						:update-visiable="updateVisiable"
 						:widget="element"
+						:list-widget="items"
 						:delete-widget="deleteWidget"
 						:class="getClass(element)"
+						@reload="getWidgetsItems"
 					/>
 				</template>
 			</draggable>
@@ -49,6 +51,9 @@ const items = ref([]);
 const id = computed(() => {
 	return route.params.id;
 });
+const nestedList = computed(() => {
+	return items.value.filter((_: any) => !_.parent);
+});
 
 watch(
 	() => route.name,
@@ -67,6 +72,7 @@ async function getWidgetsItems() {
 		//
 	}
 }
+
 async function updateVisiable(widget: any) {
 	try {
 		await api.patch(`/items/cms_widgets/${widget.id}`, { hidden: !widget.hidden });
@@ -88,12 +94,14 @@ async function onSort(val) {
 		return {
 			...item,
 			sort: index,
+			parent: null,
 		};
 	});
 	const apis = items.value.map((k: any) => {
 		return api.patch(`/items/cms_widgets/${k.id}`, k);
 	});
 	await Promise.allSettled(apis);
+	getWidgetsItems();
 }
 function getClass(el: Record<string, any>) {
 	switch (el.width) {

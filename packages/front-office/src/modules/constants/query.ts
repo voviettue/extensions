@@ -1,6 +1,17 @@
 export const formFields = [
 	{
 		collection: 'cms_queries',
+		field: 'output',
+		name: 'Output',
+		type: 'json',
+		meta: {
+			interface: 'code',
+			readonly: true,
+			placeholder: 'Enter code here...',
+		},
+	},
+	{
+		collection: 'cms_queries',
 		field: 'name',
 		name: 'Name',
 		type: 'string',

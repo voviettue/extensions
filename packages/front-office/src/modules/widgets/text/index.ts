@@ -12,10 +12,10 @@ export default defineWidget({
 			meta: {
 				required: true,
 				interface: 'input',
-				width: 'half',
+				width: 'full',
 				options: {
 					trim: true,
-					placeholder: 'Text String',
+					placeholder: 'Enter text to be displayed',
 				},
 			},
 		},
@@ -97,7 +97,7 @@ export default defineWidget({
 		},
 		{
 			field: 'textStyle',
-			name: 'TextStyle',
+			name: 'Text Style',
 			type: 'json',
 			meta: {
 				interface: 'select-multiple-dropdown',
@@ -122,17 +122,13 @@ export default defineWidget({
 		},
 		{
 			field: 'fontFamily',
-			name: 'FontFamily',
+			name: 'Font Family',
 			type: 'string',
 			meta: {
 				interface: 'select-dropdown',
 				width: 'half',
 				options: {
 					choices: [
-						{
-							text: 'Roboto',
-							value: 'Roboto',
-						},
 						{
 							text: 'Arial',
 							value: 'Arial',
@@ -142,16 +138,24 @@ export default defineWidget({
 							value: 'Cambria',
 						},
 						{
-							text: 'Times New Roman',
-							value: 'Times New Roman',
+							text: 'Courier New',
+							value: 'Courier New',
+						},
+						{
+							text: 'Lato',
+							value: 'Lato',
+						},
+						{
+							text: 'Nato Sans',
+							value: 'Nato Sans',
+						},
+						{
+							text: 'Roboto',
+							value: 'Roboto',
 						},
 						{
 							text: 'Monaco',
 							value: 'Monaco',
-						},
-						{
-							text: 'Courier New',
-							value: 'Courier New',
 						},
 					],
 				},
@@ -159,7 +163,7 @@ export default defineWidget({
 		},
 		{
 			field: 'background',
-			name: 'Background',
+			name: 'Background Color',
 			type: 'string',
 			meta: {
 				interface: 'select-color',
@@ -167,12 +171,25 @@ export default defineWidget({
 			},
 		},
 		{
-			field: 'border',
-			name: 'Border',
+			field: 'borderColor',
+			name: 'Border Color',
 			type: 'string',
 			meta: {
 				interface: 'select-color',
 				width: 'half',
+			},
+		},
+		{
+			field: 'borderWidth',
+			name: 'Border Width',
+			type: 'number',
+			meta: {
+				interface: 'input',
+				width: 'half',
+				options: {
+					trim: true,
+					placeholder: 'Enter border width size in px',
+				},
 			},
 		},
 	],

@@ -62,15 +62,18 @@ import { ExtensionOptionsContext, MenuConfig } from '../../types/extensions';
 import { formFields } from '../../constants/menu';
 import ExtensionOptions from '../shared/extension-options.vue';
 import snakeCase from 'lodash/snakeCase';
+import { useNotification } from '../../composables/use-notification';
 
 export default {
 	components: { ExtensionOptions },
-	emits: ['close'],
+	emits: ['refresh'],
 	setup(props, { emit }) {
 		const collection = 'cms_menus';
 		const router = useRouter();
 		const route = useRoute();
 		const api = useApi();
+		const { notify } = useNotification();
+
 		const { validateItem } = useValidate();
 
 		const projectId = computed(() => {
@@ -82,15 +85,15 @@ export default {
 		const menuSelected: Ref<MenuConfig | null> = ref(null);
 
 		const initialValues = ref({
-			name: null,
 			label: null,
+			key: null,
 			icon: null,
 		});
 
 		watch(
 			() => modelValue.value.label,
 			(val: any) => {
-				modelValue.value.name = snakeCase(val);
+				modelValue.value.key = snakeCase(val);
 			}
 		);
 
@@ -135,12 +138,14 @@ export default {
 			isLoading.value = true;
 			try {
 				await api.post(`/items/${collection}`, modelValue.value);
+
+				notify({ title: 'Menu created' });
 				router.push('/front-office/settings');
 			} catch {
 				//
 			}
 			isLoading.value = false;
-			emit('close');
+			emit('refresh');
 		}
 	},
 };
@@ -175,6 +180,7 @@ export default {
 	overflow: hidden;
 	text-align: center;
 	margin-right: 2rem;
+	margin-bottom: 2rem;
 }
 
 .preview {
