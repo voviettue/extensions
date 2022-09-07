@@ -34,6 +34,7 @@ export const formFields = [
 		meta: {
 			width: 'half',
 			interface: 'select-dropdown',
+			default: 'full',
 			options: {
 				choices: [
 					{
