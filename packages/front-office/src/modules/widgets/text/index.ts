@@ -142,10 +142,6 @@ export default defineWidget({
 							value: 'none',
 						},
 						{
-							text: 'None',
-							value: 'none',
-						},
-						{
 							text: 'Arial',
 							value: 'Arial',
 						},
