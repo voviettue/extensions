@@ -75,8 +75,8 @@ export default defineWidget({
 				options: {
 					choices: [
 						{
-							text: 'None',
-							value: 'none',
+							text: 'Default',
+							value: null,
 						},
 						{
 							text: 'Left',
@@ -109,8 +109,8 @@ export default defineWidget({
 					allowOther: true,
 					choices: [
 						{
-							text: 'None',
-							value: 'none',
+							text: 'Default',
+							value: null,
 						},
 						{
 							text: 'XS - 0.75rem',
@@ -184,8 +184,8 @@ export default defineWidget({
 				options: {
 					choices: [
 						{
-							text: 'None',
-							value: 'none',
+							text: 'Default',
+							value: null,
 						},
 						{
 							text: 'TOP',
@@ -213,8 +213,8 @@ export default defineWidget({
 				options: {
 					choices: [
 						{
-							text: 'None',
-							value: 'none',
+							text: 'Default',
+							value: null,
 						},
 						{
 							text: 'SM',
