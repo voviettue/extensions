@@ -150,11 +150,9 @@ async function execute() {
 
 		actionProcessing.value = 'execute';
 		const responseExecute = await api.patch(`/front-office/queries/${route.params.id}/execute`);
-		modelValue.value.output = responseExecute?.data?.data;
+		modelValue.value.output = responseExecute?.data;
 
-		if (modelValue.value.output) {
-			await api.patch(`/items/cms_queries/${route.params.id}`, { output: modelValue.value.output });
-		}
+		await api.patch(`/items/cms_queries/${route.params.id}`, { output: modelValue.value.output });
 	} catch {
 		//
 	} finally {

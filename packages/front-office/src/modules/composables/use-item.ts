@@ -70,7 +70,7 @@ export function useItem(collection: string, primaryKey: string): UsableItem {
 	async function getItem() {
 		const params = { fields: ['*'] };
 		listFields.value
-			.filter((item: Record<string, any>) => item.meta.interface === 'list-m2m')
+			.filter((item: Record<string, any>) => item?.meta?.interface === 'list-m2m')
 			.map((_: any) => params.fields.push(`${_.field}.*`));
 		loading.value = true;
 		error.value = null;
