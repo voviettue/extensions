@@ -139,7 +139,7 @@ export default {
 			try {
 				await api.post(`/items/${collection}`, modelValue.value);
 
-				notify({ title: 'Menu created' });
+				notify({ title: 'Item created' });
 				router.push('/front-office/settings');
 			} catch {
 				//

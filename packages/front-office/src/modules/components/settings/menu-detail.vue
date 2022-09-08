@@ -153,7 +153,7 @@ export default {
 			try {
 				await api.patch(`/items/${collection}/${route.params.menuId}`, modelValue.value);
 
-				notify({ title: 'Menu updated' });
+				notify({ title: 'Item updated' });
 				router.push('/front-office/settings');
 			} catch {
 				//

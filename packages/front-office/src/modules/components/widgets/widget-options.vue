@@ -34,7 +34,7 @@
 		<v-dialog v-model="deleteDialog" @esc="deleteDialog = false">
 			<v-card>
 				<v-card-title>
-					{{ `Are you sure you want to delete this menu "${widget.name}"? This action can not be undone.` }}
+					{{ `Are you sure you want to delete this widget "${widget.name}"? This action can not be undone.` }}
 				</v-card-title>
 				<v-card-actions>
 					<v-button secondary @click="deleteDialog = false">Cancel</v-button>

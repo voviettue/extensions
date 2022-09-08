@@ -31,9 +31,12 @@ import { ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import Draggable from 'vuedraggable';
 import PageItem from './page-item.vue';
+import { useNotification } from '../../composables/use-notification';
+
 const route = useRoute();
 const api = useApi();
 const items = ref([]);
+const { notify } = useNotification();
 async function getListPage() {
 	try {
 		const res = await api.get('/items/cms_pages');
@@ -71,6 +74,7 @@ async function updateVisiable(page) {
 async function deletePage(page) {
 	try {
 		await api.delete(`/items/cms_pages/${page.id}`);
+		notify({ title: 'Item deleted' });
 		getListPage();
 	} catch {
 		//

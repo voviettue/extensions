@@ -43,11 +43,13 @@ import { ref, onMounted, computed, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import Draggable from 'vuedraggable';
 import WidgetItem from './widget-item.vue';
+import { useNotification } from '../../composables/use-notification';
 
 const route = useRoute();
 const api = useApi();
 // const props = defineProps<{ widgets: Array<number | string> }>();
 const items = ref([]);
+const { notify } = useNotification();
 const id = computed(() => {
 	return route.params.id;
 });
@@ -84,6 +86,7 @@ async function updateVisiable(widget: any) {
 async function deleteWidget(widget: any) {
 	try {
 		await api.delete(`/items/cms_widgets/${widget.id}`);
+		notify({ title: 'Item deleted' });
 		getWidgetsItems();
 	} catch {
 		//
