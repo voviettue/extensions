@@ -35,7 +35,7 @@
 						class="field-fault"
 						:fields="formFields"
 						:initial-values="initialValues"
-						:validation-errors="validationErrors"
+						:validation-errors="validationWidgetErrors"
 					></v-form>
 
 					<v-divider inline />
@@ -45,7 +45,7 @@
 							v-model="modelValue.options"
 							collection="cms_widgets"
 							:options-fields="optionsFields"
-							:validation-errors="validationErrors"
+							:validation-errors="validationWidgetErrors"
 						/>
 					</div>
 				</div>
@@ -82,7 +82,7 @@ const { validateItem } = useValidate();
 const router = useRouter();
 const route = useRoute();
 
-const validationErrors: Ref<Record<string, any>[]> = ref([]);
+const validationWidgetErrors: Ref<Record<string, any>[]> = ref([]);
 const modelValue: Ref<Record<string, any>> = ref({ options: {} });
 const isOpen = ref(true);
 const isLoading = ref(false);
@@ -103,7 +103,7 @@ watch(
 );
 const page = route.params.id;
 const primaryKey = route.params.widgetId as string;
-const { item, edits, getItem, save } = useItem('cms_widgets', primaryKey);
+const { item, edits, getItem, save, validationErrors } = useItem('cms_widgets', primaryKey);
 
 if (primaryKey !== '+') {
 	getItem().then(() => {
@@ -131,10 +131,10 @@ function onChangeWidgets(widget: WidgetConfig) {
 }
 
 async function handleChangeWidgets() {
-	validationErrors.value = [];
-	const dataForm = { ...initialValues.value, ...modelValue.value, ...modelValue.value.options };
-	validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
-	if (validationErrors.value.length) return;
+	validationWidgetErrors.value = [];
+	const dataForm = { ...modelValue.value, ...modelValue.value.options };
+	validationWidgetErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
+	if (validationWidgetErrors.value.length) return;
 	isLoading.value = true;
 	try {
 		edits.value = { ...dataForm, page };
@@ -144,7 +144,7 @@ async function handleChangeWidgets() {
 		await save();
 		router.push(`/front-office/pages/${page}`);
 	} catch {
-		//
+		validationWidgetErrors.value = validationErrors.value;
 	} finally {
 		isLoading.value = false;
 	}
