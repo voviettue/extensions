@@ -34,7 +34,9 @@
 		<v-dialog v-model="deleteDialog" @esc="deleteDialog = false">
 			<v-card>
 				<v-card-title>
-					{{ `Are you sure you want to delete this menu "${page.title}"? This action can not be undone.` }}
+					{{
+						`Are you sure you want to delete the page "${page.title}"? This will delete the page and all components in it. This action is permanent.`
+					}}
 				</v-card-title>
 				<v-card-actions>
 					<v-button secondary @click="deleteDialog = false">Cancel</v-button>
