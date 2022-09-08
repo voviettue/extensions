@@ -30,6 +30,10 @@ export default defineWidget({
 					allowOther: true,
 					choices: [
 						{
+							text: 'Default',
+							value: null,
+						},
+						{
 							text: 'XS - 0.75rem',
 							value: '0.75rem',
 						},
@@ -75,6 +79,10 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					choices: [
+						{
+							text: 'Default',
+							value: null,
+						},
 						{
 							text: 'Left',
 							value: 'left',
@@ -129,6 +137,10 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					choices: [
+						{
+							text: 'Default',
+							value: null,
+						},
 						{
 							text: 'Arial',
 							value: 'Arial',

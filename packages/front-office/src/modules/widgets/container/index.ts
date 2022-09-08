@@ -42,6 +42,10 @@ export default defineWidget({
 				options: {
 					choices: [
 						{
+							text: 'Default',
+							value: null,
+						},
+						{
 							text: 'SM',
 							value: 'sm',
 						},
