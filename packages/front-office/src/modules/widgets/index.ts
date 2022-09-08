@@ -5,6 +5,7 @@ import container from './container';
 import richtext from './richtext';
 import iframe from './iframe';
 import divider from './divider';
-import List from './list';
+import list from './list';
+import keyValue from './key-value';
 
-export default [text, table, image, container, richtext, iframe, divider, List];
+export default [text, table, image, container, richtext, iframe, divider, list, keyValue];

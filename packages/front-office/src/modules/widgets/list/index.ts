@@ -11,6 +11,7 @@ export default defineWidget({
 			name: 'Data',
 			type: 'json',
 			meta: {
+				required: true,
 				interface: 'code',
 				width: 'full',
 			},
@@ -54,6 +55,7 @@ export default defineWidget({
 				interface: 'select-dropdown',
 				width: 'half',
 				options: {
+					allowNone: false,
 					choices: [
 						{
 							text: 'SM',
