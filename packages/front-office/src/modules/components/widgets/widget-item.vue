@@ -2,7 +2,7 @@
 	<div class="widget-select">
 		<!-- if widget is container  -->
 		<draggable
-			v-if="widget.widget == 'container'"
+			v-if="widget.group"
 			class="widget-grid group full nested"
 			:model-value="nestedWidgets"
 			:force-fallback="true"

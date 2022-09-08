@@ -127,6 +127,7 @@ const optionsFields = computed(() => {
 });
 
 function onChangeWidgets(widget: WidgetConfig) {
+	modelValue.value.group = !!widget?.group;
 	modelValue.value.widget = widget.id;
 }
 

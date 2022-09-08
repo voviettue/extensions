@@ -1,29 +1,20 @@
 import { defineWidget } from '../../utils/define-extension';
 
 export default defineWidget({
-	id: 'container',
-	name: 'Container',
+	id: 'list',
+	name: 'List',
 	icon: 'menu',
 	group: true,
 	options: [
-		// {
-		// 	field: 'columns',
-		// 	name: 'Grid Columns',
-		// 	type: 'integer',
-		// 	meta: {
-		// 		interface: 'input',
-		// 		width: 'half',
-		// 	},
-		// },
-		// {
-		// 	field: 'gap',
-		// 	name: 'Grid Gap',
-		// 	type: 'integer',
-		// 	meta: {
-		// 		interface: 'input',
-		// 		width: 'half',
-		// 	},
-		// },
+		{
+			field: 'data',
+			name: 'Data',
+			type: 'json',
+			meta: {
+				interface: 'code',
+				width: 'full',
+			},
+		},
 		{
 			field: 'background',
 			name: 'Background',
@@ -31,6 +22,28 @@ export default defineWidget({
 			meta: {
 				interface: 'select-color',
 				width: 'half',
+			},
+		},
+		{
+			field: 'itemBackground',
+			name: 'Item Background',
+			type: 'string',
+			meta: {
+				interface: 'select-color',
+				width: 'half',
+			},
+		},
+		{
+			field: 'itemSpacing',
+			name: 'Item Spacing',
+			type: 'string',
+			meta: {
+				interface: 'input',
+				width: 'half',
+				options: {
+					trim: true,
+					placeholder: 'Enter space size in px',
+				},
 			},
 		},
 		{
@@ -42,10 +55,6 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					choices: [
-						{
-							text: 'Default',
-							value: null,
-						},
 						{
 							text: 'SM',
 							value: 'sm',

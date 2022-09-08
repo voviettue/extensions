@@ -22,6 +22,7 @@ export interface WidgetConfig {
 	id: string;
 	name: string;
 	icon: string;
+	group?: boolean;
 	options: ExtensionOptions;
 	beforeSave?: (values: Record<string, any>) => Record<string, any>;
 }
