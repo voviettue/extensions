@@ -45,7 +45,7 @@ export default defineWidget({
 				interface: 'select-dropdown',
 				width: 'half',
 				options: {
-					allowNone: false,
+					allowNone: true,
 					choices: [
 						{
 							text: 'Default',
@@ -75,7 +75,7 @@ export default defineWidget({
 				interface: 'select-dropdown',
 				width: 'half',
 				options: {
-					allowNone: false,
+					allowNone: true,
 					choices: [
 						{
 							text: 'Default',
@@ -105,7 +105,7 @@ export default defineWidget({
 				interface: 'select-dropdown',
 				width: 'half',
 				options: {
-					allowNone: false,
+					allowNone: true,
 					choices: [
 						{
 							text: 'Default',
@@ -139,7 +139,7 @@ export default defineWidget({
 				interface: 'select-dropdown',
 				width: 'half',
 				options: {
-					allowNone: false,
+					allowNone: true,
 					choices: [
 						{
 							text: 'Default',
@@ -174,7 +174,7 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					placeholder: 'Select styles',
-					allowNone: false,
+					allowNone: true,
 					choices: [
 						{
 							text: 'BOLD',
@@ -201,7 +201,7 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					placeholder: 'Select styles',
-					allowNone: false,
+					allowNone: true,
 					choices: [
 						{
 							text: 'BOLD',
