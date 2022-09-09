@@ -116,7 +116,18 @@ export function useItem(collection: string, primaryKey: string): UsableItem {
 			validationErrors.value = err.response.data.errors
 				.filter((err: any) => VALIDATION_TYPES.includes(err?.extensions?.code))
 				.map((err: any) => {
-					return err.extensions;
+					const { field, code } = err.extensions;
+					const error: Record<string, any> = {};
+					error.field = (field || '').replace(/^\w+_/, '');
+					switch (code) {
+						case 'RECORD_NOT_UNIQUE':
+							error.type = 'unique';
+							break;
+						case 'FAILED_VALIDATION':
+							error.type = 'invalid';
+							break;
+					}
+					return error;
 				});
 		}
 		throw err;
