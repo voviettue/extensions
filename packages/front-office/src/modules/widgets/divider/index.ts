@@ -56,19 +56,6 @@ export default defineWidget({
 			},
 		},
 		{
-			field: 'width',
-			name: 'Width',
-			type: 'string',
-			meta: {
-				interface: 'input',
-				width: 'half',
-				options: {
-					trim: true,
-					placeholder: 'Enter width size in px',
-				},
-			},
-		},
-		{
 			field: 'height',
 			name: 'Height',
 			type: 'string',
@@ -115,6 +102,10 @@ export default defineWidget({
 						{
 							text: 'Default',
 							value: null,
+						},
+						{
+							text: 'Center',
+							value: 'center',
 						},
 						{
 							text: 'Left',
