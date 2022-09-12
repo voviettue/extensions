@@ -6,7 +6,7 @@ export default defineQuery({
 	icon: 'code',
 	options: [
 		{
-			field: 'jsonData',
+			field: 'json',
 			name: 'Json data',
 			type: 'json',
 			meta: {

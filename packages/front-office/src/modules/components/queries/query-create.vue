@@ -132,7 +132,7 @@ async function handleCreateQuery() {
 	isLoading.value = true;
 
 	if (modelValue.value?.query === 'json') {
-		modelValue.value.output = modelValue.value?.options;
+		modelValue.value.output = modelValue.value?.options?.json;
 	}
 
 	try {
