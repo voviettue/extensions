@@ -92,7 +92,7 @@ const initialValues = ref({
 	widget: null,
 	custom_css: null,
 	options: null,
-	hidden: true,
+	hidden: false,
 });
 
 watch(
@@ -132,7 +132,7 @@ function onChangeWidgets(widget: WidgetConfig) {
 
 async function handleChangeWidgets() {
 	validationWidgetErrors.value = [];
-	const dataForm = { ...modelValue.value, ...modelValue.value.options };
+	const dataForm = { ...initialValues.value, ...modelValue.value, ...modelValue.value.options };
 	validationWidgetErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
 	if (validationWidgetErrors.value.length) return;
 	isLoading.value = true;

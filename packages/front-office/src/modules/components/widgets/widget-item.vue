@@ -206,6 +206,11 @@ function getClass(el: Record<string, any>) {
 	&:hover .type {
 		opacity: 1;
 	}
+
+	.icons {
+		display: flex;
+		align-items: center;
+	}
 }
 .group {
 	position: relative;
