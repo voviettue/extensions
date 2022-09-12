@@ -35,7 +35,7 @@
 						class="field-fault"
 						:fields="fields"
 						:initial-values="initialValues"
-						:validation-errors="validationErrors"
+						:validation-errors="validationQueryErrors"
 					></v-form>
 
 					<v-divider inline />
@@ -45,7 +45,7 @@
 							v-model="modelValue.options"
 							collection="cms_queries"
 							:options-fields="optionsFields"
-							:validation-errors="validationErrors"
+							:validation-errors="validationQueryErrors"
 						/>
 					</div>
 				</div>
@@ -67,10 +67,10 @@
 </template>
 <script setup lang="ts">
 import { ref, Ref, computed, watch } from 'vue';
-import { useApi } from '@directus/extensions-sdk';
 import { useRouter } from 'vue-router';
 import { formFields } from '../../constants/query';
 import { useValidate } from '../../composables/use-validate';
+import { useItem } from '../../composables/use-item';
 import { ExtensionOptionsContext, QueryConfig } from '../../types/extensions';
 import queryConfigList from '../../queries';
 import isEmpty from 'lodash/isEmpty';
@@ -79,9 +79,8 @@ import ExtensionOptionsComponent from '../shared/extension-options.vue';
 
 const { validateItem } = useValidate();
 const router = useRouter();
-const api = useApi();
 
-const validationErrors: Ref<Record<string, any>[]> = ref([]);
+const validationQueryErrors: Ref<Record<string, any>[]> = ref([]);
 const modelValue: Ref<Record<string, any>> = ref({ options: {} });
 const querySelected: Ref<QueryConfig | null> = ref(null);
 const isOpen = ref(true);
@@ -93,6 +92,8 @@ const initialValues = ref({
 	options: null,
 	refresh_on_load: false,
 });
+
+const { edits, save, validationErrors } = useItem('cms_queries', '+');
 
 watch(
 	() => modelValue.value.name,
@@ -112,7 +113,7 @@ const optionsFields = computed(() => {
 	return options;
 });
 const fields = computed(() => {
-	const excludeField = ['output'];
+	const excludeField = modelValue.value?.query === 'json' ? ['refresh_on_load', 'timeout', 'output'] : ['output'];
 	return formFields?.filter((e: any) => {
 		return !excludeField.includes(e.field);
 	});
@@ -124,10 +125,10 @@ function onChangeQuery(query: QueryConfig) {
 }
 
 async function handleCreateQuery() {
-	validationErrors.value = [];
+	validationQueryErrors.value = [];
 	const dataForm = { ...modelValue.value, ...modelValue.value.options };
-	validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
-	if (validationErrors.value.length) return;
+	validationQueryErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
+	if (validationQueryErrors.value.length) return;
 
 	isLoading.value = true;
 
@@ -136,10 +137,11 @@ async function handleCreateQuery() {
 	}
 
 	try {
-		await api.post('/items/cms_queries', modelValue.value);
+		edits.value = { ...dataForm };
+		await save();
 		router.push('/front-office/queries');
 	} catch {
-		//
+		validationQueryErrors.value = validationErrors.value;
 	} finally {
 		isLoading.value = false;
 	}
