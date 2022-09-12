@@ -42,7 +42,7 @@ export function useItem(collection: string, primaryKey: string): UsableItem {
 	});
 
 	const api = useApi();
-	const VALIDATION_TYPES = ['FAILED_VALIDATION', 'RECORD_NOT_UNIQUE'];
+	const VALIDATION_TYPES = ['FAILED_VALIDATION', 'RECORD_NOT_UNIQUE', 'VALUE_TOO_LONG'];
 	const itemEndpoint = computed(() => {
 		if (isSingle.value) {
 			return getEndpoint(collection);
@@ -124,7 +124,11 @@ export function useItem(collection: string, primaryKey: string): UsableItem {
 							error.type = 'unique';
 							break;
 						case 'FAILED_VALIDATION':
-							error.type = 'invalid';
+							error.type = 'nin';
+							break;
+						case 'VALUE_TOO_LONG':
+							error.type = 'lt';
+							error.valid = '50 characters';
 							break;
 					}
 					return error;
