@@ -152,23 +152,26 @@ function getClass(el: Record<string, any>) {
 } */
 
 .widget-select {
-	margin: 4px;
+	margin: 0px 4px;
 }
 
 .widget-select:deep(.widget-grid) {
-	grid-gap: 0;
+	grid-gap: 8px;
 }
 
 .widget-select:deep(.widget-grid.group.full.nested) {
-	margin: 4px 0;
+	// margin: 4px 0;
 
 	.widget-select {
-		margin: 4px;
+		margin: 0px 4px;
 	}
 }
 .widget {
+	height: 52px;
+
 	:deep(.input) {
 		border: var(--border-width) solid var(--border-subdued) !important;
+		padding: 8px;
 	}
 
 	:deep(.input:hover) {
@@ -217,7 +220,7 @@ function getClass(el: Record<string, any>) {
 	min-height: var(--input-height);
 	padding: var(--input-padding);
 	padding-top: 40px;
-	padding-bottom: 16px;
+	padding-bottom: 8px;
 	border-radius: var(--border-radius);
 
 	> * {
@@ -389,7 +392,9 @@ function getClass(el: Record<string, any>) {
 	width: 100%;
 	display: grid;
 	grid-template-columns: repeat(6, minmax(0, 1fr));
-	gap: 12px;
+	gap: 8px;
+	padding-left: 8px;
+	padding-right: 8px;
 	.grid-full {
 		grid-column: span 6 / span 6;
 	}

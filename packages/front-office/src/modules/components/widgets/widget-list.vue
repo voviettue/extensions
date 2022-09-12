@@ -131,7 +131,7 @@ onMounted(() => {
 
 <style scope lang="scss">
 .widgets {
-	max-width: 800px;
+	max-width: 1000px;
 }
 .field-label {
 	margin-bottom: 10px;
@@ -143,7 +143,7 @@ onMounted(() => {
 	width: 100%;
 	display: grid;
 	grid-template-columns: repeat(6, minmax(0, 1fr));
-	gap: 12px;
+	gap: 8px;
 	.grid-full {
 		grid-column: span 6 / span 6;
 	}
