@@ -35,7 +35,7 @@
 						class="field-fault"
 						:fields="formFields"
 						:initial-values="initialValues"
-						:validation-errors="validationWidgetErrors"
+						:validation-errors="validationErrors"
 					></v-form>
 
 					<v-divider inline />
@@ -45,7 +45,7 @@
 							v-model="modelValue.options"
 							collection="cms_widgets"
 							:options-fields="optionsFields"
-							:validation-errors="validationWidgetErrors"
+							:validation-errors="validationErrors"
 						/>
 					</div>
 				</div>
@@ -82,7 +82,7 @@ const { validateItem } = useValidate();
 const router = useRouter();
 const route = useRoute();
 
-const validationWidgetErrors: Ref<Record<string, any>[]> = ref([]);
+// const validationWidgetErrors: Ref<Record<string, any>[]> = ref([]);
 const modelValue: Ref<Record<string, any>> = ref({ options: {} });
 const isOpen = ref(true);
 const isLoading = ref(false);
@@ -131,10 +131,10 @@ function onChangeWidgets(widget: WidgetConfig) {
 }
 
 async function handleChangeWidgets() {
-	validationWidgetErrors.value = [];
+	validationErrors.value = [];
 	const dataForm = { ...modelValue.value, ...modelValue.value.options };
-	validationWidgetErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
-	if (validationWidgetErrors.value.length) return;
+	validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
+	if (validationErrors.value.length) return;
 	isLoading.value = true;
 	try {
 		edits.value = { ...dataForm, page };
@@ -144,7 +144,7 @@ async function handleChangeWidgets() {
 		await save();
 		router.push(`/front-office/pages/${page}`);
 	} catch {
-		validationWidgetErrors.value = validationErrors.value;
+		// validationWidgetErrors.value = validationErrors.value;
 	} finally {
 		isLoading.value = false;
 	}
