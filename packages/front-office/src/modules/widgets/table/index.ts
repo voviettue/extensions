@@ -1,55 +1,54 @@
 import { defineWidget } from '../../utils/define-extension';
+import WidgetTableOptions from '../../components/widgets/table/widget-table-options.vue';
 
 export default defineWidget({
 	id: 'table',
 	name: 'Table',
 	icon: 'table',
-	options: [
+	options: WidgetTableOptions,
+	extendOptions: [
 		{
 			field: 'data',
 			name: 'Data',
-			// type: 'json',
 			meta: {
 				interface: 'input-multiline',
 				width: 'full',
 			},
 		},
 		{
-			field: 'columns',
-			name: 'Columns',
-			type: 'json',
+			field: 'strippedRow',
+			name: 'Stripped row',
+			type: 'boolean',
 			meta: {
-				interface: 'list',
-				options: {
-					addLabel: 'Create New',
-					template: '{{ label }}',
-					fields: [
-						{
-							field: 'key',
-							type: 'Key',
-							name: 'Key',
-							meta: {
-								interface: 'input',
-								width: 'half',
-								options: {
-									placeholder: 'Key',
-								},
-							},
-						},
-						{
-							field: 'label',
-							name: 'Label',
-							type: 'string',
-							meta: {
-								interface: 'input',
-								width: 'half',
-								options: {
-									placeholder: 'Value',
-								},
-							},
-						},
-					],
-				},
+				width: 'half',
+				interface: 'boolean',
+			},
+			schema: {
+				default_value: false,
+			},
+		},
+		{
+			field: 'border',
+			name: 'Border',
+			type: 'boolean',
+			meta: {
+				width: 'half',
+				interface: 'boolean',
+			},
+			schema: {
+				default_value: true,
+			},
+		},
+		{
+			field: 'verticalLines',
+			name: 'Vertical Lines',
+			type: 'boolean',
+			meta: {
+				width: 'half',
+				interface: 'boolean',
+			},
+			schema: {
+				default_value: false,
 			},
 		},
 		{
@@ -61,7 +60,7 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					trim: true,
-					placeholder: 'Enter height table here',
+					placeholder: 'Input value',
 				},
 			},
 		},
@@ -74,10 +73,6 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					choices: [
-						{
-							text: 'Default',
-							value: null,
-						},
 						{
 							text: 'Left',
 							value: 'left',
@@ -95,6 +90,8 @@ export default defineWidget({
 							value: 'justify',
 						},
 					],
+					placeholder: 'Select',
+					allowNone: true,
 				},
 			},
 		},
@@ -106,12 +103,7 @@ export default defineWidget({
 				interface: 'select-dropdown',
 				width: 'half',
 				options: {
-					allowOther: true,
 					choices: [
-						{
-							text: 'Default',
-							value: null,
-						},
 						{
 							text: 'XS - 0.75rem',
 							value: '0.75rem',
@@ -137,6 +129,8 @@ export default defineWidget({
 							value: '1.875rem',
 						},
 					],
+					placeholder: 'Select',
+					allowNone: true,
 				},
 			},
 		},
@@ -150,18 +144,20 @@ export default defineWidget({
 				options: {
 					choices: [
 						{
-							text: 'BOLD',
+							text: 'Bold',
 							value: 'bold',
 						},
 						{
-							text: 'ITALIC',
+							text: 'Italic',
 							value: 'italic',
 						},
 						{
-							text: 'UNDERLINE',
+							text: 'Underline',
 							value: 'underline',
 						},
 					],
+					placeholder: 'Select',
+					allowNone: true,
 				},
 			},
 		},
@@ -172,6 +168,10 @@ export default defineWidget({
 			meta: {
 				interface: 'input',
 				width: 'half',
+				options: {
+					trim: true,
+					placeholder: 'Input value',
+				},
 			},
 		},
 		{
@@ -184,11 +184,7 @@ export default defineWidget({
 				options: {
 					choices: [
 						{
-							text: 'Default',
-							value: null,
-						},
-						{
-							text: 'TOP',
+							text: 'Top',
 							value: 'top',
 						},
 						{
@@ -200,6 +196,8 @@ export default defineWidget({
 							value: 'bottom',
 						},
 					],
+					placeholder: 'Select',
+					allowNone: true,
 				},
 			},
 		},
@@ -212,10 +210,6 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					choices: [
-						{
-							text: 'Default',
-							value: null,
-						},
 						{
 							text: 'SM',
 							value: 'sm',
@@ -237,6 +231,8 @@ export default defineWidget({
 							value: '2xl',
 						},
 					],
+					placeholder: 'Select',
+					allowNone: true,
 				},
 			},
 		},

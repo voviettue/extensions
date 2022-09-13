@@ -375,6 +375,11 @@ export default {
 	}
 }
 
+.required {
+	position: relative;
+	left: -8px;
+	color: var(--primary);
+}
 .sortable-ghost {
 	border-radius: var(--border-radius);
 	outline: 2px dashed var(--primary);
