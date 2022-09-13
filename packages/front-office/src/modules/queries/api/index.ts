@@ -92,7 +92,7 @@ export default defineQuery({
 			},
 		},
 		{
-			field: 'query',
+			field: 'queryParams',
 			name: 'Query',
 			type: 'json',
 			meta: {
