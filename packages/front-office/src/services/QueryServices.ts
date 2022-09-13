@@ -102,9 +102,9 @@ export class QueryService {
 			query.options?.headers?.map((e: any) => (headers[e.key] = e.value));
 
 			const params: Record<string, any> = {};
-			query.options?.queryParams?.map((e: any) => (params[e.key] = e.value));
+			query.options?.params?.map((e: any) => (params[e.key] = e.value));
 
-			const body = query.options?.requestBody;
+			const body = query.options?.data ?? null;
 
 			const options = {
 				method: query.options.method,

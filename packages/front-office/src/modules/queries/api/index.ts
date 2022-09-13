@@ -94,8 +94,8 @@ export default defineQuery({
 			},
 		];
 
-		const fieldQueryParams = {
-			field: 'queryParams',
+		const fieldParams = {
+			field: 'params',
 			name: 'Query',
 			type: 'json',
 			meta: {
@@ -133,8 +133,8 @@ export default defineQuery({
 			},
 		};
 
-		const fieldRequestBody = {
-			field: 'requestBody',
+		const fieldData = {
+			field: 'data',
 			name: 'Request Body',
 			type: 'text',
 			meta: {
@@ -152,18 +152,18 @@ export default defineQuery({
 
 		switch (method) {
 			case 'get':
-				delete values?.options?.requestBody;
-				options.push(fieldQueryParams);
+				delete values?.options?.data;
+				options.push(fieldParams);
 				break;
 			case 'patch':
 			case 'post':
 			case 'put':
-				delete values?.options?.queryParams;
-				options.push(fieldRequestBody);
+				delete values?.options?.params;
+				options.push(fieldData);
 				break;
 			default:
-				delete values?.options?.requestBody;
-				delete values?.options?.queryParams;
+				delete values?.options?.data;
+				delete values?.options?.params;
 				break;
 		}
 
