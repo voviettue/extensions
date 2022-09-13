@@ -37,7 +37,7 @@ export class QueryService {
 		try {
 			const query: Query = await this.queryItemsService.readOne(queryId, { fields: '*' });
 			const callbackName = this.callback[query.query] as CallbackFunction;
-			const data = await this[callbackName](query);
+			const data = callbackName ? await this[callbackName](query) : null;
 			return data;
 		} catch (e: any) {
 			throw new BaseException(e?.message, e?.status, e?.code);
@@ -81,7 +81,7 @@ export class QueryService {
 			const data = await itemsService.readByQuery({
 				filter: query.options?.filter,
 				fields: query.options.fields,
-				limit: query.options?.per_page || 20,
+				limit: query.options?.perPage || 20,
 			});
 
 			return data;
@@ -102,9 +102,9 @@ export class QueryService {
 			query.options?.headers?.map((e: any) => (headers[e.key] = e.value));
 
 			const params: Record<string, any> = {};
-			query.options?.query?.map((e: any) => (params[e.key] = e.value));
+			query.options?.params?.map((e: any) => (params[e.key] = e.value));
 
-			const body = query.options?.request_body;
+			const body = query.options?.data ?? null;
 
 			const options = {
 				method: query.options.method,

@@ -8,6 +8,7 @@
 				<v-icon :name="queryIcon" class="page-icon" />
 				<span>{{ query.name }}</span>
 			</div>
+			<query-options :query="query" :delete-query="deleteQuery" />
 		</v-list-item>
 	</div>
 </template>
@@ -15,8 +16,9 @@
 <script setup lang="ts">
 import queryConfigList from '../../queries';
 import { computed } from 'vue';
+import QueryOptions from './query-options.vue';
 
-const props = withDefaults(defineProps<{ query: Record<string, any> }>(), {
+const props = withDefaults(defineProps<{ query: Record<string, any>; deleteQuery: Function }>(), {
 	query: () => ({
 		id: null,
 		name: '',
