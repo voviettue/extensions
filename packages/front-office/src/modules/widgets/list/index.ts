@@ -9,9 +9,9 @@ export default defineWidget({
 		{
 			field: 'data',
 			name: 'Data',
-			type: 'json',
+			// type: 'json',
 			meta: {
-				interface: 'code',
+				interface: 'input-multiline',
 				width: 'full',
 			},
 		},

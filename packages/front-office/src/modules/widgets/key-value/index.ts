@@ -8,10 +8,10 @@ export default defineWidget({
 		{
 			field: 'data',
 			name: 'Data',
-			type: 'json',
+			// type: 'json',
 			meta: {
 				required: true,
-				interface: 'code',
+				interface: 'input-multiline',
 				width: 'full',
 			},
 		},
