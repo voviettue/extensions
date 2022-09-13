@@ -24,6 +24,7 @@ export interface WidgetConfig {
 	icon: string;
 	group?: boolean;
 	options: ExtensionOptions;
+	extendOptions?: ExtensionOptions;
 	beforeSave?: (values: Record<string, any>) => Record<string, any>;
 }
 
@@ -32,4 +33,13 @@ export interface QueryConfig {
 	name: string;
 	icon: string;
 	options: ExtensionOptions;
+}
+
+export interface DisplayConfig {
+	id: string;
+	name: string;
+	icon: string;
+	description: string;
+	options: ExtensionOptions;
+	types: string[];
 }
