@@ -156,7 +156,7 @@ function getClass(el: Record<string, any>) {
 }
 
 .widget-select:deep(.widget-grid) {
-	grid-gap: 8px;
+	grid-gap: 10px;
 }
 
 .widget-select:deep(.widget-grid.group.full.nested) {
@@ -392,7 +392,7 @@ function getClass(el: Record<string, any>) {
 	width: 100%;
 	display: grid;
 	grid-template-columns: repeat(6, minmax(0, 1fr));
-	gap: 8px;
+	gap: 10px;
 	padding-left: 8px;
 	padding-right: 8px;
 	.grid-full {

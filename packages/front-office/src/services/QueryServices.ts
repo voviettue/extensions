@@ -2,6 +2,7 @@ import axios from 'axios';
 import { Query } from '../types';
 import { SchemaOverview, Accountability, ApiExtensionContext } from '@directus/shared/types';
 import { BaseException } from '@directus/shared/exceptions';
+import isJson from '../utils/is-json';
 
 type CallbackFunction = 'executeItems' | 'executeApi';
 
@@ -102,7 +103,7 @@ export class QueryService {
 			query.options?.headers?.map((e: any) => (headers[e.key] = e.value));
 
 			const params: Record<string, any> = {};
-			query.options?.params?.map((e: any) => (params[e.key] = e.value));
+			query.options?.params?.map((e: any) => (params[e.key] = isJson(e.value) ? JSON.parse(e.value) : e.value));
 
 			const body = query.options?.data ?? null;
 
