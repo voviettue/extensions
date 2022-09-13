@@ -81,7 +81,7 @@ export class QueryService {
 			const data = await itemsService.readByQuery({
 				filter: query.options?.filter,
 				fields: query.options.fields,
-				limit: query.options?.per_page || 20,
+				limit: query.options?.perPage || 20,
 			});
 
 			return data;
@@ -104,7 +104,7 @@ export class QueryService {
 			const params: Record<string, any> = {};
 			query.options?.queryParams?.map((e: any) => (params[e.key] = e.value));
 
-			const body = query.options?.request_body;
+			const body = query.options?.requestBody;
 
 			const options = {
 				method: query.options.method,
