@@ -24,7 +24,7 @@ export default defineWidget({
 						},
 					],
 				},
-				default: 'horizontal',
+				required: true,
 			},
 		},
 		{
