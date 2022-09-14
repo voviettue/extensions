@@ -4,31 +4,32 @@ export default defineDisplay({
 	id: 'text',
 	name: 'Text',
 	icon: 'text_format',
-	description: '',
+	description: 'Display text',
 	options: [
 		{
-			field: 'prefix',
-			name: 'Prefix',
+			field: 'verticalAlignment',
+			name: 'Vertical Alignment',
 			type: 'string',
 			meta: {
+				interface: 'select-dropdown',
 				width: 'half',
-				required: true,
-				interface: 'input',
 				options: {
-					trim: true,
-				},
-			},
-		},
-		{
-			field: 'suffix',
-			name: 'Suffix',
-			type: 'string',
-			meta: {
-				width: 'half',
-				required: true,
-				interface: 'input',
-				options: {
-					trim: true,
+					choices: [
+						{
+							text: 'Top',
+							value: 'top',
+						},
+						{
+							text: 'Middle',
+							value: 'middle',
+						},
+						{
+							text: 'Bottom',
+							value: 'bottom',
+						},
+					],
+					placeholder: 'Select',
+					allowNone: true,
 				},
 			},
 		},

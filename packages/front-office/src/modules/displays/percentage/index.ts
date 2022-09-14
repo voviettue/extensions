@@ -1,10 +1,10 @@
 import { defineDisplay } from '../../utils/define-extension';
 
 export default defineDisplay({
-	id: 'number',
-	name: 'Number',
-	icon: '123',
-	description: 'Display number',
+	id: 'percentage',
+	name: 'Percentage',
+	icon: 'percent',
+	description: 'Display percentage',
 	options: [
 		{
 			field: 'cellBackground',

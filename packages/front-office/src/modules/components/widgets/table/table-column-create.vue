@@ -180,7 +180,7 @@ export default {
 	min-height: 100px;
 	overflow: hidden;
 	text-align: center;
-	margin-right: 2rem;
+	margin: 0 0 2rem 2rem;
 }
 
 .preview {

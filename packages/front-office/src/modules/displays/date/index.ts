@@ -1,10 +1,10 @@
 import { defineDisplay } from '../../utils/define-extension';
 
 export default defineDisplay({
-	id: 'number',
-	name: 'Number',
-	icon: '123',
-	description: 'Display number',
+	id: 'date',
+	name: 'Date',
+	icon: 'calendar_month',
+	description: 'Display date',
 	options: [
 		{
 			field: 'cellBackground',
@@ -149,5 +149,5 @@ export default defineDisplay({
 			},
 		},
 	],
-	types: ['integer', 'bigInteger', 'decimal', 'float'],
+	types: ['date', 'dateTime'],
 });
