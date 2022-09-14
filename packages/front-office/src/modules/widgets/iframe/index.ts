@@ -31,6 +31,9 @@ export default defineWidget({
 					placeholder: 'Ratio Width Here',
 				},
 			},
+			schema: {
+				default_value: 16,
+			},
 		},
 		{
 			field: 'ratioHeight',
@@ -43,6 +46,9 @@ export default defineWidget({
 					trim: true,
 					placeholder: 'Ratio Height Here',
 				},
+			},
+			schema: {
+				default_value: 9,
 			},
 		},
 	],
