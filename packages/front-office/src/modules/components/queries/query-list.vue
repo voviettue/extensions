@@ -17,7 +17,7 @@
 				handle=".drag-handle"
 			>
 				<template #item="{ element }">
-					<query-item :query="element" :delete-query="deleteQuery"></query-item>
+					<query-item :query="element" @refresh="getListQuery()"></query-item>
 				</template>
 			</draggable>
 		</v-list>
@@ -31,12 +31,9 @@ import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import Draggable from 'vuedraggable';
 import QueryItem from './query-item.vue';
-import { useNotification } from '../../composables/use-notification';
-import { Query } from '../../types';
 
 const route = useRoute();
 const api = useApi();
-const { notify } = useNotification();
 
 const listQueries = ref([]);
 
@@ -55,16 +52,6 @@ async function getListQuery() {
 	try {
 		const queriesApiData = await api.get('/items/cms_queries');
 		listQueries.value = queriesApiData?.data?.data || [];
-	} catch {
-		//
-	}
-}
-
-async function deleteQuery(query: Query) {
-	try {
-		await api.delete(`/items/cms_queries/${query.id}`);
-		notify({ title: 'Item deleted' });
-		await getListQuery();
 	} catch {
 		//
 	}

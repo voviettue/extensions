@@ -16,4 +16,11 @@ export default defineQuery({
 			},
 		},
 	],
+	beforeSave: (values) => {
+		if (values?.options?.json) {
+			values.output = values?.options?.json;
+			values.refresh_on_load = false;
+		}
+		return values;
+	},
 });

@@ -20,7 +20,7 @@
 				icon
 				rounded
 				:disabled="!isAdmin || !hasEdits"
-				:loading="actionProcessing === 'save'"
+				:loading="saving"
 				@click="updateAndNavigate"
 			>
 				<v-icon name="check" />
@@ -31,7 +31,7 @@
 				rounded
 				icon
 				:disabled="!isAdmin"
-				:loading="actionProcessing === 'execute'"
+				:loading="executing"
 				@click="execute"
 			>
 				<v-icon name="play_arrow" />
@@ -48,9 +48,9 @@
 				v-model="modelValue"
 				primary-key="+"
 				class="field-fault"
-				:fields="fields"
+				:fields="defaultFields"
 				:initial-values="initialValues"
-				:validation-errors="validationQueryErrors"
+				:validation-errors="validationErrors"
 			></v-form>
 
 			<div class="group-raw">
@@ -58,7 +58,7 @@
 					v-model="modelValue.options"
 					collection="cms_queries"
 					:options-fields="optionsFields"
-					:validation-errors="validationQueryErrors"
+					:validation-errors="validationErrors"
 				/>
 			</div>
 		</div>
@@ -79,15 +79,13 @@
 <script setup lang="ts">
 import { useApi, useStores } from '@directus/extensions-sdk';
 import { useRoute, useRouter } from 'vue-router';
-import { ref, Ref, computed, watch } from 'vue';
-import { useValidate } from '../../composables/use-validate';
+import { ref, Ref, computed } from 'vue';
 import { useItem } from '../../composables/use-item';
 import { useNotification } from '../../composables/use-notification';
 import { formFields } from '../../constants/query';
 import { ExtensionOptionsContext } from '../../types/extensions';
 import { useFrontOfficeStore } from '../../stores/front-office';
 import queryConfigList from '../../queries';
-import snakeCase from 'lodash/snakeCase';
 import Navigation from '../navigation.vue';
 import ExtensionOptionsComponent from '../shared/extension-options.vue';
 import QueryLogSidebar from './query-log-sidebar.vue';
@@ -99,14 +97,12 @@ const route = useRoute();
 const router = useRouter();
 const { useUserStore } = useStores();
 const { isAdmin } = useUserStore();
-const { validateItem } = useValidate();
 const { notify } = useNotification();
 const frontOfficeStore = useFrontOfficeStore();
+
 const confirmExecute = ref(false);
 const primaryKey = route.params.id as string;
-
 const modelValue: Ref<Record<string, any>> = ref({ options: {} });
-const validationQueryErrors: Ref<Record<string, any>[]> = ref([]);
 const initialValues: Ref<Record<string, any>> = ref({
 	name: '',
 	timeout: 10000,
@@ -114,21 +110,19 @@ const initialValues: Ref<Record<string, any>> = ref({
 	options: null,
 	refresh_on_load: false,
 });
-const actionProcessing = ref('');
+const executing = ref(false);
 
-const { item, edits, getItem, save, validationErrors } = useItem('cms_queries', primaryKey);
+const { item, edits, getItem, saving, save, validationErrors, fieldsWithPermissions } = useItem(
+	'cms_queries',
+	primaryKey
+);
 
 if (primaryKey !== '+') {
-	actionProcessing.value = 'getDetailPage';
-	getItem()
-		.then(() => {
-			initialValues.value = { ...item.value } || {};
-			initialValues.value.output = initialValues.value?.output && JSON.parse(initialValues.value.output);
-			modelValue.value = Object.assign({}, initialValues.value);
-		})
-		.finally(() => {
-			actionProcessing.value = '';
-		});
+	getItem().then(() => {
+		initialValues.value = { ...item.value } || {};
+		initialValues.value.output = initialValues.value?.output && JSON.parse(initialValues.value.output);
+		modelValue.value = Object.assign({}, initialValues.value);
+	});
 }
 
 const hasEdits = computed(() => {
@@ -151,11 +145,17 @@ const optionsFields = computed(() => {
 
 	return options;
 });
-const fields = computed(() => {
-	const excludeField = modelValue.value.query === 'json' ? ['refresh_on_load', 'timeout'] : [];
-	return formFields?.filter((e: any) => {
-		return !excludeField.includes(e.field);
-	});
+
+const defaultFields = computed(() => {
+	if (typeof formFields === 'function') {
+		const ctx = { values: modelValue.value } as ExtensionOptionsContext;
+		return formFields(ctx);
+	}
+	return formFields;
+});
+
+const selectedQuery = computed(() => {
+	return queryConfigList.find((e) => e.id === modelValue.value?.query);
 });
 
 async function execute() {
@@ -165,41 +165,35 @@ async function execute() {
 			return;
 		}
 
-		actionProcessing.value = 'execute';
+		executing.value = true;
 		const responseExecute = await api.patch(`/front-office/queries/${route.params.id}/execute`);
 		modelValue.value.output = responseExecute?.data;
 
 		await api.patch(`/items/cms_queries/${route.params.id}`, { output: modelValue.value.output });
+
 		notify({ title: 'Item executed!' });
 	} catch {
 		//
 	} finally {
-		actionProcessing.value = '';
+		executing.value = false;
 	}
 
 	await getLogs();
 }
 
 async function update() {
-	validationQueryErrors.value = [];
-	const dataForm = { ...modelValue.value, ...modelValue.value.options };
-	validationQueryErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
-	if (validationQueryErrors.value.length) return;
-
-	actionProcessing.value = 'save';
-
-	if (modelValue.value?.query === 'json') {
-		dataForm.output = dataForm?.json;
-	}
-
 	try {
-		edits.value = { ...dataForm };
+		edits.value = { ...modelValue.value, ...modelValue.value.options };
+		fieldsWithPermissions.value = [...defaultFields.value, ...optionsFields.value];
+
+		if (selectedQuery.value?.beforeSave) {
+			edits.value = selectedQuery.value.beforeSave(edits.value);
+		}
+
 		await save();
 		initialValues.value = { ...modelValue.value };
 	} catch {
-		validationQueryErrors.value = validationErrors.value;
-	} finally {
-		actionProcessing.value = '';
+		//
 	}
 }
 

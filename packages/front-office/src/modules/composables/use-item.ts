@@ -1,8 +1,11 @@
 import { useApi, useStores } from '@directus/extensions-sdk';
 import { useNotification } from './use-notification';
 import { useCollection } from '@directus/shared/composables';
+import { useValidate } from './use-validate';
 import { getEndpoint } from '@directus/shared/utils';
 import { computed, ComputedRef, Ref, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
+import merge from 'lodash/merge';
 
 type UsableItem = {
 	edits: Ref<Record<string, any>>;
@@ -14,11 +17,12 @@ type UsableItem = {
 	refresh: () => void;
 	save: () => Promise<any>;
 	isNew: ComputedRef<boolean>;
-	// remove: () => Promise<void>;
-	// deleting: Ref<boolean>;
+	remove: () => Promise<void>;
+	deleting: Ref<boolean>;
 	getItem: () => Promise<void>;
 	validationErrors: Ref<any[]>;
 	listFields: ComputedRef<Record<string, any>>;
+	fieldsWithPermissions: Ref<any>;
 };
 
 export function useItem(collection: string, primaryKey: string): UsableItem {
@@ -29,12 +33,15 @@ export function useItem(collection: string, primaryKey: string): UsableItem {
 	const loading = ref(false);
 	const saving = ref(false);
 	const deleting = ref(false);
+	const fieldsWithPermissions = ref<any>([]);
 	const edits = ref<Record<string, any>>({});
 	const hasEdits = computed(() => Object.keys(edits.value).length > 0);
 	const isNew = computed(() => primaryKey === '+');
 	const isSingle = computed(() => !!collectionInfo.value?.meta?.singleton);
 	const { notify } = useNotification();
+	const { t } = useI18n();
 	const { useFieldsStore } = useStores();
+	const { validateItem } = useValidate();
 	const listFields = computed(() => {
 		const fieldsStore = useFieldsStore();
 		const fields = fieldsStore.getFieldsForCollection(collection);
@@ -62,9 +69,12 @@ export function useItem(collection: string, primaryKey: string): UsableItem {
 		refresh,
 		save,
 		isNew,
+		remove,
+		deleting,
 		getItem,
 		validationErrors,
 		listFields,
+		fieldsWithPermissions,
 	};
 
 	async function getItem() {
@@ -87,6 +97,15 @@ export function useItem(collection: string, primaryKey: string): UsableItem {
 	async function save() {
 		saving.value = true;
 		validationErrors.value = [];
+
+		const errors = validateItem(merge({}, item.value, edits.value), fieldsWithPermissions.value);
+
+		if (errors.length > 0) {
+			validationErrors.value = errors;
+			saving.value = false;
+			throw errors;
+		}
+
 		try {
 			let response;
 			if (isNew.value === true) {
@@ -108,6 +127,36 @@ export function useItem(collection: string, primaryKey: string): UsableItem {
 			saveErrorHandler(err);
 		} finally {
 			saving.value = false;
+		}
+	}
+
+	async function remove() {
+		deleting.value = true;
+
+		try {
+			await api.delete(itemEndpoint.value);
+			item.value = null;
+			notify({ title: 'Item deleted!' });
+		} catch (err: any) {
+			deleteErrorHandler(err);
+			throw err;
+		} finally {
+			deleting.value = false;
+		}
+	}
+
+	function deleteErrorHandler(err: any) {
+		if (err?.response?.data?.errors && err?.response?.data?.errors[0]) {
+			const message = err?.response?.data?.errors[0]?.message;
+			const code = err?.response?.data?.errors[0].extensions?.code || 'UNKNOWN';
+
+			notify({
+				title: t(`errors.${code}`),
+				text: message,
+				type: 'error',
+				dialog: true,
+				err,
+			});
 		}
 	}
 

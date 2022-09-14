@@ -33,9 +33,9 @@
 						v-model="modelValue"
 						primary-key="+"
 						class="field-fault"
-						:fields="fields"
+						:fields="defaultFields"
 						:initial-values="initialValues"
-						:validation-errors="validationQueryErrors"
+						:validation-errors="validationErrors"
 					></v-form>
 
 					<v-divider inline />
@@ -45,7 +45,7 @@
 							v-model="modelValue.options"
 							collection="cms_queries"
 							:options-fields="optionsFields"
-							:validation-errors="validationQueryErrors"
+							:validation-errors="validationErrors"
 						/>
 					</div>
 				</div>
@@ -56,7 +56,7 @@
 				v-tooltip.bottom="`Save`"
 				rounded
 				icon
-				:loading="isLoading"
+				:loading="saving"
 				:disabled="isDisable"
 				@click="handleCreateQuery"
 			>
@@ -69,7 +69,6 @@
 import { ref, Ref, computed, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { formFields } from '../../constants/query';
-import { useValidate } from '../../composables/use-validate';
 import { useItem } from '../../composables/use-item';
 import { ExtensionOptionsContext, QueryConfig } from '../../types/extensions';
 import queryConfigList from '../../queries';
@@ -77,23 +76,19 @@ import isEmpty from 'lodash/isEmpty';
 import snakeCase from 'lodash/snakeCase';
 import ExtensionOptionsComponent from '../shared/extension-options.vue';
 
-const { validateItem } = useValidate();
+const { edits, saving, save, validationErrors, fieldsWithPermissions } = useItem('cms_queries', '+');
 const router = useRouter();
 
-const validationQueryErrors: Ref<Record<string, any>[]> = ref([]);
 const modelValue: Ref<Record<string, any>> = ref({ options: {} });
 const querySelected: Ref<QueryConfig | null> = ref(null);
 const isOpen = ref(true);
-const isLoading = ref(false);
 const initialValues = ref({
 	name: '',
 	timeout: 10000,
 	query: null,
 	options: null,
-	refresh_on_load: false,
+	refresh_on_load: true,
 });
-
-const { edits, save, validationErrors } = useItem('cms_queries', '+');
 
 watch(
 	() => modelValue.value.name,
@@ -112,11 +107,12 @@ const optionsFields = computed(() => {
 
 	return options;
 });
-const fields = computed(() => {
-	const excludeField = modelValue.value?.query === 'json' ? ['refresh_on_load', 'timeout', 'output'] : ['output'];
-	return formFields?.filter((e: any) => {
-		return !excludeField.includes(e.field);
-	});
+const defaultFields = computed(() => {
+	if (typeof formFields === 'function') {
+		const ctx = { values: modelValue.value } as ExtensionOptionsContext;
+		return formFields(ctx);
+	}
+	return formFields;
 });
 
 function onChangeQuery(query: QueryConfig) {
@@ -125,25 +121,19 @@ function onChangeQuery(query: QueryConfig) {
 }
 
 async function handleCreateQuery() {
-	validationQueryErrors.value = [];
-	const dataForm = { ...modelValue.value, ...modelValue.value.options };
-	validationQueryErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
-	if (validationQueryErrors.value.length) return;
-
-	isLoading.value = true;
-
-	if (modelValue.value?.query === 'json') {
-		modelValue.value.output = modelValue.value?.options?.json;
-	}
-
 	try {
-		edits.value = { ...dataForm };
+		edits.value = { ...modelValue.value, ...modelValue.value.options };
+		fieldsWithPermissions.value = [...defaultFields.value, ...optionsFields.value];
+
+		if (querySelected.value?.beforeSave) {
+			edits.value = querySelected.value.beforeSave(edits.value);
+		}
+
 		await save();
+
 		router.push('/front-office/queries');
 	} catch {
-		validationQueryErrors.value = validationErrors.value;
-	} finally {
-		isLoading.value = false;
+		//
 	}
 }
 </script>
