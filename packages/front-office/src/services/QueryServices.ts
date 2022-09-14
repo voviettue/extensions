@@ -15,7 +15,7 @@ export class QueryService {
 	callback = {
 		items: 'executeItems',
 		api: 'executeApi',
-		json: '',
+		json: 'executeJson',
 	};
 
 	constructor(schema: SchemaOverview, accountability: Accountability, ctx: ApiExtensionContext) {
@@ -38,7 +38,7 @@ export class QueryService {
 		try {
 			const query: Query = await this.queryItemsService.readOne(queryId, { fields: '*' });
 			const callbackName = this.callback[query.query] as CallbackFunction;
-			const data = callbackName ? await this[callbackName](query) : null;
+			const data = await this[callbackName](query);
 			return data;
 		} catch (e: any) {
 			throw new BaseException(e?.message, e?.status, e?.code);
@@ -120,9 +120,14 @@ export class QueryService {
 
 			return data;
 		} catch (e: any) {
-			const message = (e.response.data.errors && e.response.data.errors[0]?.message) || e.response.data.message || '';
+			const message =
+				(e?.response?.data?.errors && e?.response?.data?.errors[0]?.message) || e?.response?.data?.message || '';
 			const statusCode = e.response.status;
 			throw new BaseException(message, statusCode, e?.code);
 		}
+	}
+
+	executeJson(query: Query) {
+		return query.output;
 	}
 }

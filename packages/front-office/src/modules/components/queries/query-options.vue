@@ -22,7 +22,7 @@
 				</v-card-title>
 				<v-card-actions>
 					<v-button secondary @click="deleteDialog = false">Cancel</v-button>
-					<v-button :loading="deleting" kind="danger" @click="deleteQuery(query)">Delete</v-button>
+					<v-button :loading="deleting" kind="danger" @click="deleteQuery()">Delete</v-button>
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
@@ -30,10 +30,12 @@
 </template>
 <script setup lang="ts">
 import { useStores } from '@directus/extensions-sdk';
+import { useRoute } from 'vue-router';
+import { useItem } from '../../composables/use-item';
 import { Ref, ref } from 'vue';
-const { useUserStore } = useStores();
-const { isAdmin } = useUserStore();
-withDefaults(defineProps<{ query: Record<string, any>; deleteQuery: Function }>(), {
+
+const emit = defineEmits(['refresh']);
+withDefaults(defineProps<{ query: Record<string, any> }>(), {
 	query: () => ({
 		id: null,
 		name: '',
@@ -42,6 +44,19 @@ withDefaults(defineProps<{ query: Record<string, any>; deleteQuery: Function }>(
 		query: null,
 	}),
 });
+
+const { useUserStore } = useStores();
+const { isAdmin } = useUserStore();
+const route = useRoute();
+
+const primaryKey = route.params.id as string;
+const { deleting, remove } = useItem('cms_queries', primaryKey);
+
+async function deleteQuery() {
+	await remove();
+	emit('refresh');
+}
+
 const deleteDialog: Ref<boolean> = ref(false);
 </script>
 <style scoped>

@@ -8,7 +8,7 @@
 				<v-icon :name="queryIcon" class="page-icon" />
 				<span>{{ query.name }}</span>
 			</div>
-			<query-options :query="query" :delete-query="deleteQuery" />
+			<query-options :query="query" @refresh="emit('refresh')" />
 		</v-list-item>
 	</div>
 </template>
@@ -18,7 +18,8 @@ import queryConfigList from '../../queries';
 import { computed } from 'vue';
 import QueryOptions from './query-options.vue';
 
-const props = withDefaults(defineProps<{ query: Record<string, any>; deleteQuery: Function }>(), {
+const emit = defineEmits(['refresh']);
+const props = withDefaults(defineProps<{ query: Record<string, any> }>(), {
 	query: () => ({
 		id: null,
 		name: '',
