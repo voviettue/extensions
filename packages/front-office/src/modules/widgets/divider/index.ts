@@ -24,7 +24,9 @@ export default defineWidget({
 						},
 					],
 				},
-				default: 'horizontal',
+			},
+			schema: {
+				default_value: 'horizontal',
 			},
 		},
 		{
@@ -56,7 +58,7 @@ export default defineWidget({
 		{
 			field: 'lineWidth',
 			name: 'Line Width',
-			type: 'string',
+			type: 'integer',
 			meta: {
 				interface: 'input',
 				width: 'half',
@@ -69,7 +71,7 @@ export default defineWidget({
 		{
 			field: 'lineHeight',
 			name: 'Line Height',
-			type: 'string',
+			type: 'integer',
 			meta: {
 				interface: 'input',
 				width: 'half',
