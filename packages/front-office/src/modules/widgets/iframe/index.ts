@@ -19,5 +19,31 @@ export default defineWidget({
 				},
 			},
 		},
+		{
+			field: 'ratioWidth',
+			name: 'Ratio Width',
+			type: 'integer',
+			meta: {
+				interface: 'input',
+				width: 'full',
+				options: {
+					trim: true,
+					placeholder: 'Ratio Width Here',
+				},
+			},
+		},
+		{
+			field: 'ratioHeight',
+			name: 'Ratio Height',
+			type: 'integer',
+			meta: {
+				interface: 'input',
+				width: 'full',
+				options: {
+					trim: true,
+					placeholder: 'Ratio Height Here',
+				},
+			},
+		},
 	],
 });
