@@ -24,7 +24,9 @@ export default defineWidget({
 						},
 					],
 				},
-				required: true,
+			},
+			schema: {
+				default_value: 'horizontal',
 			},
 		},
 		{
