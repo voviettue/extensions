@@ -6,7 +6,7 @@
 			</template>
 
 			<template #input>
-				<div v-tooltip="`${column.key}`" class="label" @click="isOpenDetail = true">
+				<div v-tooltip="`${column.options?.display ?? 'None'}`" class="label" @click="isOpenDetail = true">
 					<div class="label-inner">
 						<v-icon v-if="!!column.icon" :name="column.icon" @click.stop />
 						<span class="name">{{ column.label }}</span>
@@ -17,13 +17,12 @@
 
 			<template #append>
 				<div class="icons">
-					<!-- <v-icon v-if="hidden" v-tooltip="`Hidden menu`" name="visibility_off" class="hidden-icon" small /> -->
-					<!-- <table-column-select-menu
-						:item=""
-						@toggle-visibility="toggleVisibility"
-						@duplicate="duplicateMenuItem"
-						@delete="deleteActive = true"
-					/> -->
+					<v-icon v-if="hidden" v-tooltip="`Hidden menu`" name="visibility_off" class="hidden-icon" small />
+					<table-column-select-menu
+						:column="column"
+						@open-detail="isOpenDetail = true"
+						@delete="$emit('delete', column)"
+					/>
 				</div>
 			</template>
 		</v-input>
@@ -42,21 +41,24 @@
 
 <script lang="ts">
 import { ref, computed } from 'vue';
+import TableColumnSelectMenu from './table-column-select-menu.vue';
 import TableColumnDetail from './table-column-detail.vue';
 
 export default {
-	components: { TableColumnDetail },
+	components: { TableColumnSelectMenu, TableColumnDetail },
 	props: {
 		column: {
 			type: Object,
 			default: null,
 		},
 	},
-	emits: ['update'],
+	emits: ['update', 'delete'],
 	setup(props, { emit }) {
 		const isOpenDetail = ref<boolean>(false);
+		const hidden = computed(() => props.column?.hidden === true);
 
 		return {
+			hidden,
 			isOpenDetail,
 			close,
 		};

@@ -6,6 +6,7 @@
 		<draggable
 			class="menu-grid"
 			:model-value="itemMenus.filter((item) => item.parent == null)"
+			:item-key="`id`"
 			:force-fallback="true"
 			handle=".drag-handle"
 			:group="{ name: 'setting-menus' }"

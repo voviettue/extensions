@@ -23,9 +23,6 @@ export default defineWidget({
 				width: 'half',
 				interface: 'boolean',
 			},
-			schema: {
-				default_value: false,
-			},
 		},
 		{
 			field: 'border',
@@ -35,9 +32,6 @@ export default defineWidget({
 				width: 'half',
 				interface: 'boolean',
 			},
-			schema: {
-				default_value: true,
-			},
 		},
 		{
 			field: 'verticalLines',
@@ -46,9 +40,6 @@ export default defineWidget({
 			meta: {
 				width: 'half',
 				interface: 'boolean',
-			},
-			schema: {
-				default_value: false,
 			},
 		},
 		{

@@ -20,7 +20,6 @@
 				v-model="modelValue"
 				class="field-fault"
 				:fields="formFields"
-				:initial-values="initialValues"
 				:validation-errors="validationErrors"
 			/>
 
@@ -55,13 +54,14 @@
 	</v-drawer>
 </template>
 <script lang="ts">
-import { ref, Ref, computed } from 'vue';
+import { ref, Ref, computed, watch, onMounted } from 'vue';
 import formatTitle from '@directus/format-title';
 import { useValidate } from '../../../composables/use-validate';
 import listDisplayConfig from '../../../displays';
 import { ExtensionOptionsContext, DisplayConfig } from '../../../types/extensions';
 import { formFields } from '../../../constants/column';
 import ExtensionOptions from '../../shared/extension-options.vue';
+import snakeCase from 'lodash/snakeCase';
 
 export default {
 	components: { ExtensionOptions },
@@ -81,14 +81,22 @@ export default {
 
 		const isLoading = ref<boolean>(false);
 		const validationErrors: Ref<Record<string, any>[]> = ref([]);
-		const modelValue: Ref<Record<string, any>> = ref({ ...props.column });
-		const selectedDisplay: Ref<DisplayConfig | null> = ref(
-			listDisplayConfig.find((display: DisplayConfig) => display.id == props.column.display) as DisplayConfig
+		const modelValue: Ref<Record<string, any>> = ref({ options: {} });
+		const selectedDisplay: Ref<DisplayConfig | null> = ref(null);
+
+		watch(
+			() => modelValue.value.label,
+			(val: any) => {
+				modelValue.value.key = snakeCase(val);
+			}
 		);
 
-		const initialValues = ref({
-			key: null,
-			label: null,
+		onMounted(async () => {
+			modelValue.value = { ...props.column } || {};
+
+			selectedDisplay.value = listDisplayConfig.find(
+				(display: DisplayConfig) => display.id == props.column.display
+			) as DisplayConfig;
 		});
 
 		const optionsFields = computed(() => {
@@ -124,7 +132,6 @@ export default {
 			validationErrors,
 			selectedDisplay,
 			toggleDisplayConfig,
-			initialValues,
 		};
 
 		function toggleDisplayConfig(display: DisplayConfig) {
@@ -142,7 +149,6 @@ export default {
 			isLoading.value = true;
 
 			emit('update', modelValue.value);
-			modelValue.value = {};
 
 			isLoading.value = false;
 		}

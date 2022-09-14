@@ -4,11 +4,12 @@
 			<div class="field-label type-label">
 				<span class="field-name"><v-text-overflow text="Column" /></span>
 			</div>
-			<v-notice v-if="optionsValues.columns === undefined">No items</v-notice>
+			<v-notice v-if="optionsValues.columns === undefined || optionsValues.columns?.length === 0">No items</v-notice>
 			<draggable
 				v-else
 				class="table-column-grid"
 				:model-value="optionsValues.columns"
+				:item-key="`key`"
 				:force-fallback="true"
 				handle=".drag-handle"
 				:group="{ name: 'table-columns' }"
@@ -17,8 +18,14 @@
 				:invert-swap="true"
 				@update:model-value="setSort"
 			>
-				<template #item="{ element }">
-					<widget-table-column :column="element" @update="updateColumn" />
+				<template #item="{ element, index }">
+					<widget-table-column
+						:column="element"
+						@update="updateColumn($event, index)"
+						@toggle-visibility="toggleVisibility($event, index)"
+						@duplicate="duplicateColumn($event, index)"
+						@delete="deleteColumn($event, index)"
+					/>
 				</template>
 			</draggable>
 
@@ -29,9 +36,10 @@
 			:model-value="optionsValues"
 			class="extension-options"
 			:fields="extendFields"
+			:initial-values="extendInitialValues"
 			primary-key="+"
 			style="padding: 0"
-			@update:model-value="updateValue($event)"
+			@update:model-value="updateExtendValues($event)"
 		/>
 	</div>
 </template>
@@ -58,6 +66,11 @@ export default {
 	emits: ['input', 'update:modelValue'],
 	setup(props, { emit }) {
 		const isOpenCreate = ref<boolean>(false);
+		const extendInitialValues = ref({
+			strippedRow: false,
+			border: true,
+			verticalLines: false,
+		});
 
 		const optionsValues = computed({
 			get() {
@@ -89,9 +102,6 @@ export default {
 						width: 'half',
 						interface: 'boolean',
 					},
-					schema: {
-						default_value: false,
-					},
 				},
 				{
 					field: 'border',
@@ -101,9 +111,6 @@ export default {
 						width: 'half',
 						interface: 'boolean',
 					},
-					schema: {
-						default_value: true,
-					},
 				},
 				{
 					field: 'verticalLines',
@@ -112,9 +119,6 @@ export default {
 					meta: {
 						width: 'half',
 						interface: 'boolean',
-					},
-					schema: {
-						default_value: false,
 					},
 				},
 				{
@@ -310,17 +314,21 @@ export default {
 			isOpenCreate,
 			optionsValues,
 			extendFields,
-			updateValue,
+			extendInitialValues,
+			updateExtendValues,
 			setSort,
 			createColumn,
 			updateColumn,
+			deleteColumn,
 		};
 
 		async function setSort(values: any) {
-			// console.log(values);
+			const data = cloneDeep(optionsValues.value);
+			const edits = { ...data, columns: values };
+			optionsValues.value = edits;
 		}
 
-		function updateValue(values: any) {
+		function updateExtendValues(values: any) {
 			const data = cloneDeep(optionsValues.value);
 			const edits = { ...data, ...values };
 			optionsValues.value = edits;
@@ -341,11 +349,19 @@ export default {
 			close();
 		}
 
-		function updateColumn(value: any) {
+		function updateColumn(value: any, index: number) {
 			const data = cloneDeep(optionsValues.value);
 			const columnData = data.columns ?? [];
-			Object.assign(columnData[columnData.findIndex((col: Record<string, any>) => col.key === value.key)], value);
+			Object.assign(columnData[columnData.findIndex((col: Record<string, any>, i: number) => i === index)], value);
 
+			const edits = { ...data, columns: columnData };
+			optionsValues.value = edits;
+		}
+
+		function deleteColumn(value: any, index: number) {
+			const data = cloneDeep(optionsValues.value);
+			const columnData = data.columns ?? [];
+			columnData.splice(index, 1);
 			const edits = { ...data, columns: columnData };
 			optionsValues.value = edits;
 		}
