@@ -24,6 +24,7 @@ export default defineWidget({
 						},
 					],
 				},
+				default: 'horizontal',
 			},
 		},
 		{
@@ -35,10 +36,6 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					choices: [
-						{
-							text: 'Default',
-							value: null,
-						},
 						{
 							text: 'Solid',
 							value: 'solid',
@@ -52,19 +49,33 @@ export default defineWidget({
 							value: 'dotted',
 						},
 					],
+					allowNone: true,
 				},
 			},
 		},
 		{
-			field: 'height',
-			name: 'Height',
+			field: 'lineWidth',
+			name: 'Line Width',
 			type: 'string',
 			meta: {
 				interface: 'input',
 				width: 'half',
 				options: {
 					trim: true,
-					placeholder: 'Enter height size in px',
+					placeholder: 'Enter width here',
+				},
+			},
+		},
+		{
+			field: 'lineHeight',
+			name: 'Line Height',
+			type: 'string',
+			meta: {
+				interface: 'input',
+				width: 'half',
+				options: {
+					trim: true,
+					placeholder: 'Enter height here',
 				},
 			},
 		},
@@ -100,10 +111,6 @@ export default defineWidget({
 				options: {
 					choices: [
 						{
-							text: 'Default',
-							value: null,
-						},
-						{
 							text: 'Center',
 							value: 'center',
 						},
@@ -124,6 +131,7 @@ export default defineWidget({
 							value: 'top',
 						},
 					],
+					allowNone: true,
 				},
 			},
 		},
