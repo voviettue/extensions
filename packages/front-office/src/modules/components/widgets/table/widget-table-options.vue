@@ -85,7 +85,8 @@ export default {
 		});
 
 		const extendFields = computed(() => {
-			return [
+			const pagination = optionsValues.value?.pagination;
+			const extendOptions = [
 				{
 					field: 'data',
 					name: 'Data',
@@ -306,7 +307,56 @@ export default {
 						},
 					},
 				},
+				{
+					field: 'pagination',
+					name: 'Pagination',
+					type: 'boolean',
+					meta: {
+						interface: 'radio',
+						width: 'half',
+					},
+				},
 			];
+			if (pagination === true) {
+				const itemPerPageField = {
+					field: 'itemPerPage',
+					name: 'Item Per Page',
+					type: 'integer',
+					meta: {
+						interface: 'select-dropdown',
+						width: 'half',
+						options: {
+							choices: [
+								{
+									text: '10',
+									value: 10,
+								},
+								{
+									text: '20',
+									value: 20,
+								},
+								{
+									text: '50',
+									value: 50,
+								},
+								{
+									text: '100',
+									value: 100,
+								},
+								{
+									text: '200',
+									value: 200,
+								},
+							],
+							placeholder: '10',
+							allowOther: true,
+							allowNone: true,
+						},
+					},
+				};
+				extendOptions.push(itemPerPageField);
+			}
+			return extendOptions;
 		});
 
 		return {
