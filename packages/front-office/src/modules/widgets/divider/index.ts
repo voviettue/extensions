@@ -64,7 +64,7 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					trim: true,
-					placeholder: 'Enter width here',
+					placeholder: 'Enter the length in px here',
 				},
 			},
 		},
@@ -77,7 +77,7 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					trim: true,
-					placeholder: 'Enter height here',
+					placeholder: 'Enter the thickness in px here',
 				},
 			},
 		},
