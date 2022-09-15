@@ -10,6 +10,17 @@
 				<v-list-item-content>Edit</v-list-item-content>
 			</v-list-item>
 
+			<v-list-item clickable @click="$emit('toggleVisibility')">
+				<template v-if="column?.hidden === false">
+					<v-list-item-icon><v-icon name="visibility_off" /></v-list-item-icon>
+					<v-list-item-content>Hide</v-list-item-content>
+				</template>
+				<template v-else>
+					<v-list-item-icon><v-icon name="visibility" /></v-list-item-icon>
+					<v-list-item-content>Show</v-list-item-content>
+				</template>
+			</v-list-item>
+
 			<v-divider />
 
 			<v-list-item clickable class="danger" @click="$emit('delete')">
@@ -36,7 +47,7 @@ export default {
 			default: false,
 		},
 	},
-	emits: ['delete', 'openDetail'],
+	emits: ['toggleVisibility', 'delete', 'openDetail'],
 };
 </script>
 <style scoped>

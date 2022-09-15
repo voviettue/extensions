@@ -39,6 +39,18 @@ export const formFields = [
 		},
 	},
 	{
+		field: 'tooltip',
+		name: 'Tooltip',
+		type: 'string',
+		meta: {
+			width: 'half',
+			interface: 'input',
+			options: {
+				trim: true,
+			},
+		},
+	},
+	{
 		field: 'hidden',
 		name: 'Hidden',
 		type: 'boolean',
@@ -46,6 +58,5 @@ export const formFields = [
 			width: 'half',
 			interface: 'boolean',
 		},
-		defaultValue: false,
 	},
 ];

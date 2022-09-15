@@ -7,6 +7,26 @@ export default defineDisplay({
 	description: 'Display date',
 	options: [
 		{
+			field: 'format',
+			name: 'Format',
+			type: 'string',
+			meta: {
+				interface: 'select-dropdown',
+				width: 'half',
+				options: {
+					choices: [
+						{ text: 'Long', value: 'long' },
+						{ text: 'Short', value: 'short' },
+					],
+					allowOther: true,
+				},
+				note: 'The custom format accepts the __[Date Field Symbol Table](https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table)__',
+			},
+			schema: {
+				default_value: 'long',
+			},
+		},
+		{
 			field: 'cellBackground',
 			name: 'Cell Background',
 			type: 'string',

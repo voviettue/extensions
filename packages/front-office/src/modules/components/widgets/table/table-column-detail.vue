@@ -1,5 +1,5 @@
 <template>
-	<v-drawer :title="`Editing Column Item`" :model-value="isOpen" persistent @cancel="close">
+	<v-drawer :title="`Editing Table Column`" :model-value="isOpen" persistent @cancel="close">
 		<template #sidebar>
 			<v-tabs v-model="currentTab" vertical>
 				<v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value">
@@ -16,14 +16,14 @@
 
 		<div class="edit-column-container">
 			<v-form
-				v-if="currentTab == 'field'"
+				v-if="currentTab == 'properties'"
 				v-model="modelValue"
 				class="field-fault"
 				:fields="formFields"
 				:validation-errors="validationErrors"
 			/>
 
-			<div v-if="currentTab == 'style'" class="list-column-config">
+			<div v-if="currentTab == 'displayValue'" class="list-column-config">
 				<button
 					v-for="displayConfig of listDisplayConfig"
 					:key="displayConfig.id"
@@ -81,8 +81,11 @@ export default {
 
 		const isLoading = ref<boolean>(false);
 		const validationErrors: Ref<Record<string, any>[]> = ref([]);
-		const modelValue: Ref<Record<string, any>> = ref({ options: {} });
-		const selectedDisplay: Ref<DisplayConfig | null> = ref(null);
+		const modelValue: Ref<Record<string, any>> = ref(props.column);
+		const selectedDisplay: Ref<DisplayConfig | null> = ref(
+			listDisplayConfig.find((display: DisplayConfig) => display.id == props.column.display) as DisplayConfig
+		);
+		const currentTab = ref<string>();
 
 		watch(
 			() => modelValue.value.label,
@@ -91,12 +94,16 @@ export default {
 			}
 		);
 
-		onMounted(async () => {
-			modelValue.value = { ...props.column } || {};
+		watch(
+			() => props.column,
+			(val: any) => {
+				modelValue.value = val;
+			},
+			{ deep: true, immediate: true }
+		);
 
-			selectedDisplay.value = listDisplayConfig.find(
-				(display: DisplayConfig) => display.id == props.column.display
-			) as DisplayConfig;
+		onMounted(async () => {
+			currentTab.value = 'properties';
 		});
 
 		const optionsFields = computed(() => {
@@ -111,12 +118,10 @@ export default {
 
 		const tabs = computed(() => {
 			return [
-				{ value: 'field', text: 'Field' },
-				{ value: 'style', text: 'Style' },
+				{ value: 'properties', text: 'Properties' },
+				{ value: 'displayValue', text: 'Display Value' },
 			];
 		});
-
-		const currentTab = ref<string>('field');
 
 		return {
 			tabs,
@@ -188,7 +193,7 @@ export default {
 	min-height: 100px;
 	overflow: hidden;
 	text-align: center;
-	margin-right: 2rem;
+	margin: 0 0 2rem 2rem;
 }
 
 .preview {

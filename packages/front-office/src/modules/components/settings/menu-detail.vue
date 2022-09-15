@@ -52,7 +52,7 @@
 	</v-drawer>
 </template>
 <script lang="ts">
-import { ref, Ref, computed, onBeforeMount, watch } from 'vue';
+import { ref, Ref, computed, onMounted, watch } from 'vue';
 import { useApi } from '@directus/extensions-sdk';
 import { useRoute, useRouter } from 'vue-router';
 import formatTitle from '@directus/format-title';
@@ -106,7 +106,7 @@ export default {
 			return options;
 		});
 
-		onBeforeMount(async () => {
+		onMounted(async () => {
 			await getMenuDetail();
 
 			selectedMenu.value = listMenuConfig.find((menu: MenuConfig) => menu.id == modelValue.value.menu) as MenuConfig;

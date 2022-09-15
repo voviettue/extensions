@@ -21,6 +21,7 @@
 					<table-column-select-menu
 						:column="column"
 						@open-detail="isOpenDetail = true"
+						@toggle-visibility="$emit('toggleVisibility', column)"
 						@delete="$emit('delete', column)"
 					/>
 				</div>
@@ -52,7 +53,7 @@ export default {
 			default: null,
 		},
 	},
-	emits: ['update', 'delete'],
+	emits: ['update', 'toggleVisibility', 'delete'],
 	setup(props, { emit }) {
 		const isOpenDetail = ref<boolean>(false);
 		const hidden = computed(() => props.column?.hidden === true);

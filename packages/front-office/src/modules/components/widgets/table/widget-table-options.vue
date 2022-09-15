@@ -2,7 +2,7 @@
 	<div class="form">
 		<div>
 			<div class="field-label type-label">
-				<span class="field-name"><v-text-overflow text="Column" /></span>
+				<span class="field-name"><v-text-overflow text="Columns" /></span>
 			</div>
 			<v-notice v-if="optionsValues.columns === undefined || optionsValues.columns?.length === 0">No items</v-notice>
 			<draggable
@@ -369,6 +369,7 @@ export default {
 			setSort,
 			createColumn,
 			updateColumn,
+			toggleVisibility,
 			deleteColumn,
 		};
 
@@ -403,6 +404,18 @@ export default {
 			const data = cloneDeep(optionsValues.value);
 			const columnData = data.columns ?? [];
 			Object.assign(columnData[columnData.findIndex((col: Record<string, any>, i: number) => i === index)], value);
+
+			const edits = { ...data, columns: columnData };
+			optionsValues.value = edits;
+		}
+
+		function toggleVisibility(value: any, index: number) {
+			const data = cloneDeep(optionsValues.value);
+			const columnData = data.columns ?? [];
+			Object.assign(columnData[columnData.findIndex((col: Record<string, any>, i: number) => i === index)], {
+				...value,
+				hidden: !value.hidden,
+			});
 
 			const edits = { ...data, columns: columnData };
 			optionsValues.value = edits;

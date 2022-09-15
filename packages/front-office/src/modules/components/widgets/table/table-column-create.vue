@@ -1,5 +1,5 @@
 <template>
-	<v-drawer :title="`Creating Widget Table Column`" :model-value="isOpen" persistent @cancel="$emit('close')">
+	<v-drawer :title="`Creating Table Column`" :model-value="isOpen" persistent @cancel="$emit('close')">
 		<template #sidebar>
 			<v-tabs v-model="currentTab" vertical>
 				<v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value">
@@ -16,14 +16,14 @@
 
 		<div class="create-column-container">
 			<v-form
-				v-if="currentTab == 'field'"
+				v-if="currentTab == 'properties'"
 				v-model="modelValue"
 				class="field-fault"
 				:fields="formFields"
 				:initial-values="initialValues"
 				:validation-errors="validationErrors"
 			/>
-			<div v-if="currentTab == 'style'" class="list-column-config">
+			<div v-if="currentTab == 'displayValue'" class="list-column-config">
 				<button
 					v-for="displayConfig of listDisplayConfig"
 					:key="displayConfig.id"
@@ -105,12 +105,12 @@ export default {
 
 		const tabs = computed(() => {
 			return [
-				{ value: 'field', text: 'Field' },
-				{ value: 'style', text: 'Style' },
+				{ value: 'properties', text: 'Properties' },
+				{ value: 'displayValue', text: 'Display Value' },
 			];
 		});
 
-		const currentTab = ref<string>('field');
+		const currentTab = ref<string>('properties');
 
 		return {
 			currentTab,
