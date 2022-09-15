@@ -183,7 +183,7 @@ async function execute() {
 
 async function update() {
 	try {
-		edits.value = { ...modelValue.value, ...modelValue.value.options };
+		edits.value = { ...initialValues.value, ...modelValue.value, ...modelValue.value.options };
 		fieldsWithPermissions.value = [...defaultFields.value, ...optionsFields.value];
 
 		if (selectedQuery.value?.beforeSave) {
