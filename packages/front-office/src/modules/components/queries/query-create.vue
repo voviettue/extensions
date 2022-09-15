@@ -122,7 +122,7 @@ function onChangeQuery(query: QueryConfig) {
 
 async function handleCreateQuery() {
 	try {
-		edits.value = { ...modelValue.value, ...modelValue.value.options };
+		edits.value = { ...initialValues.value, ...modelValue.value, ...modelValue.value.options };
 		fieldsWithPermissions.value = [...defaultFields.value, ...optionsFields.value];
 
 		if (querySelected.value?.beforeSave) {
