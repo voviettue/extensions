@@ -16,6 +16,44 @@ export default defineWidget({
 			},
 		},
 		{
+			field: 'keyTransformation',
+			name: 'Key transformation',
+			type: 'json',
+			meta: {
+				interface: 'list',
+				options: {
+					addLable: 'Add key transformation',
+					template: '{{ key }}: {{ value}}',
+					fields: [
+						{
+							field: 'key',
+							type: 'string',
+							name: 'Key',
+							meta: {
+								interface: 'input',
+								width: 'half',
+								options: {
+									placeholder: 'Key',
+								},
+							},
+						},
+						{
+							field: 'value',
+							name: 'Value',
+							type: 'string',
+							meta: {
+								interface: 'input',
+								width: 'half',
+								options: {
+									placeholder: 'Value',
+								},
+							},
+						},
+					],
+				},
+			},
+		},
+		{
 			field: 'rows',
 			name: 'Rows',
 			type: 'number',
