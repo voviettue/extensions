@@ -1,7 +1,7 @@
 import { defineWidget } from '../../utils/define-extension';
 
 export default defineWidget({
-	id: 'linkl',
+	id: 'link',
 	name: 'Link',
 	icon: 'link',
 	options: [
