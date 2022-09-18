@@ -7,5 +7,6 @@ import iframe from './iframe';
 import divider from './divider';
 import list from './list';
 import keyValue from './key-value';
+import link from './link';
 
-export default [text, table, image, container, richtext, iframe, divider, list, keyValue];
+export default [text, table, image, container, richtext, iframe, divider, list, keyValue, link];
