@@ -5,7 +5,7 @@ export default defineDisplay({
 	name: 'Number',
 	icon: '123',
 	description: 'Display number',
-	options: [
+	displayOptions: [
 		{
 			field: 'prefix',
 			name: 'Prefix',

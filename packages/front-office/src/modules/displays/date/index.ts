@@ -5,7 +5,7 @@ export default defineDisplay({
 	name: 'Date',
 	icon: 'calendar_month',
 	description: 'Display date',
-	options: [
+	displayOptions: [
 		{
 			field: 'format',
 			name: 'Format',

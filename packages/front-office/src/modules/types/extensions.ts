@@ -41,6 +41,6 @@ export interface DisplayConfig {
 	name: string;
 	icon: string;
 	description: string;
-	options: ExtensionOptions;
+	displayOptions: ExtensionOptions;
 	types: string[];
 }

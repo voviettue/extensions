@@ -5,7 +5,7 @@ export default defineDisplay({
 	name: 'Percentage',
 	icon: 'percent',
 	description: 'Display percentage',
-	options: [
+	displayOptions: [
 		{
 			field: 'cellBackground',
 			name: 'Cell Background',

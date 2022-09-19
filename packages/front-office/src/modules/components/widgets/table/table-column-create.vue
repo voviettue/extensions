@@ -41,7 +41,7 @@
 					<div v-if="selectedDisplay" class="group">
 						<div class="group-raw">
 							<extension-options
-								v-model="modelValue.options"
+								v-model="modelValue.displayOptions"
 								:options-fields="optionsFields"
 								:validation-errors="validationErrors"
 								style="padding: 0"
@@ -77,13 +77,14 @@ export default {
 
 		const isLoading = ref<boolean>(false);
 		const validationErrors: Ref<Record<string, any>[]> = ref([]);
-		const modelValue: Ref<Record<string, any>> = ref({ hidden: false, options: {} });
+		const modelValue: Ref<Record<string, any>> = ref({ hidden: false, displayOptions: {} });
 		const selectedDisplay: Ref<DisplayConfig | null> = ref(null);
 
 		const initialValues = ref({
 			key: null,
 			label: null,
 			hidden: false,
+			tooltip: null,
 		});
 
 		watch(
@@ -94,7 +95,7 @@ export default {
 		);
 
 		const optionsFields = computed(() => {
-			const options = selectedDisplay.value?.options ?? [];
+			const options = selectedDisplay.value?.displayOptions ?? [];
 			if (typeof options === 'function') {
 				const ctx = { values: modelValue.value } as ExtensionOptionsContext;
 				return options(ctx);
@@ -135,7 +136,7 @@ export default {
 		}
 
 		async function saveTableColumn() {
-			const dataForm = { ...modelValue.value, ...modelValue.value.options };
+			const dataForm = { ...modelValue.value, ...modelValue.value.displayOptions };
 
 			validationErrors.value = [];
 			validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
