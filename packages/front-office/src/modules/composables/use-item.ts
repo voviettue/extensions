@@ -165,9 +165,9 @@ export function useItem(collection: string, primaryKey: string): UsableItem {
 			validationErrors.value = err.response.data.errors
 				.filter((err: any) => VALIDATION_TYPES.includes(err?.extensions?.code))
 				.map((err: any) => {
-					const { field, code } = err.extensions;
+					const { code, collection, field } = err.extensions;
 					const error: Record<string, any> = {};
-					error.field = (field || '').replace(/^\w+_/, '');
+					error.field = (collection ?? '' + field ?? '').replace(collectionInfo.value?.collection.replace('_', ''), '');
 					switch (code) {
 						case 'RECORD_NOT_UNIQUE':
 							error.type = 'unique';
