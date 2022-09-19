@@ -93,18 +93,18 @@ const initialValues = ref({
 	options: null,
 	hidden: false,
 });
-
-watch(
-	() => modelValue.value.name,
-	(val) => {
-		modelValue.value.key = snakeCase(val);
-	}
-);
 const page = route.params.id;
 const primaryKey = route.params.widgetId as string;
 const { item, edits, getItem, save, validationErrors } = useItem('cms_widgets', primaryKey);
 
-if (primaryKey !== '+') {
+if (primaryKey === '+') {
+	watch(
+		() => modelValue.value.name,
+		(val) => {
+			modelValue.value.key = snakeCase(val);
+		}
+	);
+} else {
 	getItem().then(() => {
 		modelValue.value = { ...item.value };
 	});
