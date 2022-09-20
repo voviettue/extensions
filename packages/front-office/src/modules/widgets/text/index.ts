@@ -28,7 +28,7 @@ export default defineWidget({
 				width: 'full',
 				options: {
 					addLabel: 'Add Condition',
-					template: 'Name: {{ name }}',
+					template: '{{ operator }}: {{ value }}',
 					fields: [
 						{
 							field: 'operator',
