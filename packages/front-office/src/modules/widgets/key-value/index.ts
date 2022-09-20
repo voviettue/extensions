@@ -3,7 +3,7 @@ import { defineWidget } from '../../utils/define-extension';
 export default defineWidget({
 	id: 'keyValue',
 	name: 'Key Value',
-	icon: 'chat',
+	icon: 'list_alt',
 	options: [
 		{
 			field: 'data',

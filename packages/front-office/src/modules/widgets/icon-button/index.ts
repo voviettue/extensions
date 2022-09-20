@@ -1,22 +1,18 @@
 import { defineWidget } from '../../utils/define-extension';
 
 export default defineWidget({
-	id: 'button',
-	name: 'Button',
-	icon: 'smart_button',
+	id: 'icon-button',
+	name: 'Icon Button',
+	icon: 'add_box',
 	options: [
 		{
-			field: 'label',
-			name: 'Label',
+			field: 'icon',
+			name: 'Icon',
 			type: 'string',
 			meta: {
 				required: true,
-				interface: 'input',
-				width: 'full',
-				options: {
-					trim: true,
-					placeholder: 'Enter label to be displayed',
-				},
+				width: 'half',
+				interface: 'select-icon',
 			},
 		},
 		{
@@ -43,24 +39,6 @@ export default defineWidget({
 						},
 					],
 				},
-			},
-		},
-		{
-			field: 'leftIcon',
-			name: 'Left Icon',
-			type: 'string',
-			meta: {
-				width: 'half',
-				interface: 'select-icon',
-			},
-		},
-		{
-			field: 'rightIcon',
-			name: 'Right Icon',
-			type: 'string',
-			meta: {
-				width: 'half',
-				interface: 'select-icon',
 			},
 		},
 		{

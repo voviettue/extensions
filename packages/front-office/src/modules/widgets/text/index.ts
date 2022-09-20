@@ -3,7 +3,7 @@ import { defineWidget } from '../../utils/define-extension';
 export default defineWidget({
 	id: 'text',
 	name: 'Text',
-	icon: 'chat',
+	icon: 'text_fields',
 	options: [
 		{
 			field: 'text',
