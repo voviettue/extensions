@@ -27,10 +27,10 @@ export default defineWidget({
 		{
 			field: 'border',
 			name: 'Border',
-			type: 'boolean',
+			type: 'string',
 			meta: {
 				width: 'half',
-				interface: 'boolean',
+				interface: 'select-color',
 			},
 		},
 		{
@@ -225,6 +225,15 @@ export default defineWidget({
 					placeholder: 'Select',
 					allowNone: true,
 				},
+			},
+		},
+		{
+			field: 'pagination',
+			name: 'Pagination',
+			type: 'boolean',
+			meta: {
+				interface: 'radio',
+				width: 'half',
 			},
 		},
 	],
