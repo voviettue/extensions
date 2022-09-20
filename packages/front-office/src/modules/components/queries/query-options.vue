@@ -53,6 +53,7 @@ const primaryKey = route.params.id as string;
 const { deleting, remove } = useItem('cms_queries', primaryKey);
 
 async function deleteQuery() {
+	deleteDialog.value = false;
 	await remove();
 	emit('refresh');
 }
