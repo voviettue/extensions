@@ -34,6 +34,9 @@ export default defineWidget({
 							field: 'operator',
 							name: 'Operator',
 							type: 'string',
+							schema: {
+								default_value: 'eq',
+							},
 							meta: {
 								interface: 'select-dropdown',
 								width: 'half',
