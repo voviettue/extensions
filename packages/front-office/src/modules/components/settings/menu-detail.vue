@@ -70,7 +70,7 @@ export default {
 	setup(props, { emit }) {
 		const collection = 'cms_menus';
 		const api = useApi();
-		const { notify } = useNotification();
+		const { notify, unexpectedError } = useNotification();
 
 		const { validateItem } = useValidate();
 		const route = useRoute();
@@ -152,12 +152,13 @@ export default {
 			isLoading.value = true;
 			try {
 				await api.patch(`/items/${collection}/${route.params.menuId}`, modelValue.value);
-
 				notify({ title: 'Item updated' });
+
 				router.push('/front-office/settings');
-			} catch {
-				//
+			} catch (err) {
+				unexpectedError(err);
 			}
+
 			isLoading.value = false;
 			emit('refresh');
 		}

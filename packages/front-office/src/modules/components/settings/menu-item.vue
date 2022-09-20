@@ -109,7 +109,7 @@ export default {
 	setup(props, { emit }) {
 		const collection = 'cms_menus';
 		const api = useApi();
-		const { notify } = useNotification();
+		const { notify, unexpectedError } = useNotification();
 
 		const { deleteActive, deleting, deleteMenuItem } = useDeleteMenuItem();
 
@@ -193,8 +193,8 @@ export default {
 				await api.post(`/items/${collection}`, data);
 
 				close();
-			} catch (err: any) {
-				notify({ title: `Couldn't duplicate menu`, type: 'error' });
+			} catch (err) {
+				unexpectedError(err);
 			}
 		}
 
