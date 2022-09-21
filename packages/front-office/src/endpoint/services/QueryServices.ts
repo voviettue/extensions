@@ -2,6 +2,8 @@ import axios from 'axios';
 import { Query } from '../types';
 import { SchemaOverview, Accountability, ApiExtensionContext } from '@directus/shared/types';
 import { BaseException } from '@directus/shared/exceptions';
+import isJson from '../utils/is-json';
+import renderTemplate from '../utils/render-template';
 
 type CallbackFunction = 'executeItems' | 'executeApi';
 
@@ -12,10 +14,12 @@ export class QueryService {
 	activityService: any;
 	queryItemsService: any;
 	callback = {
+		item: 'executeItem',
 		items: 'executeItems',
 		api: 'executeApi',
-		json: '',
+		json: 'executeJson',
 	};
+	params: any;
 
 	constructor(schema: SchemaOverview, accountability: Accountability, ctx: ApiExtensionContext) {
 		this.schema = schema;
@@ -33,9 +37,15 @@ export class QueryService {
 		});
 	}
 
-	async execute(queryId: number) {
+	async execute(queryId: number, params: any = {}) {
 		try {
-			const query: Query = await this.queryItemsService.readOne(queryId, { fields: '*' });
+			this.params = {};
+			const query: Query = await this.queryItemsService.readOne(queryId);
+			const queryParams = query.params ?? [];
+			for (const param of queryParams) {
+				this.params[param?.name] = param?.value ?? null;
+			}
+			this.params = { ...this.params, ...params };
 			const callbackName = this.callback[query.query] as CallbackFunction;
 			const data = await this[callbackName](query);
 			return data;
@@ -64,6 +74,31 @@ export class QueryService {
 		});
 	}
 
+	async executeItem(query: Query) {
+		const { InvalidPayloadException } = this.ctx.exceptions;
+		const { ItemsService } = this.ctx.services;
+
+		try {
+			if (!query?.options?.collection || !query?.options?.primaryValue) {
+				throw new InvalidPayloadException('invalid params');
+			}
+
+			const itemsService = new ItemsService(query.options.collection, {
+				schema: this.schema,
+				accountability: this.accountability,
+			});
+
+			const primaryValue = renderTemplate(query.options.primaryValue, this.params);
+			const data = await itemsService.readOne(primaryValue, {
+				fields: query.options?.fields && query.options.fields.length ? query.options.fields : '*',
+			});
+
+			return data;
+		} catch (e: any) {
+			throw new InvalidPayloadException(e?.message);
+		}
+	}
+
 	async executeItems(query: Query) {
 		const { InvalidPayloadException } = this.ctx.exceptions;
 		const { ItemsService } = this.ctx.services;
@@ -80,8 +115,8 @@ export class QueryService {
 
 			const data = await itemsService.readByQuery({
 				filter: query.options?.filter,
-				fields: query.options.fields,
-				limit: query.options?.per_page || 20,
+				fields: query.options?.fields && query.options.fields.length ? query.options.fields : '*',
+				limit: query.options?.perPage || 20,
 			});
 
 			return data;
@@ -102,9 +137,9 @@ export class QueryService {
 			query.options?.headers?.map((e: any) => (headers[e.key] = e.value));
 
 			const params: Record<string, any> = {};
-			query.options?.query?.map((e: any) => (params[e.key] = e.value));
+			query.options?.params?.map((e: any) => (params[e.key] = isJson(e.value) ? JSON.parse(e.value) : e.value));
 
-			const body = query.options?.request_body;
+			const body = query.options?.data ?? null;
 
 			const options = {
 				method: query.options.method,
@@ -119,9 +154,14 @@ export class QueryService {
 
 			return data;
 		} catch (e: any) {
-			const message = (e.response.data.errors && e.response.data.errors[0]?.message) || e.response.data.message || '';
+			const message =
+				(e?.response?.data?.errors && e?.response?.data?.errors[0]?.message) || e?.response?.data?.message || '';
 			const statusCode = e.response.status;
 			throw new BaseException(message, statusCode, e?.code);
 		}
+	}
+
+	executeJson(query: Query) {
+		return query.output;
 	}
 }

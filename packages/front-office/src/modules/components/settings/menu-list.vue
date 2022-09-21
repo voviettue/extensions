@@ -3,9 +3,11 @@
 		<div class="field-label type-label">
 			<span class="field-name"><v-text-overflow text="Menu" /></span>
 		</div>
+		<v-notice v-if="itemMenus === undefined || itemMenus.length === 0">No items</v-notice>
 		<draggable
 			class="menu-grid"
 			:model-value="itemMenus.filter((item) => item.parent == null)"
+			:item-key="`id`"
 			:force-fallback="true"
 			handle=".drag-handle"
 			:group="{ name: 'setting-menus' }"

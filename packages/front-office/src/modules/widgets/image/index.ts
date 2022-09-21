@@ -3,7 +3,7 @@ import { defineWidget } from '../../utils/define-extension';
 export default defineWidget({
 	id: 'image',
 	name: 'Image',
-	icon: 'camera',
+	icon: 'image',
 	options: ({ values }) => {
 		if (values?.options?.defaultImage) {
 			values.options.project_logo = values.options.defaultImage;
@@ -44,6 +44,10 @@ export default defineWidget({
 					width: 'half',
 					options: {
 						choices: [
+							{
+								text: 'None',
+								value: 'none',
+							},
 							{
 								text: 'AUTO',
 								value: 'auto',
@@ -91,6 +95,10 @@ export default defineWidget({
 					width: 'half',
 					options: {
 						choices: [
+							{
+								text: 'None',
+								value: 'none',
+							},
 							{
 								text: 'SM',
 								value: 'sm',

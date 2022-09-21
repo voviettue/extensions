@@ -18,7 +18,7 @@ export default defineQuery({
 		const options = [
 			{
 				collection: 'cms_queries',
-				field: 'per_page',
+				field: 'perPage',
 				name: 'Per Page',
 				type: 'integer',
 				meta: {

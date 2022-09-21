@@ -3,7 +3,8 @@ import { defineWidget } from '../../utils/define-extension';
 export default defineWidget({
 	id: 'container',
 	name: 'Container',
-	icon: 'menu',
+	icon: 'settings_overscan',
+	group: true,
 	options: [
 		// {
 		// 	field: 'columns',
@@ -41,6 +42,10 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					choices: [
+						{
+							text: 'Default',
+							value: null,
+						},
 						{
 							text: 'SM',
 							value: 'sm',

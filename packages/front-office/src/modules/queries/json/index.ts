@@ -6,7 +6,7 @@ export default defineQuery({
 	icon: 'code',
 	options: [
 		{
-			field: 'jsonData',
+			field: 'json',
 			name: 'Json data',
 			type: 'json',
 			meta: {
@@ -16,4 +16,11 @@ export default defineQuery({
 			},
 		},
 	],
+	beforeSave: (values) => {
+		if (values?.options?.json) {
+			values.output = values?.options?.json;
+			values.refresh_on_load = false;
+		}
+		return values;
+	},
 });

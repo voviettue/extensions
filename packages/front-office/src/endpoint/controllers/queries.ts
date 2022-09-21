@@ -29,7 +29,7 @@ async function execute(req: any, res: any, ctx: ApiExtensionContext) {
 	const queryService: QueryService = new QueryService(req.schema, req.accountability, ctx);
 
 	try {
-		data = await queryService.execute(queryId);
+		data = await queryService.execute(queryId, req.body);
 	} catch (e: any) {
 		error = e;
 		error.errMessage = e.message;

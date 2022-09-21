@@ -90,6 +90,7 @@ import { useApi } from '@directus/extensions-sdk';
 import MenuItemSelectMenu from './menu-item-select-menu.vue';
 import formatTitle from '@directus/format-title';
 import listMenuConfig from '../../menus';
+import { useNotification } from '../../composables/use-notification';
 import Draggable from 'vuedraggable';
 
 export default {
@@ -108,6 +109,7 @@ export default {
 	setup(props, { emit }) {
 		const collection = 'cms_menus';
 		const api = useApi();
+		const { notify, unexpectedError } = useNotification();
 
 		const { deleteActive, deleting, deleteMenuItem } = useDeleteMenuItem();
 
@@ -167,15 +169,32 @@ export default {
 		}
 
 		async function duplicateMenuItem() {
-			const data = { ...props.menu };
+			let menuLabel = props.menu.label;
+			let menuKey = props.menu.key;
+
+			do {
+				menuLabel = 'Copy ' + menuLabel;
+				menuKey = 'copy_' + menuKey;
+
+				if (!props.menuList.find((menu: any) => menu.key == menuKey)) break;
+				// eslint-disable-next-line no-constant-condition
+			} while (true);
+
+			const data = {
+				...props.menu,
+				...{
+					label: menuLabel,
+					key: menuKey,
+				},
+			};
 			delete data.id;
 
 			try {
 				await api.post(`/items/${collection}`, data);
 
 				close();
-			} catch {
-				//
+			} catch (err) {
+				unexpectedError(err);
 			}
 		}
 
@@ -195,7 +214,7 @@ export default {
 
 					close();
 				} catch {
-					//
+					notify({ title: `Couldn't delete menu`, type: 'error' });
 				}
 
 				deleting.value = false;
@@ -375,6 +394,11 @@ export default {
 	}
 }
 
+.required {
+	position: relative;
+	left: -8px;
+	color: var(--primary);
+}
 .sortable-ghost {
 	border-radius: var(--border-radius);
 	outline: 2px dashed var(--primary);

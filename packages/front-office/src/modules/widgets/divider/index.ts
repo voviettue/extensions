@@ -25,6 +25,9 @@ export default defineWidget({
 					],
 				},
 			},
+			schema: {
+				default_value: 'horizontal',
+			},
 		},
 		{
 			field: 'strokeStyle',
@@ -48,32 +51,33 @@ export default defineWidget({
 							value: 'dotted',
 						},
 					],
+					allowNone: true,
 				},
 			},
 		},
 		{
-			field: 'width',
-			name: 'Width',
-			type: 'string',
+			field: 'lineWidth',
+			name: 'Line Width',
+			type: 'integer',
 			meta: {
 				interface: 'input',
 				width: 'half',
 				options: {
 					trim: true,
-					placeholder: 'Enter width size in px',
+					placeholder: 'Enter the length in px here',
 				},
 			},
 		},
 		{
-			field: 'height',
-			name: 'Height',
-			type: 'string',
+			field: 'lineHeight',
+			name: 'Line Height',
+			type: 'integer',
 			meta: {
 				interface: 'input',
 				width: 'half',
 				options: {
 					trim: true,
-					placeholder: 'Enter height size in px',
+					placeholder: 'Enter the thickness in px here',
 				},
 			},
 		},
@@ -109,6 +113,10 @@ export default defineWidget({
 				options: {
 					choices: [
 						{
+							text: 'Center',
+							value: 'center',
+						},
+						{
 							text: 'Left',
 							value: 'left',
 						},
@@ -125,6 +133,7 @@ export default defineWidget({
 							value: 'top',
 						},
 					],
+					allowNone: true,
 				},
 			},
 		},

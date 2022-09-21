@@ -1,5 +1,5 @@
 import { defineEndpoint } from '@directus/extensions-sdk';
-import queryController from '../controllers/queries';
+import queryController from './controllers/queries';
 
 export default defineEndpoint({
 	id: 'front-office',

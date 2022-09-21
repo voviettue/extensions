@@ -17,7 +17,7 @@
 				handle=".drag-handle"
 			>
 				<template #item="{ element }">
-					<query-item :query="element"></query-item>
+					<query-item :query="element" @refresh="getListQuery()"></query-item>
 				</template>
 			</draggable>
 		</v-list>

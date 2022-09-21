@@ -72,7 +72,7 @@ export default {
 		const router = useRouter();
 		const route = useRoute();
 		const api = useApi();
-		const { notify } = useNotification();
+		const { notify, unexpectedError } = useNotification();
 
 		const { validateItem } = useValidate();
 
@@ -138,12 +138,13 @@ export default {
 			isLoading.value = true;
 			try {
 				await api.post(`/items/${collection}`, modelValue.value);
+				notify({ title: 'Item created' });
 
-				notify({ title: 'Menu created' });
 				router.push('/front-office/settings');
-			} catch {
-				//
+			} catch (err) {
+				unexpectedError(err);
 			}
+
 			isLoading.value = false;
 			emit('refresh');
 		}

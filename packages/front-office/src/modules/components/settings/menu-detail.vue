@@ -52,7 +52,7 @@
 	</v-drawer>
 </template>
 <script lang="ts">
-import { ref, Ref, computed, onBeforeMount, watch } from 'vue';
+import { ref, Ref, computed, onMounted, watch } from 'vue';
 import { useApi } from '@directus/extensions-sdk';
 import { useRoute, useRouter } from 'vue-router';
 import formatTitle from '@directus/format-title';
@@ -70,7 +70,7 @@ export default {
 	setup(props, { emit }) {
 		const collection = 'cms_menus';
 		const api = useApi();
-		const { notify } = useNotification();
+		const { notify, unexpectedError } = useNotification();
 
 		const { validateItem } = useValidate();
 		const route = useRoute();
@@ -106,7 +106,7 @@ export default {
 			return options;
 		});
 
-		onBeforeMount(async () => {
+		onMounted(async () => {
 			await getMenuDetail();
 
 			selectedMenu.value = listMenuConfig.find((menu: MenuConfig) => menu.id == modelValue.value.menu) as MenuConfig;
@@ -152,12 +152,13 @@ export default {
 			isLoading.value = true;
 			try {
 				await api.patch(`/items/${collection}/${route.params.menuId}`, modelValue.value);
+				notify({ title: 'Item updated' });
 
-				notify({ title: 'Menu updated' });
 				router.push('/front-office/settings');
-			} catch {
-				//
+			} catch (err) {
+				unexpectedError(err);
 			}
+
 			isLoading.value = false;
 			emit('refresh');
 		}

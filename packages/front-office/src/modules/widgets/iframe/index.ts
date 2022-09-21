@@ -3,10 +3,10 @@ import { defineWidget } from '../../utils/define-extension';
 export default defineWidget({
 	id: 'iframe',
 	name: 'Iframe',
-	icon: 'menu',
+	icon: 'filter_frames',
 	options: [
 		{
-			field: 'Url',
+			field: 'url',
 			name: 'URL',
 			type: 'string',
 			meta: {
@@ -17,6 +17,38 @@ export default defineWidget({
 					trim: true,
 					placeholder: 'Embed Url Here',
 				},
+			},
+		},
+		{
+			field: 'ratioWidth',
+			name: 'Ratio Width',
+			type: 'integer',
+			meta: {
+				interface: 'input',
+				width: 'full',
+				options: {
+					trim: true,
+					placeholder: 'Ratio Width Here',
+				},
+			},
+			schema: {
+				default_value: 16,
+			},
+		},
+		{
+			field: 'ratioHeight',
+			name: 'Ratio Height',
+			type: 'integer',
+			meta: {
+				interface: 'input',
+				width: 'full',
+				options: {
+					trim: true,
+					placeholder: 'Ratio Height Here',
+				},
+			},
+			schema: {
+				default_value: 9,
 			},
 		},
 	],

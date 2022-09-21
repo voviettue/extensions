@@ -82,7 +82,6 @@ const { validateItem } = useValidate();
 const router = useRouter();
 const route = useRoute();
 
-const validationErrors: Ref<Record<string, any>[]> = ref([]);
 const modelValue: Ref<Record<string, any>> = ref({ options: {} });
 const isOpen = ref(true);
 const isLoading = ref(false);
@@ -92,20 +91,20 @@ const initialValues = ref({
 	widget: null,
 	custom_css: null,
 	options: null,
-	hidden: true,
+	hidden: false,
 });
-
-watch(
-	() => modelValue.value.name,
-	(val) => {
-		modelValue.value.key = snakeCase(val);
-	}
-);
 const page = route.params.id;
 const primaryKey = route.params.widgetId as string;
-const { item, edits, getItem, save } = useItem('cms_widgets', primaryKey);
+const { item, edits, getItem, save, validationErrors } = useItem('cms_widgets', primaryKey);
 
-if (primaryKey !== '+') {
+if (primaryKey === '+') {
+	watch(
+		() => modelValue.value.name,
+		(val) => {
+			modelValue.value.key = snakeCase(val);
+		}
+	);
+} else {
 	getItem().then(() => {
 		modelValue.value = { ...item.value };
 	});
@@ -133,7 +132,9 @@ function onChangeWidgets(widget: WidgetConfig) {
 async function handleChangeWidgets() {
 	validationErrors.value = [];
 	const dataForm = { ...initialValues.value, ...modelValue.value, ...modelValue.value.options };
-	validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
+	const widgetOptionsFields: Record<string, any> =
+		selectedWidget.value?.extendOptions ?? selectedWidget.value?.options ?? [];
+	validationErrors.value = validateItem(dataForm, [...formFields, ...widgetOptionsFields]);
 	if (validationErrors.value.length) return;
 	isLoading.value = true;
 	try {
@@ -144,7 +145,7 @@ async function handleChangeWidgets() {
 		await save();
 		router.push(`/front-office/pages/${page}`);
 	} catch {
-		//
+		// do nothing
 	} finally {
 		isLoading.value = false;
 	}

@@ -20,8 +20,8 @@
 				icon
 				rounded
 				:disabled="!isAdmin || !hasEdits"
-				:loading="actionProcessing === 'save'"
-				@click="saveAndNavigate"
+				:loading="saving"
+				@click="updateAndNavigate"
 			>
 				<v-icon name="check" />
 			</v-button>
@@ -31,7 +31,7 @@
 				rounded
 				icon
 				:disabled="!isAdmin"
-				:loading="actionProcessing === 'execute'"
+				:loading="executing"
 				@click="execute"
 			>
 				<v-icon name="play_arrow" />
@@ -39,7 +39,7 @@
 		</template>
 
 		<template #sidebar>
-			<sidebar-detail icon="info" :title="t('information')" close></sidebar-detail>
+			<sidebar-detail icon="info" title="Information" close></sidebar-detail>
 			<query-log-sidebar></query-log-sidebar>
 		</template>
 
@@ -48,7 +48,7 @@
 				v-model="modelValue"
 				primary-key="+"
 				class="field-fault"
-				:fields="formFields"
+				:fields="defaultFields"
 				:initial-values="initialValues"
 				:validation-errors="validationErrors"
 			></v-form>
@@ -69,7 +69,7 @@
 				<v-card-text>Are you sure you want to update and execute this query?</v-card-text>
 				<v-card-actions>
 					<v-button secondary @click="confirmExecute = false">Cancel</v-button>
-					<v-button @click="saveAndExecute">Update and Execute</v-button>
+					<v-button @click="updateAndExecute">Update and Execute</v-button>
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
@@ -79,31 +79,30 @@
 <script setup lang="ts">
 import { useApi, useStores } from '@directus/extensions-sdk';
 import { useRoute, useRouter } from 'vue-router';
-import { onBeforeMount, ref, Ref, computed, watch } from 'vue';
-import { useValidate } from '../../composables/use-validate';
+import { ref, Ref, computed } from 'vue';
+import { useItem } from '../../composables/use-item';
+import { useNotification } from '../../composables/use-notification';
 import { formFields } from '../../constants/query';
-import { useI18n } from 'vue-i18n';
 import { ExtensionOptionsContext } from '../../types/extensions';
 import { useFrontOfficeStore } from '../../stores/front-office';
 import queryConfigList from '../../queries';
-import snakeCase from 'lodash/snakeCase';
 import Navigation from '../navigation.vue';
 import ExtensionOptionsComponent from '../shared/extension-options.vue';
 import QueryLogSidebar from './query-log-sidebar.vue';
 import isEqual from 'lodash/isEqual';
+import isEmpty from 'lodash/isEmpty';
 
 const api = useApi();
 const route = useRoute();
 const router = useRouter();
 const { useUserStore } = useStores();
 const { isAdmin } = useUserStore();
-const { validateItem } = useValidate();
-const { t } = useI18n();
+const { notify } = useNotification();
 const frontOfficeStore = useFrontOfficeStore();
-const confirmExecute = ref(false);
 
+const confirmExecute = ref(false);
+const primaryKey = route.params.id as string;
 const modelValue: Ref<Record<string, any>> = ref({ options: {} });
-const validationErrors: Ref<Record<string, any>[]> = ref([]);
 const initialValues: Ref<Record<string, any>> = ref({
 	name: '',
 	timeout: 10000,
@@ -111,14 +110,20 @@ const initialValues: Ref<Record<string, any>> = ref({
 	options: null,
 	refresh_on_load: false,
 });
-const actionProcessing = ref('');
+const executing = ref(false);
 
-watch(
-	() => modelValue.value.name,
-	(val) => {
-		modelValue.value.key = snakeCase(val);
-	}
+const { item, edits, getItem, saving, save, validationErrors, fieldsWithPermissions } = useItem(
+	'cms_queries',
+	primaryKey
 );
+
+if (primaryKey !== '+') {
+	getItem().then(() => {
+		initialValues.value = { ...item.value } || {};
+		initialValues.value.output = initialValues.value?.output && JSON.parse(initialValues.value.output);
+		modelValue.value = Object.assign({}, initialValues.value);
+	});
+}
 
 const hasEdits = computed(() => {
 	let isUpdated = false;
@@ -141,6 +146,18 @@ const optionsFields = computed(() => {
 	return options;
 });
 
+const defaultFields = computed(() => {
+	if (typeof formFields === 'function') {
+		const ctx = { values: modelValue.value } as ExtensionOptionsContext;
+		return formFields(ctx);
+	}
+	return formFields;
+});
+
+const selectedQuery = computed(() => {
+	return queryConfigList.find((e) => e.id === modelValue.value?.query);
+});
+
 async function execute() {
 	try {
 		if (hasEdits.value) {
@@ -148,53 +165,35 @@ async function execute() {
 			return;
 		}
 
-		actionProcessing.value = 'execute';
+		executing.value = true;
 		const responseExecute = await api.patch(`/front-office/queries/${route.params.id}/execute`);
 		modelValue.value.output = responseExecute?.data;
 
 		await api.patch(`/items/cms_queries/${route.params.id}`, { output: modelValue.value.output });
+
+		notify({ title: 'Item executed!' });
 	} catch {
 		//
 	} finally {
-		actionProcessing.value = '';
+		executing.value = false;
 	}
 
 	await getLogs();
 }
 
-async function getDetailPage() {
+async function update() {
 	try {
-		actionProcessing.value = 'getDetailPage';
-		const resQueryDetails = await api.get(`/items/cms_queries/${route.params.id}`);
-		initialValues.value = { ...resQueryDetails?.data?.data } || {};
-		initialValues.value.output = initialValues.value?.output && JSON.parse(initialValues.value.output);
-		modelValue.value = Object.assign({}, initialValues.value);
-	} catch {
-		//
-	} finally {
-		actionProcessing.value = '';
-	}
-}
+		edits.value = { ...initialValues.value, ...modelValue.value, ...modelValue.value.options };
+		fieldsWithPermissions.value = [...defaultFields.value, ...optionsFields.value];
 
-async function save() {
-	validationErrors.value = [];
-	const dataForm = { ...modelValue.value, ...modelValue.value.options };
-	validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
-	if (validationErrors.value.length) return;
+		if (selectedQuery.value?.beforeSave) {
+			edits.value = selectedQuery.value.beforeSave(edits.value);
+		}
 
-	actionProcessing.value = 'save';
-
-	if (modelValue.value?.query === 'json') {
-		modelValue.value.output = modelValue.value?.options;
-	}
-
-	try {
-		await api.patch(`/items/cms_queries/${route.params.id}`, modelValue.value);
+		await save();
 		initialValues.value = { ...modelValue.value };
 	} catch {
 		//
-	} finally {
-		actionProcessing.value = '';
 	}
 }
 
@@ -208,24 +207,16 @@ async function getLogs() {
 	await frontOfficeStore.getLogListByQuery(query);
 }
 
-async function saveAndExecute() {
-	await save();
+async function updateAndExecute() {
+	await update();
 	await execute();
 	confirmExecute.value = false;
 }
 
-async function saveAndNavigate() {
-	try {
-		await save();
-		router.push('/front-office/queries');
-	} catch {
-		//
-	}
+async function updateAndNavigate() {
+	await update();
+	isEmpty(validationErrors.value) && router.push('/front-office/queries');
 }
-
-onBeforeMount(async () => {
-	await getDetailPage();
-});
 </script>
 
 <style scoped>
