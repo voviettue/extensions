@@ -28,8 +28,19 @@ export default defineWidget({
 				width: 'full',
 				options: {
 					addLabel: 'Add Condition',
-					template: '{{ operator }}: {{ value }}',
+					template: 'Name: {{ name }}',
 					fields: [
+						{
+							field: 'name',
+							name: 'Name',
+							meta: {
+								interface: 'input',
+								options: {
+									trim: true,
+									placeholder: 'Enter a value...',
+								},
+							},
+						},
 						{
 							field: 'operator',
 							name: 'Operator',
@@ -91,7 +102,7 @@ export default defineWidget({
 								width: 'half',
 								options: {
 									trim: true,
-									placeholder: 'Enter border width size in px',
+									placeholder: 'Enter a value...',
 								},
 							},
 						},
