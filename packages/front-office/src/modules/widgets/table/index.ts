@@ -16,6 +16,19 @@ export default defineWidget({
 			},
 		},
 		{
+			field: 'onRowClick',
+			name: 'On Row Click (Javascript)',
+			meta: {
+				width: 'full',
+				interface: 'input-code',
+				options: {
+					language: 'javascript',
+					lineNumber: true,
+					template: 'navigateTo("/items/" + item.id)',
+				},
+			},
+		},
+		{
 			field: 'strippedRow',
 			name: 'Stripped row',
 			type: 'boolean',

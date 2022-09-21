@@ -67,6 +67,43 @@ export function formFields({ values }) {
 				interface: 'boolean',
 			},
 		},
+		{
+			field: 'params',
+			name: 'Query Params',
+			type: 'json',
+			meta: {
+				interface: 'list',
+				width: 'full',
+				options: {
+					addLabel: 'Add Param',
+					template: '{{ name }}: {{ value }}',
+					fields: [
+						{
+							field: 'name',
+							name: 'Name',
+							type: 'string',
+							meta: {
+								interface: 'input',
+								width: 'half',
+								required: true,
+								trim: true,
+							},
+						},
+						{
+							field: 'value',
+							name: 'Default Value',
+							meta: {
+								interface: 'input',
+								width: 'half',
+								options: {
+									trim: true,
+								},
+							},
+						},
+					],
+				},
+			},
+		},
 	];
 
 	const excludeField: string[] = [];

@@ -23,12 +23,12 @@ export default {
 				},
 				{
 					icon: 'article',
-					name: 'Page',
+					name: 'Pages',
 					to: '/front-office/pages',
 				},
 				{
 					icon: 'star',
-					name: 'Query',
+					name: 'Queries',
 					to: '/front-office/queries',
 				},
 			];

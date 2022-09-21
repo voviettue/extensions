@@ -30,12 +30,11 @@
 </template>
 <script setup lang="ts">
 import { useStores } from '@directus/extensions-sdk';
-import { useRoute } from 'vue-router';
 import { useItem } from '../../composables/use-item';
 import { Ref, ref } from 'vue';
 
 const emit = defineEmits(['refresh']);
-withDefaults(defineProps<{ query: Record<string, any> }>(), {
+const props = withDefaults(defineProps<{ query: Record<string, any> }>(), {
 	query: () => ({
 		id: null,
 		name: '',
@@ -47,9 +46,8 @@ withDefaults(defineProps<{ query: Record<string, any> }>(), {
 
 const { useUserStore } = useStores();
 const { isAdmin } = useUserStore();
-const route = useRoute();
 
-const primaryKey = route.params.id as string;
+const primaryKey = props.query.id as string;
 const { deleting, remove } = useItem('cms_queries', primaryKey);
 
 async function deleteQuery() {

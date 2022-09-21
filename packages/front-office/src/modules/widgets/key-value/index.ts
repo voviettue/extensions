@@ -23,7 +23,7 @@ export default defineWidget({
 				interface: 'list',
 				options: {
 					addLable: 'Add key transformation',
-					template: '{{ key }}: {{ value}}',
+					template: '{{ key }}  →  {{ value}}',
 					fields: [
 						{
 							field: 'key',

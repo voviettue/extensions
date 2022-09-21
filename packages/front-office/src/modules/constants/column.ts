@@ -32,7 +32,6 @@ export const formFields = [
 		meta: {
 			width: 'half',
 			interface: 'input',
-			required: true,
 			options: {
 				trim: true,
 			},

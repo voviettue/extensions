@@ -12,7 +12,7 @@ import MenuDetailComponent from './components/settings/menu-detail.vue';
 
 export default defineModule({
 	id: 'front-office',
-	name: 'Front Office',
+	name: 'App Builder',
 	icon: 'web',
 	routes: [
 		{
