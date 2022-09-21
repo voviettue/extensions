@@ -22,13 +22,10 @@ export default defineDisplay({
 				},
 				note: 'The custom format accepts the __[Date Field Symbol Table](https://www.unicode.org/reports/tr35/tr35-dates.html#Date_Field_Symbol_Table)__',
 			},
-			schema: {
-				default_value: 'long',
-			},
 		},
 		{
-			field: 'cellBackground',
-			name: 'Cell Background',
+			field: 'background',
+			name: 'Background',
 			type: 'string',
 			meta: {
 				interface: 'select-color',
