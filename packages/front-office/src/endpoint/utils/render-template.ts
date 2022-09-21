@@ -8,7 +8,7 @@ export default function renderTemplate(template: string, params: any): string {
 		const statement = 'return ' + block.replace('{{', '').replace('}}', '');
 		try {
 			// eslint-disable-next-line no-new-func
-			const fn = new Function('$params', statement);
+			const fn = new Function('$param', statement);
 			const value = fn(params) ?? block;
 			const replacement = typeof value === 'string' ? value : JSON.stringify(value);
 			result = result.replace(block, replacement);
