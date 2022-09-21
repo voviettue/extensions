@@ -3,7 +3,7 @@ import { defineWidget } from '../../utils/define-extension';
 export default defineWidget({
 	id: 'container',
 	name: 'Container',
-	icon: 'menu',
+	icon: 'settings_overscan',
 	group: true,
 	options: [
 		// {

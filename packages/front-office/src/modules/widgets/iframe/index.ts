@@ -3,7 +3,7 @@ import { defineWidget } from '../../utils/define-extension';
 export default defineWidget({
 	id: 'iframe',
 	name: 'Iframe',
-	icon: 'menu',
+	icon: 'filter_frames',
 	options: [
 		{
 			field: 'url',

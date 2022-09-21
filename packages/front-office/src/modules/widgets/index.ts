@@ -8,5 +8,7 @@ import divider from './divider';
 import list from './list';
 import keyValue from './key-value';
 import link from './link';
+import button from './button';
+import iconButton from './icon-button';
 
-export default [text, table, image, container, richtext, iframe, divider, list, keyValue, link];
+export default [text, table, image, container, richtext, iframe, divider, list, keyValue, link, button, iconButton];

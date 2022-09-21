@@ -3,7 +3,7 @@ import { defineWidget } from '../../utils/define-extension';
 export default defineWidget({
 	id: 'richText',
 	name: 'Rich Text',
-	icon: 'chat',
+	icon: 'format_align_left',
 	options: [
 		{
 			field: 'content',

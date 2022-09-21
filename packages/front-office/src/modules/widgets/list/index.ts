@@ -3,7 +3,7 @@ import { defineWidget } from '../../utils/define-extension';
 export default defineWidget({
 	id: 'list',
 	name: 'List',
-	icon: 'menu',
+	icon: 'view_list',
 	group: true,
 	options: [
 		{

@@ -4,7 +4,7 @@ import WidgetTableOptions from '../../components/widgets/table/widget-table-opti
 export default defineWidget({
 	id: 'table',
 	name: 'Table',
-	icon: 'table',
+	icon: 'table_view',
 	options: WidgetTableOptions,
 	extendOptions: [
 		{
