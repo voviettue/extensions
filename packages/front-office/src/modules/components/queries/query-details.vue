@@ -26,7 +26,7 @@
 				<v-icon name="check" />
 			</v-button>
 			<v-button
-				v-if="modelValue.query !== 'json'"
+				v-if="displayExecute"
 				v-tooltip.bottom="'Execute'"
 				rounded
 				icon
@@ -159,6 +159,10 @@ const defaultFields = computed(() => {
 
 const selectedQuery = computed(() => {
 	return queryConfigList.find((e) => e.id === modelValue.value?.query);
+});
+
+const displayExecute = computed(() => {
+	return modelValue.value?.query !== 'json' && modelValue.value?.query !== 'js-object';
 });
 
 async function execute() {

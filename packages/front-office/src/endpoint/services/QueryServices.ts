@@ -18,6 +18,7 @@ export class QueryService {
 		items: 'executeItems',
 		api: 'executeApi',
 		json: 'executeJson',
+		'js-object': 'executeJson',
 	};
 	params: any;
 
