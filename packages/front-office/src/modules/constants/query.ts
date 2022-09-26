@@ -4,9 +4,8 @@ export function formFields({ values }) {
 			collection: 'cms_queries',
 			field: 'output',
 			name: 'Output',
-			type: 'json',
 			meta: {
-				interface: 'code',
+				interface: 'input-code',
 				readonly: true,
 				placeholder: 'Enter code here...',
 			},

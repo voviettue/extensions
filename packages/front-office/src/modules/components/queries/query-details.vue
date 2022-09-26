@@ -91,6 +91,7 @@ import ExtensionOptionsComponent from '../shared/extension-options.vue';
 import QueryLogSidebar from './query-log-sidebar.vue';
 import isEqual from 'lodash/isEqual';
 import isEmpty from 'lodash/isEmpty';
+import isJson from '../../../endpoint/utils/is-json';
 
 const api = useApi();
 const route = useRoute();
@@ -120,7 +121,9 @@ const { item, edits, getItem, saving, save, validationErrors, fieldsWithPermissi
 if (primaryKey !== '+') {
 	getItem().then(() => {
 		initialValues.value = { ...item.value } || {};
-		initialValues.value.output = initialValues.value?.output && JSON.parse(initialValues.value.output);
+		initialValues.value.output = isJson(initialValues.value?.output)
+			? JSON.parse(initialValues.value.output)
+			: initialValues.value?.output;
 		modelValue.value = Object.assign({}, initialValues.value);
 	});
 }
