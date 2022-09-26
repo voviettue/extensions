@@ -132,8 +132,7 @@ function onChangeWidgets(widget: WidgetConfig) {
 async function handleChangeWidgets() {
 	validationErrors.value = [];
 	const dataForm = { ...initialValues.value, ...modelValue.value, ...modelValue.value.options };
-	const widgetOptionsFields: Record<string, any> =
-		selectedWidget.value?.extendOptions ?? selectedWidget.value?.options ?? [];
+	const widgetOptionsFields: Record<string, any> = selectedWidget.value?.extendOptions ?? optionsFields.value ?? [];
 	validationErrors.value = validateItem(dataForm, [...formFields, ...widgetOptionsFields]);
 	if (validationErrors.value.length) return;
 	isLoading.value = true;

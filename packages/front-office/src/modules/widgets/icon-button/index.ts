@@ -142,7 +142,7 @@ export default defineWidget({
 		{
 			field: 'borderRadius',
 			name: 'Border Radius',
-			type: 'number',
+			type: 'integer',
 			meta: {
 				interface: 'input',
 				width: 'half',
@@ -187,7 +187,7 @@ export default defineWidget({
 			},
 		},
 		{
-			field: 'onclick',
+			field: 'onClick',
 			name: 'Event Onclick',
 			type: 'text',
 			meta: {
@@ -196,7 +196,7 @@ export default defineWidget({
 				options: {
 					language: 'javascript',
 					lineNumber: true,
-					template: '() => {}',
+					template: 'console.log("javascript")',
 				},
 			},
 		},
