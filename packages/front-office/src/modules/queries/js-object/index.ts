@@ -1,22 +1,10 @@
 import { defineQuery } from '../../utils/define-extension';
 
 export default defineQuery({
-	id: 'jsonFunction',
-	name: 'Json function',
+	id: 'js-object',
+	name: 'JS Object',
 	icon: 'code',
 	options: [
-		{
-			field: 'isAsync',
-			name: 'Async Function',
-			type: 'boolean',
-			schema: {
-				default_value: 'false',
-			},
-			meta: {
-				width: 'half',
-				interface: 'boolean',
-			},
-		},
 		{
 			field: 'confirmBeforeCalling',
 			name: 'Confirm Before Calling',
