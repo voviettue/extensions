@@ -132,8 +132,8 @@ export default defineWidget({
 							value: 'light',
 						},
 						{
-							text: 'Dart',
-							value: 'dart',
+							text: 'Dark',
+							value: 'dark',
 						},
 					],
 				},
