@@ -25,8 +25,7 @@
 			Create New
 		</v-button>
 	</div>
-	<router-view name="add_menu" @refresh="refresh"></router-view>
-	<router-view name="update_menu" @refresh="refresh"></router-view>
+	<router-view name="menu_detail" @refresh="refresh"></router-view>
 </template>
 
 <script lang="ts">
