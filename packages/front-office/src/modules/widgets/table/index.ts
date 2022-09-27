@@ -20,12 +20,12 @@ export default defineWidget({
 			name: 'On Row Click (Javascript)',
 			meta: {
 				width: 'full',
-				interface: 'input-code',
+				interface: 'input-javascript',
 				options: {
-					language: 'javascript',
-					lineNumber: true,
-					template: 'navigateTo("/items/" + item.id)',
+					context: { $item: {} },
+					minLine: 4,
 				},
+				note: 'Type "/" to see all of variables and function are supported.',
 			},
 		},
 		{
