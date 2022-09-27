@@ -210,16 +210,14 @@ export default defineWidget({
 		},
 		{
 			field: 'onClick',
-			name: 'Event Onclick',
-			type: 'text',
+			name: 'On Click (Javascript)',
 			meta: {
-				interface: 'input-code',
 				width: 'full',
+				interface: 'input-javascript',
 				options: {
-					language: 'javascript',
-					lineNumber: true,
-					template: 'console.log("javascript")',
+					minLine: 4,
 				},
+				note: 'Type "/" to see all of variables and function are supported.',
 			},
 		},
 	],

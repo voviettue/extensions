@@ -15,6 +15,7 @@ import { startCompletion, completeFromList } from '@codemirror/autocomplete';
 import { LanguageSupport, syntaxTree } from '@codemirror/language';
 import { snippets } from './snippets';
 import { useApi } from '@directus/extensions-sdk';
+import { parseQuery } from './parse-query';
 
 interface Props {
 	value: string;
@@ -84,7 +85,7 @@ async function buildQueryContext() {
 	const queries = await getQueries();
 	const $query = {};
 	for (const query of queries) {
-		$query[query.key] = JSON.parse(query.output) ?? null;
+		$query[query.key] = parseQuery(query);
 	}
 	context.$query = $query;
 }
