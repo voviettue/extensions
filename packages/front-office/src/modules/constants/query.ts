@@ -111,7 +111,7 @@ export function formFields({ values }) {
 		excludeField.push('output');
 	}
 
-	if (values.query === 'json') {
+	if (values.query === 'json' || values.query === 'js-object') {
 		excludeField.push('refresh_on_load');
 		excludeField.push('timeout');
 	}
