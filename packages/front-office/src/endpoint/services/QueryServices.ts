@@ -5,20 +5,16 @@ import { BaseException } from '@directus/shared/exceptions';
 import isJson from '../utils/is-json';
 import renderTemplate from '../utils/render-template';
 
-type CallbackFunction = 'executeItems' | 'executeApi';
-
 export class QueryService {
 	schema: SchemaOverview;
 	accountability: Accountability;
 	ctx: ApiExtensionContext;
 	activityService: any;
 	queryItemsService: any;
-	callback = {
+	handlers = {
 		item: 'executeItem',
 		items: 'executeItems',
 		api: 'executeApi',
-		json: 'executeJson',
-		'js-object': 'executeJson',
 	};
 	params: any;
 
@@ -42,14 +38,18 @@ export class QueryService {
 		try {
 			this.params = {};
 			const query: Query = await this.queryItemsService.readOne(queryId);
-			const queryParams = query.params ?? [];
+			const queryParams: any[] = query.params ?? [];
 			for (const param of queryParams) {
 				this.params[param?.name] = param?.value ?? null;
 			}
 			this.params = { ...this.params, ...params };
-			const callbackName = this.callback[query.query] as CallbackFunction;
-			const data = await this[callbackName](query);
-			return data;
+			// if (this.handlers?.[query.query]) {
+
+			// }
+			const fn = this.handlers?.[query.query];
+			if (!fn) return query.output;
+
+			return await this[fn](query);
 		} catch (e: any) {
 			throw new BaseException(e?.message, e?.status, e?.code);
 		}
@@ -114,10 +114,12 @@ export class QueryService {
 				accountability: this.accountability,
 			});
 
+			const filter = JSON.parse(renderTemplate(JSON.stringify(query.options?.filter), this.params)) ?? null;
+			const limit = parseInt(renderTemplate(query.options?.perPage, this.params)) || 20;
 			const data = await itemsService.readByQuery({
-				filter: query.options?.filter,
 				fields: query.options?.fields && query.options.fields.length ? query.options.fields : '*',
-				limit: query.options?.perPage || 20,
+				filter: filter,
+				limit: isNaN(limit) ? null : limit,
 			});
 
 			return data;
@@ -135,16 +137,20 @@ export class QueryService {
 			}
 
 			const headers: Record<string, any> = {};
-			query.options?.headers?.map((e: any) => (headers[e.key] = e.value));
-
 			const params: Record<string, any> = {};
-			query.options?.params?.map((e: any) => (params[e.key] = isJson(e.value) ? JSON.parse(e.value) : e.value));
 
-			const body = query.options?.data ?? null;
+			query.options?.headers?.map((e: any) => (headers[e.key] = renderTemplate(e.value, this.params)));
+			query.options?.params?.map((e: any) => {
+				const value = renderTemplate(e.value, this.params);
+				params[e.key] = isJson(value) ? JSON.parse(value) : value;
+			});
+
+			const body = renderTemplate(query.options?.data, this.params) ?? null;
+			const url = renderTemplate(query.options.url, this.params) ?? null;
 
 			const options = {
 				method: query.options.method,
-				url: query.options.url,
+				url: url,
 				params: params,
 				data: body,
 				headers: headers,
@@ -160,9 +166,5 @@ export class QueryService {
 			const statusCode = e.response.status;
 			throw new BaseException(message, statusCode, e?.code);
 		}
-	}
-
-	executeJson(query: Query) {
-		return query.output;
 	}
 }
