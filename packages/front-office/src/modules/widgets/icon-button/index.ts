@@ -40,6 +40,9 @@ export default defineWidget({
 					],
 				},
 			},
+			schema: {
+				default_value: 'md',
+			},
 		},
 		{
 			field: 'disable',
@@ -138,6 +141,9 @@ export default defineWidget({
 					],
 				},
 			},
+			schema: {
+				default_value: 'primary',
+			},
 		},
 		{
 			field: 'borderRadius',
@@ -150,6 +156,9 @@ export default defineWidget({
 					trim: true,
 					placeholder: 'Enter border width size in px',
 				},
+			},
+			schema: {
+				default_value: 0,
 			},
 		},
 		{
