@@ -6,18 +6,6 @@ export default defineQuery({
 	icon: 'code',
 	options: [
 		{
-			field: 'confirmBeforeCalling',
-			name: 'Confirm Before Calling',
-			type: 'boolean',
-			schema: {
-				default_value: 'false',
-			},
-			meta: {
-				width: 'half',
-				interface: 'boolean',
-			},
-		},
-		{
 			field: 'code',
 			name: 'Code',
 			meta: {
