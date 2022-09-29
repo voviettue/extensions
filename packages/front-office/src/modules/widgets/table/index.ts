@@ -8,6 +8,48 @@ export default defineWidget({
 	options: WidgetTableOptions,
 	extendOptions: [
 		{
+			field: 'headerOptions',
+			type: 'alias',
+			meta: {
+				interface: 'presentation-divider',
+				options: {
+					icon: 'search',
+					title: 'Header options',
+				},
+				special: ['alias', 'no-data'],
+			},
+		},
+		{
+			field: 'activeSearch',
+			name: 'Search',
+			type: 'boolean',
+			meta: {
+				width: 'half',
+				interface: 'boolean',
+			},
+		},
+		{
+			field: 'activeFilter',
+			name: 'Filter',
+			type: 'boolean',
+			meta: {
+				width: 'half',
+				interface: 'boolean',
+			},
+		},
+		{
+			field: 'tableOptions',
+			type: 'alias',
+			meta: {
+				interface: 'presentation-divider',
+				options: {
+					icon: 'grid_on',
+					title: 'Table options',
+				},
+				special: ['alias', 'no-data'],
+			},
+		},
+		{
 			field: 'data',
 			name: 'Data',
 			meta: {
