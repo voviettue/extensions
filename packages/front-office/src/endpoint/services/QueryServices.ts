@@ -114,7 +114,9 @@ export class QueryService {
 				accountability: this.accountability,
 			});
 
-			const filter = JSON.parse(renderTemplate(JSON.stringify(query.options?.filter), this.params)) ?? null;
+			const filter = query.options?.filter
+				? JSON.parse(renderTemplate(JSON.stringify(query.options?.filter), this.params))
+				: null;
 			const limit = parseInt(renderTemplate(query.options?.perPage, this.params)) || 20;
 			const data = await itemsService.readByQuery({
 				fields: query.options?.fields && query.options.fields.length ? query.options.fields : '*',
