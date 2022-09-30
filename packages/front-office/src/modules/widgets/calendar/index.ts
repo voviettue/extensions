@@ -18,7 +18,7 @@ export default defineWidget({
 		// 	},
 		// },
 		{
-			field: 'events',
+			field: 'data',
 			name: 'Data source',
 			meta: {
 				interface: 'input-code',
@@ -80,7 +80,7 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					trim: true,
-					placeholder: 'Enter value...',
+					placeholder: 'Ex: id,name,key',
 				},
 			},
 		},
