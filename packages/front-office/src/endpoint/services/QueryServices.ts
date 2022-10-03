@@ -154,7 +154,7 @@ export class QueryService {
 				method: query.options.method,
 				url: url,
 				params: params,
-				data: body,
+				data: isJson(body) ? JSON.parse(body) : body,
 				headers: headers,
 				timeout: query.timeout,
 			};
