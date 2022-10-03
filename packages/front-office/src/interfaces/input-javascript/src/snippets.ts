@@ -1,6 +1,16 @@
 import { Completion, snippetCompletion } from '@codemirror/autocomplete';
 
 export const snippets: readonly Completion[] = [
+	snippetCompletion('executeQuery("${key_of_query}")', {
+		label: 'executeQuery',
+		detail: '',
+		type: 'keyword',
+	}),
+	snippetCompletion('executeQuery("${key_of_query}", { id: ${id} })', {
+		label: 'executeQuery',
+		detail: 'with params',
+		type: 'keyword',
+	}),
 	snippetCompletion('navigateTo("/${endpoint}")', {
 		label: 'navigateTo',
 		detail: 'endpoint',
