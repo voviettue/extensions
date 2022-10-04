@@ -1,4 +1,4 @@
-export const formFields = [
+export default [
 	{
 		field: 'label',
 		name: 'Column Name',
@@ -56,6 +56,9 @@ export const formFields = [
 		meta: {
 			width: 'half',
 			interface: 'boolean',
+		},
+		schema: {
+			default_value: false,
 		},
 	},
 	{

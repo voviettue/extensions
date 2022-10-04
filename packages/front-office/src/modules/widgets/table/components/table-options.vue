@@ -19,7 +19,7 @@
 				@update:model-value="setSort"
 			>
 				<template #item="{ element, index }">
-					<widget-table-column
+					<table-column
 						:column="element"
 						@update="updateColumn($event, index)"
 						@toggle-visibility="toggleVisibility($event, index)"
@@ -35,8 +35,7 @@
 		<v-form
 			:model-value="optionsValues"
 			class="extension-options"
-			:fields="extendFields"
-			:initial-values="extendInitialValues"
+			:fields="formFields"
 			primary-key="+"
 			style="padding: 0"
 			@update:model-value="updateExtendValues($event)"
@@ -47,13 +46,13 @@
 <script lang="ts">
 import { computed, ref } from 'vue';
 import cloneDeep from 'lodash/cloneDeep';
-import WidgetTableColumn from './widget-table-column.vue';
+import TableColumn from './table-column.vue';
 import TableColumnCreate from './table-column-create.vue';
-import table from '../../../widgets/table';
+import optionsFields from '../config/table-options-fields';
 import Draggable from 'vuedraggable';
 
 export default {
-	components: { Draggable, WidgetTableColumn, TableColumnCreate },
+	components: { Draggable, TableColumn, TableColumnCreate },
 	props: {
 		value: {
 			type: Object,
@@ -67,12 +66,6 @@ export default {
 	emits: ['input', 'update:modelValue'],
 	setup(props, { emit }) {
 		const isOpenCreate = ref<boolean>(false);
-		const extendInitialValues = ref({
-			strippedRow: false,
-			border: '#000000',
-			verticalLines: false,
-		});
-
 		const optionsValues = computed({
 			get() {
 				if (props.value === undefined || props.value === null) {
@@ -85,9 +78,9 @@ export default {
 			},
 		});
 
-		const extendFields = computed(() => {
+		const formFields = computed(() => {
 			const pagination = optionsValues.value?.pagination;
-			const extendOptions = [...table.extendOptions];
+			const options = [...optionsFields!];
 			if (pagination === true) {
 				const itemPerPageField = {
 					field: 'itemPerPage',
@@ -125,17 +118,16 @@ export default {
 						},
 					},
 				};
-				extendOptions.push(itemPerPageField);
+				options.push(itemPerPageField);
 			}
-			return extendOptions;
+			return options;
 		});
 
 		return {
 			close,
 			isOpenCreate,
 			optionsValues,
-			extendFields,
-			extendInitialValues,
+			formFields,
 			updateExtendValues,
 			setSort,
 			createColumn,
@@ -151,9 +143,7 @@ export default {
 		}
 
 		function updateExtendValues(values: any) {
-			const data = cloneDeep(optionsValues.value);
-			const edits = { ...data, ...values };
-			optionsValues.value = edits;
+			optionsValues.value = cloneDeep(values);
 		}
 
 		function close() {

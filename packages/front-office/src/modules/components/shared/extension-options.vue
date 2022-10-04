@@ -47,8 +47,11 @@ const optionsValues = computed({
 	},
 });
 
-const useComponent =
-	typeof props.optionsFields !== 'function' &&
-	Array.isArray(props.optionsFields) === false &&
-	props.optionsFields !== null;
+const useComponent = computed(() => {
+	return (
+		typeof props.optionsFields !== 'function' &&
+		Array.isArray(props.optionsFields) === false &&
+		props.optionsFields !== null
+	);
+});
 </script>

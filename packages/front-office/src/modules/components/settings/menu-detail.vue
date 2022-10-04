@@ -29,7 +29,6 @@
 							primary-key="+"
 							class="field-fault"
 							:fields="formFields"
-							:initial-values="initialValues"
 							:validation-errors="validationErrors"
 						/>
 
@@ -82,12 +81,6 @@ const selectedMenu = computed(() => {
 	return listMenuConfig.find((e) => e.id === modelValue.value?.menu);
 });
 const { item, edits, getItem, save, validationErrors } = useItem(collection, primaryKey);
-
-const initialValues = ref({
-	label: null,
-	key: null,
-	icon: null,
-});
 
 if (primaryKey === '+') {
 	watch(

@@ -1,5 +1,5 @@
 <template>
-	<v-drawer :title="`Editing Table Column`" :model-value="isOpen" persistent @cancel="close">
+	<v-drawer :title="`Creating Table Column`" :model-value="isOpen" persistent @cancel="$emit('close')">
 		<template #sidebar>
 			<v-tabs v-model="currentTab" vertical>
 				<v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value">
@@ -14,7 +14,7 @@
 			</v-button>
 		</template>
 
-		<div class="edit-column-container">
+		<div class="create-column-container">
 			<v-form
 				v-if="currentTab == 'properties'"
 				v-model="modelValue"
@@ -22,7 +22,6 @@
 				:fields="formFields"
 				:validation-errors="validationErrors"
 			/>
-
 			<div v-if="currentTab == 'displayValue'" class="list-column-config">
 				<button
 					v-for="displayConfig of listDisplayConfig"
@@ -54,38 +53,38 @@
 	</v-drawer>
 </template>
 <script lang="ts">
-import { ref, Ref, computed, watch, onMounted } from 'vue';
+import { ref, Ref, computed, watch } from 'vue';
 import formatTitle from '@directus/format-title';
 import { useValidate } from '../../../composables/use-validate';
 import listDisplayConfig from '../../../displays';
 import { ExtensionOptionsContext, DisplayConfig } from '../../../types/extensions';
-import { formFields } from '../../../constants/column';
-import ExtensionOptions from '../../shared/extension-options.vue';
+import formFields from '../config/column-fields';
+import ExtensionOptions from '../../../components/shared/extension-options.vue';
 import snakeCase from 'lodash/snakeCase';
 
 export default {
 	components: { ExtensionOptions },
 	props: {
-		column: {
-			type: Object,
-			default: null,
-		},
 		isOpen: {
 			type: Boolean,
 			default: false,
 		},
 	},
-	emits: ['close', 'update'],
+	emits: ['close', 'create'],
 	setup(props, { emit }) {
 		const { validateItem } = useValidate();
 
 		const isLoading = ref<boolean>(false);
 		const validationErrors: Ref<Record<string, any>[]> = ref([]);
-		const modelValue: Ref<Record<string, any>> = ref(props.column);
-		const selectedDisplay: Ref<DisplayConfig | null> = ref(
-			listDisplayConfig.find((display: DisplayConfig) => display.id == props.column.display) as DisplayConfig
-		);
-		const currentTab = ref<string>();
+		const modelValue: Ref<Record<string, any>> = ref({ hidden: false, displayOptions: {} });
+		const selectedDisplay: Ref<DisplayConfig | null> = ref(null);
+
+		const initialValues = ref({
+			key: null,
+			label: null,
+			hidden: false,
+			tooltip: null,
+		});
 
 		watch(
 			() => modelValue.value.label,
@@ -93,18 +92,6 @@ export default {
 				modelValue.value.key = snakeCase(val);
 			}
 		);
-
-		watch(
-			() => props.column,
-			(val: any) => {
-				modelValue.value = val;
-			},
-			{ deep: true, immediate: true }
-		);
-
-		onMounted(async () => {
-			currentTab.value = 'properties';
-		});
 
 		const optionsFields = computed(() => {
 			const options = selectedDisplay.value?.displayOptions ?? [];
@@ -123,9 +110,11 @@ export default {
 			];
 		});
 
+		const currentTab = ref<string>('properties');
+
 		return {
-			tabs,
 			currentTab,
+			tabs,
 			listDisplayConfig,
 			close,
 			isLoading,
@@ -137,6 +126,7 @@ export default {
 			validationErrors,
 			selectedDisplay,
 			toggleDisplayConfig,
+			initialValues,
 		};
 
 		function toggleDisplayConfig(display: DisplayConfig) {
@@ -153,19 +143,16 @@ export default {
 
 			isLoading.value = true;
 
-			emit('update', modelValue.value);
+			emit('create', modelValue.value);
+			modelValue.value = {};
 
 			isLoading.value = false;
-		}
-
-		function close() {
-			emit('close');
 		}
 	},
 };
 </script>
 <style scoped>
-.edit-column-container {
+.create-column-container {
 	padding: 20px;
 }
 
