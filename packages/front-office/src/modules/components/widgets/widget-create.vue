@@ -72,6 +72,7 @@ import { useRouter, useRoute } from 'vue-router';
 import { formFields } from '../../constants/widget';
 import { useValidate } from '../../composables/use-validate';
 import { ExtensionOptionsContext, WidgetConfig } from '../../types/extensions';
+import { useFrontOfficeStore } from '../../stores/front-office';
 import widgetConfigList from '../../widgets';
 import isEmpty from 'lodash/isEmpty';
 import snakeCase from 'lodash/snakeCase';
@@ -79,6 +80,7 @@ import ExtensionOptionsComponent from '../shared/extension-options.vue';
 import { useItem } from '../../composables/use-item';
 
 const { validateItem } = useValidate();
+const frontOfficeStore = useFrontOfficeStore();
 const router = useRouter();
 const route = useRoute();
 
@@ -97,6 +99,7 @@ const page = route.params.id;
 const primaryKey = route.params.widgetId as string;
 const { item, edits, getItem, save, validationErrors } = useItem('cms_widgets', primaryKey);
 
+frontOfficeStore.hydrateQueries();
 if (primaryKey === '+') {
 	watch(
 		() => modelValue.value.name,

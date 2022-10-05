@@ -9,6 +9,7 @@ export const useFrontOfficeStore = defineStore({
 		menus: [],
 		queries: [],
 		logList: [],
+		queries: [],
 		api: useApi(),
 	}),
 	actions: {
@@ -39,6 +40,10 @@ export const useFrontOfficeStore = defineStore({
 			this.logList = (logListResponse?.data?.data || []).map((e: any) => {
 				return { ...e, comment: e.comment && JSON.parse(e.comment) };
 			});
+		},
+		async hydrateQueries() {
+			const res = await this.api.get<any>(`/items/cms_queries`, { params: { limit: -1 } });
+			this.queries = (res?.data?.data || []).sort((a: any, b: any) => (a.sort ?? 1000) - (b.sort ?? 1000));
 		},
 	},
 });
