@@ -27,6 +27,13 @@
       "path": "dist/front-office-input-javascript.js",
       "source": "src/interfaces/input-javascript/index.ts",
       "host": "^9.15.0"
+    },
+    {
+      "name": "front-office-interface-input-display-template",
+      "type": "interface",
+      "path": "dist/front-office-input-display-template.js",
+      "source": "src/interfaces/input-display-template/index.ts",
+      "host": "^9.15.0"
     }
   ],
   "scripts": {
@@ -43,6 +50,7 @@
     "@directus/shared": "^9.15.1",
     "@gigapress/bundle-extensions-sdk": "workspace:*",
     "axios": "^0.27.2",
+    "date-fns": "^2.29.1",
     "lodash": "^4.17.21",
     "pinia": "^2.0.18",
     "typescript": "^4.7.4",
