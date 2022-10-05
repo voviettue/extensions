@@ -62,6 +62,7 @@ async function savePage() {
 </script>
 <style scoped>
 .new-page-container {
+	--form-vertical-gap: 2rem;
 	padding: 20px;
 }
 .submit-page {

@@ -168,7 +168,7 @@ async function saveSettingMenu() {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 160px;
+	width: 132px;
 	height: 100px;
 	margin-bottom: 8px;
 	border: var(--border-width) solid var(--border-subdued);
@@ -230,6 +230,7 @@ async function saveSettingMenu() {
 }
 
 .group {
+	--form-vertical-gap: 2rem;
 	background-color: var(--background-subdued);
 	border-top: 3px solid var(--border-normal);
 	padding: 2.125rem;

@@ -228,6 +228,7 @@ async function updateAndNavigate() {
 
 <style scoped>
 .field-fault {
+	--form-vertical-gap: 2rem;
 	padding-bottom: 1.25rem;
 }
 </style>

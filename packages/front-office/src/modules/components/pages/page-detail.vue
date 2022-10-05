@@ -91,6 +91,7 @@ onMounted(() => {
 	padding-top: 0;
 }
 .padding-box .page-detail-container {
+	--form-vertical-gap: 2rem;
 	width: 100%;
 	padding: 20px;
 	display: flex;

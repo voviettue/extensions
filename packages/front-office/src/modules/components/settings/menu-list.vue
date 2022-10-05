@@ -22,7 +22,7 @@
 		</draggable>
 
 		<v-button class="add-new" half-width :to="`/front-office/settings/project/${projectId}/menu/+`">
-			Create New
+			Create Menu
 		</v-button>
 	</div>
 	<router-view name="menu_detail" @refresh="refresh"></router-view>

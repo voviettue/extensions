@@ -231,7 +231,7 @@ export default {
 <style lang="scss" scoped>
 .group {
 	position: relative;
-	min-height: 48px;
+	min-height: 52px;
 	padding: 8px;
 	padding-top: 40px;
 	padding-bottom: 8px;
@@ -291,7 +291,7 @@ export default {
 }
 .menu {
 	--input-padding: 8px;
-	--input-height: 48px;
+	--input-height: 52px;
 	.type {
 		color: var(--foreground-subdued);
 		font-family: var(--family-monospace);

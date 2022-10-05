@@ -72,7 +72,7 @@ export default {
 </script>
 <style lang="scss" scoped>
 .table-column-select {
-	--input-height: 48px;
+	--input-height: 52px;
 	--input-padding: 8px;
 	margin: 4px;
 }

@@ -161,7 +161,7 @@ async function handleCreateQuery() {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 160px;
+	width: 132px;
 	height: 100px;
 	margin-bottom: 8px;
 	border: var(--border-width) solid var(--border-subdued);
@@ -203,6 +203,7 @@ async function handleCreateQuery() {
 	box-shadow: 0 0 8px var(--foreground-subdued);
 }
 .group {
+	--form-vertical-gap: 2rem;
 	background-color: var(--background-subdued);
 	border-top: 3px solid var(--border-normal);
 	padding: 2.125rem;

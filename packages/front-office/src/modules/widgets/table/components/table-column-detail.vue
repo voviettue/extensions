@@ -202,7 +202,7 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 160px;
+	width: 132px;
 	height: 100px;
 	margin-bottom: 8px;
 	border: var(--border-width) solid var(--border-subdued);

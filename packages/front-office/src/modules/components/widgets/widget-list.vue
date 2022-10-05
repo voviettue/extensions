@@ -31,7 +31,7 @@
 			</draggable>
 		</v-list>
 		<div class="new-widget">
-			<v-button :to="`/front-office/pages/${id}/widget/+`" full-width>Create Widget</v-button>
+			<v-button :to="`/front-office/pages/${id}/widget/+`">Create Widget</v-button>
 		</div>
 
 		<router-view name="addWidget"></router-view>
@@ -131,7 +131,7 @@ onMounted(() => {
 
 <style scope lang="scss">
 .widgets {
-	max-width: 1000px;
+	max-width: 100%;
 }
 .field-label {
 	margin-bottom: 10px;
