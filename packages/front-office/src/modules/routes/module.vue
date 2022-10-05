@@ -2,7 +2,7 @@
 	<private-view v-if="loading">
 		<div class="padding-box">loading...</div>
 	</private-view>
-	<router-view v-else></router-view>
+	<router-view v-else class="module-front-office"></router-view>
 </template>
 
 <script lang="ts" setup>
@@ -19,3 +19,10 @@ onMounted(async () => {
 	loading.value = false;
 });
 </script>
+
+<style scoped>
+.module-front-office {
+	--form-horizontal-gap: 32px;
+	--form-vertical-gap: 32px;
+}
+</style>

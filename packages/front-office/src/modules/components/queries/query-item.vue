@@ -1,12 +1,13 @@
 <template>
-	<div class="page-item">
+	<div class="query">
 		<v-list-item block dense clickable :to="`/front-office/queries/${query.id}`">
 			<v-list-item-icon>
 				<v-icon class="drag-handle" name="drag_handle" />
 			</v-list-item-icon>
 			<div class="">
-				<v-icon :name="queryIcon" class="page-icon" />
-				<span>{{ query.name }}</span>
+				<v-icon :name="queryIcon" class="icon" />
+				<span class="name">{{ query.name }}</span>
+				<span class="key">{{ query.key }}</span>
 			</div>
 			<query-options :query="query" @refresh="emit('refresh')" />
 		</v-list-item>
@@ -35,11 +36,24 @@ const queryIcon = computed(() => {
 });
 </script>
 
-<style scoped>
-.page-item {
+<style scoped lang="scss">
+.query {
 	margin-bottom: 10px;
-}
-.page-icon {
-	margin-right: 10px;
+
+	.name {
+		margin: 8px;
+	}
+	.icon {
+		margin-right: 2px;
+	}
+	.key {
+		color: var(--foreground-subdued);
+		font-family: var(--family-monospace);
+		transition: opacity var(--fast) var(--transition);
+		opacity: 0;
+	}
+	&:hover .key {
+		opacity: 1;
+	}
 }
 </style>

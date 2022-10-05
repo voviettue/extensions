@@ -52,7 +52,7 @@
 					<div class="label-inner">
 						<v-icon v-if="!!menu.icon" class="drag-handle" :name="menu.icon" @click.stop />
 						<span class="name">{{ menu.label }}</span>
-						<small class="type">{{ config?.key }}</small>
+						<small class="type">{{ config?.name }}</small>
 					</div>
 				</div>
 			</template>
@@ -231,10 +231,10 @@ export default {
 <style lang="scss" scoped>
 .group {
 	position: relative;
-	min-height: var(--input-height);
-	padding: var(--input-padding);
+	min-height: 48px;
+	padding: 8px;
 	padding-top: 40px;
-	padding-bottom: 16px;
+	padding-bottom: 8px;
 	border-radius: var(--border-radius);
 
 	> * {
@@ -289,7 +289,19 @@ export default {
 		}
 	}
 }
-
+.menu {
+	--input-padding: 8px;
+	--input-height: 48px;
+	.type {
+		color: var(--foreground-subdued);
+		font-family: var(--family-monospace);
+		transition: opacity var(--fast) var(--transition);
+		opacity: 0;
+	}
+	&:hover .type {
+		opacity: 1;
+	}
+}
 .menu-grid {
 	position: relative;
 	display: grid;

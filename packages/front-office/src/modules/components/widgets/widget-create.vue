@@ -28,7 +28,7 @@
 			</div>
 
 			<transition-expand>
-				<div v-if="!!modelValue?.widget" class="group">
+				<div v-if="!!modelValue?.widget" class="group" style="grid-row: 2 / auto">
 					<v-form
 						v-model="modelValue"
 						primary-key="+"

@@ -53,7 +53,7 @@ export const formFields = [
 			width: 'half',
 			interface: 'select-dropdown-m2o',
 			options: {
-				template: '{{name}}',
+				template: '{{ title }}',
 			},
 			group: 'project_setup',
 		},
