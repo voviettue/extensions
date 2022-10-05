@@ -115,15 +115,6 @@ export default defineWidget({
 			},
 		},
 		{
-			field: 'allowSearching',
-			name: 'Allow Searching',
-			type: 'boolean',
-			meta: {
-				width: 'half',
-				interface: 'Boolean',
-			},
-		},
-		{
 			field: 'label',
 			name: 'Label',
 			type: 'string',
@@ -153,32 +144,6 @@ export default defineWidget({
 						{
 							text: 'Top',
 							value: 'top',
-						},
-						{
-							text: 'Auto',
-							value: 'auto',
-						},
-					],
-				},
-			},
-		},
-		{
-			field: 'alignment',
-			name: 'Alignment',
-			type: 'string',
-			meta: {
-				interface: 'select-dropdown',
-				width: 'half',
-				options: {
-					allowNone: true,
-					choices: [
-						{
-							text: 'Left',
-							value: 'left',
-						},
-						{
-							text: 'Right',
-							value: 'right',
 						},
 					],
 				},
