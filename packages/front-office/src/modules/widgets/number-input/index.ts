@@ -9,7 +9,7 @@ export default defineWidget({
 			{
 				field: 'defaultValue',
 				name: 'Default Value',
-				type: 'string',
+				type: 'integer',
 				meta: {
 					interface: 'input',
 					width: 'full',
@@ -99,15 +99,6 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'trim',
-				name: 'Trim',
-				type: 'boolean',
-				meta: {
-					width: 'half',
-					interface: 'Boolean',
-				},
-			},
-			{
 				field: 'marked',
 				name: 'Marked',
 				type: 'boolean',
@@ -177,8 +168,10 @@ export default defineWidget({
 				meta: {
 					interface: 'input',
 					width: 'full',
+					required: true,
 					options: {
 						trim: true,
+
 						placeholder: 'Enter label to be displayed',
 					},
 				},

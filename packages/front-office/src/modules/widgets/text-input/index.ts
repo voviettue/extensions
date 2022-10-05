@@ -179,6 +179,7 @@ export default defineWidget({
 				meta: {
 					interface: 'input',
 					width: 'full',
+					required: true,
 					options: {
 						trim: true,
 						placeholder: 'Enter label to be displayed',
