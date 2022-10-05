@@ -41,11 +41,13 @@ import { useRoute, useRouter } from 'vue-router';
 import { useItem } from '../../composables/use-item';
 import WidgetList from '../widgets/widget-list.vue';
 import { formFields } from '../../constants/page';
+import { useValidate } from '../../composables/use-validate';
 
 const { useUserStore } = useStores();
 const { isAdmin } = useUserStore();
 const route = useRoute();
 const router = useRouter();
+const { validateItem } = useValidate();
 
 const collection = 'cms_pages';
 const primaryKey = computed(() => {
@@ -57,6 +59,10 @@ const { edits, item, save, validationErrors, loading, refresh, getItem } = useIt
 	primaryKey.value as string
 );
 
+watch(item, () => {
+	edits.value = { ...item.value };
+});
+
 watch(
 	() => edits.value.endpoint,
 	(val: string) => {
@@ -65,6 +71,9 @@ watch(
 );
 
 async function savePage() {
+	validationErrors.value = validateItem(edits.value, formFields);
+	if (validationErrors.value.length) return;
+
 	await save();
 	if (!validationErrors.value.length) {
 		refresh();

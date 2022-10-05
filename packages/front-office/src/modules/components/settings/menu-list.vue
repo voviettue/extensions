@@ -45,7 +45,7 @@ export default {
 	},
 	setup() {
 		const frontOfficeStore = useFrontOfficeStore();
-		const itemMenus = computed(() => frontOfficeStore.menuList);
+		const itemMenus = computed(() => frontOfficeStore.menus);
 
 		return { itemMenus, setSort, setNestedSort, refresh };
 
@@ -67,7 +67,7 @@ export default {
 		}
 
 		async function refresh() {
-			await frontOfficeStore.getMenuList();
+			await frontOfficeStore.hydrateMenus();
 		}
 	},
 };

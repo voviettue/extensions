@@ -1,4 +1,5 @@
 import { defineModule } from '@directus/extensions-sdk';
+import ModuleComponent from './routes/module.vue';
 import SettingComponent from './routes/setting.vue';
 import PagesComponent from './routes/pages.vue';
 import QueriesComponent from './routes/queries.vue';
@@ -15,68 +16,71 @@ export default defineModule({
 	icon: 'web',
 	routes: [
 		{
-			path: '',
-			redirect: '/front-office/settings',
-		},
-		{
-			path: '/front-office/settings',
-			component: SettingComponent,
+			path: '/front-office',
+			component: ModuleComponent,
+			redirect: '/front-office/pages',
 			children: [
 				{
-					path: 'project/:projectId/menu/:menuId',
-					name: 'setting-menu-detail',
-					components: {
-						menu_detail: MenuDetailComponent,
-					},
+					path: 'settings',
+					component: SettingComponent,
+					children: [
+						{
+							path: 'project/:projectId/menu/:menuId',
+							name: 'setting-menu-detail',
+							components: {
+								menu_detail: MenuDetailComponent,
+							},
+						},
+					],
 				},
-			],
-		},
-		{
-			name: 'front-office-page',
-			path: '/front-office/pages',
-			component: PagesComponent,
-			children: [
 				{
-					path: '+',
-					name: 'page-add-new',
-					components: {
-						add: NewPageComponent,
-					},
+					name: 'front-office-page',
+					path: 'pages',
+					component: PagesComponent,
+					children: [
+						{
+							path: '+',
+							name: 'page-add-new',
+							components: {
+								add: NewPageComponent,
+							},
+						},
+					],
 				},
-			],
-		},
-		{
-			name: 'page-detail',
-			path: '/front-office/pages/:id',
-			component: PageDetailComponent,
-			children: [
 				{
-					path: 'widget/:widgetId',
-					name: 'page-add-new-widget',
-					components: {
-						addWidget: NewWidgetComponent,
-					},
+					name: 'page-detail',
+					path: 'pages/:id',
+					component: PageDetailComponent,
+					children: [
+						{
+							path: 'widget/:widgetId',
+							name: 'page-add-new-widget',
+							components: {
+								addWidget: NewWidgetComponent,
+							},
+						},
+					],
 				},
-			],
-		},
-		{
-			name: 'front-office-query',
-			path: '/front-office/queries',
-			component: QueriesComponent,
-			children: [
 				{
-					path: '+',
-					name: 'query-add-new',
-					components: {
-						add: NewQueryComponent,
-					},
+					name: 'front-office-query',
+					path: 'queries',
+					component: QueriesComponent,
+					children: [
+						{
+							path: '+',
+							name: 'query-add-new',
+							components: {
+								add: NewQueryComponent,
+							},
+						},
+					],
+				},
+				{
+					name: 'query-details',
+					path: 'queries/:id',
+					component: QueryDetailsComponent,
 				},
 			],
-		},
-		{
-			name: 'query-details',
-			path: '/front-office/queries/:id',
-			component: QueryDetailsComponent,
 		},
 	],
 });

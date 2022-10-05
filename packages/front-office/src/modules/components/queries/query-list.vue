@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<v-info v-if="listQueries.length === 0" icon="web" title="No Query">
+		<v-info v-if="queries.length === 0" icon="web" title="No Query">
 			<template #append>
 				<v-button to="/front-office/queries/+">Create Query</v-button>
 			</template>
@@ -9,7 +9,7 @@
 		<v-list v-else>
 			<draggable
 				:force-fallback="true"
-				:model-value="listQueries"
+				:model-value="queries"
 				:group="{ name: 'queries' }"
 				:swap-threshold="0.3"
 				class="root-drag-container"
@@ -17,7 +17,7 @@
 				handle=".drag-handle"
 			>
 				<template #item="{ element }">
-					<query-item :query="element" @refresh="getListQuery()"></query-item>
+					<query-item :query="element" @refresh="refresh()"></query-item>
 				</template>
 			</draggable>
 		</v-list>
@@ -26,34 +26,24 @@
 </template>
 
 <script setup lang="ts">
-import { useApi } from '@directus/extensions-sdk';
-import { ref, watch } from 'vue';
+import { storeToRefs } from 'pinia';
+import { watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 import Draggable from 'vuedraggable';
+import { useFrontOfficeStore } from '../../stores/front-office';
 import QueryItem from './query-item.vue';
 
 const route = useRoute();
-const api = useApi();
+const store = useFrontOfficeStore();
+const { queries } = storeToRefs(store);
 
-const listQueries = ref([]);
-
-watch(
-	() => route.name,
-	(val) => {
-		if (val === 'front-office-query') {
-			getListQuery();
-		}
+watchEffect(() => {
+	if (route.name === 'front-office-query') {
+		refresh();
 	}
-);
+});
 
-getListQuery();
-
-async function getListQuery() {
-	try {
-		const queriesApiData = await api.get('/items/cms_queries');
-		listQueries.value = queriesApiData?.data?.data || [];
-	} catch {
-		//
-	}
+function refresh() {
+	store.hydrateQueries();
 }
 </script>

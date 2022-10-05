@@ -22,11 +22,12 @@ import { formFields } from '../../constants/page';
 import snakeCase from 'lodash/snakeCase';
 import { useItem } from '../../composables/use-item';
 import { useRouter } from 'vue-router';
+import { useValidate } from '../../composables/use-validate';
 
 const collection = 'cms_pages';
 const primaryKey = '+';
 const router = useRouter();
-
+const { validateItem } = useValidate();
 const { edits, save, validationErrors, loading, refresh } = useItem(collection, primaryKey);
 
 const initForm = ref({
@@ -49,6 +50,9 @@ watch(
 	}
 );
 async function savePage() {
+	validationErrors.value = validateItem(edits.value, formFields);
+	if (validationErrors.value.length) return;
+
 	await save();
 	if (!validationErrors.value.length) {
 		refresh();

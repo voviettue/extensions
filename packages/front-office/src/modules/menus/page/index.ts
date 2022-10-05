@@ -17,7 +17,7 @@ export default defineMenu({
 					required: true,
 					interface: 'select-dropdown',
 					options: {
-						choices: frontOfficeStore.pageList,
+						choices: frontOfficeStore.pages,
 					},
 				},
 			},

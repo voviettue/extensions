@@ -27,24 +27,29 @@
 </template>
 <script setup lang="ts">
 import { useApi } from '@directus/extensions-sdk';
-import { ref, onMounted, watch } from 'vue';
+import { watch } from 'vue';
 import { useRoute } from 'vue-router';
 import Draggable from 'vuedraggable';
 import PageItem from './page-item.vue';
 import { useNotification } from '../../composables/use-notification';
+import { useFrontOfficeStore } from '../../stores/front-office';
+import { storeToRefs } from 'pinia';
 
 const route = useRoute();
 const api = useApi();
-const items = ref([]);
 const { notify } = useNotification();
-async function getListPage() {
-	try {
-		const res = await api.get('/items/cms_pages');
-		items.value = (res?.data?.data || []).sort((a, b) => (a.sort ?? 1000) - (b.sort ?? 1000));
-	} catch {
-		//
+const store = useFrontOfficeStore();
+const { pages: items } = storeToRefs(store);
+
+store.hydratePages();
+
+watch(
+	() => route.name,
+	(val) => {
+		if (val === 'front-office-page') store.hydratePages();
 	}
-}
+);
+
 async function onSort(val) {
 	items.value = val.map((item, index) => {
 		return {
@@ -56,31 +61,25 @@ async function onSort(val) {
 		return api.patch(`/items/cms_pages/${k.id}`, k);
 	});
 	await Promise.allSettled(apis);
+	await store.hydratePages();
 }
-watch(
-	() => route.name,
-	(val) => {
-		if (val === 'front-office-page') getListPage();
-	}
-);
+
 async function updateVisiable(page) {
 	try {
 		await api.patch(`/items/cms_pages/${page.id}`, { hidden: !page.hidden });
-		getListPage();
+		store.hydratePages();
 	} catch {
 		//
 	}
 }
+
 async function deletePage(page) {
 	try {
 		await api.delete(`/items/cms_pages/${page.id}`);
 		notify({ title: 'Item deleted' });
-		getListPage();
+		store.hydratePages();
 	} catch {
 		//
 	}
 }
-onMounted(() => {
-	getListPage();
-});
 </script>
