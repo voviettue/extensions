@@ -1,5 +1,5 @@
 import getDateFieldFromCollection from '../../utils/get-date-field-from-collection';
-import validateDataCalendar from '../../utils/validate-data-calendar';
+import validateDataCalendar from '../../utils/parse-date';
 import { useFrontOfficeStore } from '../../stores/front-office';
 import { defineWidget } from '../../utils/define-extension';
 import renderTemplate from '../../utils/render-template';
@@ -9,46 +9,46 @@ import capitalize from 'lodash/capitalize';
 import lowerCase from 'lodash/lowerCase';
 import format from 'date-fns/format';
 import { storeToRefs } from 'pinia';
+import parseJson from '../../utils/parse-json';
+import { useBindData } from '../../composables/use-bind-data';
+import pickBy from 'lodash/pickBy';
+import { isDate } from 'lodash';
+import parseDate from '../../utils/parse-date';
+
+let currentData: any = null;
 
 export default defineWidget({
 	id: 'calendar',
 	name: 'Calendar',
 	icon: 'calendar_month',
 	options: ({ values }) => {
-		const frontOfficeStore = useFrontOfficeStore();
-		const { queries } = storeToRefs(frontOfficeStore);
+		// const frontOfficeStore = useFrontOfficeStore();
+		// const { queries } = storeToRefs(frontOfficeStore);
 
-		const $query: Record<string, any> = {};
-		queries.value.forEach((query: any) => {
-			$query[query.key] = isJson(query.output) ? JSON.parse(query.output) : query.output;
-		});
+		// const $query: Record<string, any> = {};
+		// queries.value.forEach((query: any) => {
+		// 	$query[query.key] = isJson(query.output) ? JSON.parse(query.output) : query.output;
+		// });
 
-		const template = renderTemplate(values.options?.data, { $query });
+		// if (currentData !== values?.options?.data) {
+		// }
 
-		const data = isJson(template) ? JSON.parse(template) : template;
-		const isValid = validateDataCalendar(data);
-
-		let fields: Record<string, any>[] = [];
-		let dateFields: string[] = [];
-
-		if (isValid) {
-			fields = Object.keys(data[0])?.map(
-				(key: string) =>
-					({
-						field: key,
-						name: capitalize(lowerCase(key)),
-						type: 'string',
-						collection: '',
-						meta: null,
-						schema: null,
-					} as Field)
-			);
-			dateFields = getDateFieldFromCollection(data);
-		} else {
-			values.options.startDateField = null;
-			values.options.endDateField = null;
-			values.options.displayTemplate = null;
-		}
+		currentData = values?.options?.data;
+		const bindData = useBindData(currentData);
+		const data = parseJson(bindData, []);
+		const object = data?.[0] ?? {};
+		const fields = Object.keys(object).map(
+			(key: string) =>
+				({
+					field: key,
+					name: capitalize(lowerCase(key)),
+					type: 'string',
+					collection: '',
+					meta: null,
+					schema: null,
+				} as Field)
+		);
+		const dateFields = Object.keys(pickBy(object, (value) => !!parseDate(value)));
 
 		const options = [
 			{
@@ -165,32 +165,34 @@ export default defineWidget({
 			},
 			{
 				field: 'startDateField',
-				name: 'Start Date',
+				name: 'Start Date Field',
 				type: 'string',
 				meta: {
 					interface: 'select-dropdown',
 					options: {
 						choices: dateFields?.map((field) => ({
-							text: capitalize(lowerCase(field)),
+							text: field,
 							value: field,
 						})),
 						allowNone: true,
+						allowOther: true,
 					},
 					width: 'half',
 				},
 			},
 			{
 				field: 'endDateField',
-				name: 'End Date',
+				name: 'End Date Field',
 				type: 'string',
 				meta: {
 					interface: 'select-dropdown',
 					options: {
 						choices: dateFields?.map((field) => ({
-							text: capitalize(lowerCase(field)),
+							text: field,
 							value: field,
 						})),
 						allowNone: true,
+						allowOther: true,
 					},
 					width: 'half',
 				},

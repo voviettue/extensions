@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia';
 import { useApi } from '@directus/extensions-sdk';
+import { parseQuery } from '../utils/parse-query';
 
 export const useFrontOfficeStore = defineStore({
 	id: 'frontOfficeStore',
@@ -7,11 +8,20 @@ export const useFrontOfficeStore = defineStore({
 		hydrated: false,
 		pages: [],
 		menus: [],
-		queries: [],
+		queries: [] as any[],
 		logList: [],
-		queries: [],
 		api: useApi(),
 	}),
+	getters: {
+		context() {
+			const $query: any = {};
+			for (const query of this.queries) {
+				$query[query.key] = parseQuery(query);
+			}
+
+			return { $query };
+		},
+	},
 	actions: {
 		async hydrate() {
 			await Promise.all([this.hydratePages(), this.hydrateMenus(), this.hydrateQueries()]);

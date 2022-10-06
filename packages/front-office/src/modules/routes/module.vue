@@ -1,6 +1,8 @@
 <template>
 	<private-view v-if="loading">
-		<div class="padding-box">loading...</div>
+		<div class="padding-box">
+			<v-progress-circular />
+		</div>
 	</private-view>
 	<router-view v-else class="module-front-office"></router-view>
 </template>
