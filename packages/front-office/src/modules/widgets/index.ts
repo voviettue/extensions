@@ -11,6 +11,8 @@ import link from './link';
 import button from './button';
 import iconButton from './icon-button';
 import calendar from './calendar';
+import textInput from './text-input';
+import numberInput from './number-input';
 
 export default [
 	text,
@@ -26,4 +28,6 @@ export default [
 	button,
 	iconButton,
 	calendar,
+	textInput,
+	numberInput,
 ];

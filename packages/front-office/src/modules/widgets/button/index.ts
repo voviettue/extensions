@@ -44,6 +44,9 @@ export default defineWidget({
 					],
 				},
 			},
+			schema: {
+				default_value: 'md',
+			},
 		},
 		{
 			field: 'leftIcon',
@@ -212,9 +215,6 @@ export default defineWidget({
 						},
 					],
 				},
-			},
-			schema: {
-				default_value: 'md',
 			},
 		},
 		{
