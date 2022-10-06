@@ -41,7 +41,7 @@ export default defineWidget({
 			(key: string) =>
 				({
 					field: key,
-					name: capitalize(lowerCase(key)),
+					name: key,
 					type: 'string',
 					collection: '',
 					meta: null,

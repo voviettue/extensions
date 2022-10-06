@@ -11,14 +11,14 @@
 			<v-list-item-icon>
 				<v-icon class="drag-handle" name="drag_handle" />
 			</v-list-item-icon>
-			<div>
+			<div class="line">
 				<v-icon
 					:color="page.hidden ? 'var(--foreground-subdued)' : page.color ?? 'var(--primary)'"
 					class="icon"
 					:name="page.hidden ? 'visibility_off' : 'article'"
 				/>
 				<span :class="`endpoint ${page.hidden ? 'hidden' : ''}`">{{ page.endpoint }}</span>
-				<small class="title">{{ page.title }}</small>
+				<v-text-overflow class="title" :text="page.title" />
 			</div>
 			<page-options :page="page" :update-visiable="updateVisiable" :delete-page="deletePage" />
 		</v-list-item>
@@ -39,6 +39,11 @@ withDefaults(defineProps<{ page: Record<string, any>; updateVisiable: Function; 
 <style scoped lang="scss">
 .page {
 	margin-bottom: 10px;
+	.line {
+		flex-grow: 1;
+		display: flex;
+		align-items: center;
+	}
 	.icon {
 		margin-right: 10px;
 	}
@@ -47,7 +52,7 @@ withDefaults(defineProps<{ page: Record<string, any>; updateVisiable: Function; 
 		opacity: 0.5;
 	}
 	.title {
-		color: var(--foreground-subdued);
+		color: var(--foreground-subdued) !important;
 		font-family: var(--family-monospace);
 		transition: opacity var(--fast) var(--transition);
 		opacity: 0;

@@ -161,7 +161,7 @@ async function handleCreateQuery() {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 132px;
+	width: 128px;
 	height: 100px;
 	margin-bottom: 8px;
 	border: var(--border-width) solid var(--border-subdued);
