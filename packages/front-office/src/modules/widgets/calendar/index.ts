@@ -61,16 +61,14 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'defaultDate',
-				name: 'Default date',
-				schema: {
-					default_value: format(new Date(), 'yyyy-MM-dd'),
-				},
+				field: 'displayTemplate',
+				name: 'Display template',
 				meta: {
-					interface: 'datetime',
-					width: 'half',
+					interface: 'input-display-template',
+					options: {
+						fields: fields,
+					},
 				},
-				type: 'date',
 			},
 			{
 				field: 'defaultView',
@@ -102,17 +100,6 @@ export default defineWidget({
 							},
 						],
 					},
-				},
-			},
-			{
-				field: 'displayTemplate',
-				name: 'Display template',
-				meta: {
-					interface: 'input-display-template',
-					options: {
-						fields: fields,
-					},
-					width: 'half',
 				},
 			},
 			{
