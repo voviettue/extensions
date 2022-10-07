@@ -99,8 +99,8 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'marked',
-				name: 'Marked',
+				field: 'masked',
+				name: 'Masked',
 				type: 'boolean',
 				meta: {
 					width: 'half',
