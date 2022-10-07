@@ -5,8 +5,8 @@ export default [
 		meta: {
 			interface: 'presentation-divider',
 			options: {
-				icon: 'search',
-				title: 'Header options',
+				icon: 'table',
+				title: 'Actions',
 			},
 			special: ['alias', 'no-data'],
 		},
@@ -30,13 +30,31 @@ export default [
 		},
 	},
 	{
+		field: 'sortable',
+		name: 'Sortable',
+		type: 'boolean',
+		meta: {
+			width: 'half',
+			interface: 'boolean',
+		},
+	},
+	{
+		field: 'pagination',
+		name: 'Pagination',
+		type: 'boolean',
+		meta: {
+			interface: 'radio',
+			width: 'half',
+		},
+	},
+	{
 		field: 'tableOptions',
 		type: 'alias',
 		meta: {
 			interface: 'presentation-divider',
 			options: {
 				icon: 'grid_on',
-				title: 'Table options',
+				title: 'Options',
 			},
 			special: ['alias', 'no-data'],
 		},
@@ -281,15 +299,6 @@ export default [
 				placeholder: 'Select',
 				allowNone: true,
 			},
-		},
-	},
-	{
-		field: 'pagination',
-		name: 'Pagination',
-		type: 'boolean',
-		meta: {
-			interface: 'radio',
-			width: 'half',
 		},
 	},
 ];
