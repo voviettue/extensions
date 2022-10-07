@@ -1,18 +1,10 @@
-import getDateFieldFromCollection from '../../utils/get-date-field-from-collection';
-import validateDataCalendar from '../../utils/parse-date';
-import { useFrontOfficeStore } from '../../stores/front-office';
 import { defineWidget } from '../../utils/define-extension';
-import renderTemplate from '../../utils/render-template';
-import isJson from '../../../endpoint/utils/is-json';
 import { Field } from '@directus/shared/types';
-import capitalize from 'lodash/capitalize';
-import lowerCase from 'lodash/lowerCase';
 import format from 'date-fns/format';
-import { storeToRefs } from 'pinia';
 import parseJson from '../../utils/parse-json';
 import { useBindData } from '../../composables/use-bind-data';
 import pickBy from 'lodash/pickBy';
-import { isDate } from 'lodash';
+import union from 'lodash/union';
 import parseDate from '../../utils/parse-date';
 
 let currentData: any = null;
@@ -48,7 +40,11 @@ export default defineWidget({
 					schema: null,
 				} as Field)
 		);
-		const dateFields = Object.keys(pickBy(object, (value) => !!parseDate(value)));
+
+		let dateFields: string[] = [];
+		data?.map((e: {}) => {
+			dateFields = union(dateFields, Object.keys(pickBy(e, (value: any) => !!parseDate(value))));
+		});
 
 		const options = [
 			{
