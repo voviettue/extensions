@@ -110,8 +110,8 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'marked',
-				name: 'Marked',
+				field: 'masked',
+				name: 'Masked',
 				type: 'boolean',
 				meta: {
 					width: 'half',
@@ -407,7 +407,7 @@ export default defineWidget({
 		];
 		let data = [...defaultOptions];
 		if (values?.options?.labelPosition === 'top') {
-			data = data.filter((item) => item.field !== 'labelWidth');
+			data = data.filter((item) => !['labelWidth', 'alignment'].includes(item.field));
 		}
 		return data;
 	},
