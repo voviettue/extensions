@@ -118,7 +118,8 @@ export default {
 						},
 					},
 				};
-				options.push(itemPerPageField);
+				const paginationIndex = options.findIndex((option: any) => option.field === 'pagination');
+				options.splice(paginationIndex + 1, 0, itemPerPageField);
 			}
 			return options;
 		});

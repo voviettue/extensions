@@ -25,18 +25,18 @@ export default [
 			},
 		},
 	},
-	{
-		field: 'mappedValue',
-		name: 'Mapped Value',
-		type: 'string',
-		meta: {
-			width: 'half',
-			interface: 'input',
-			options: {
-				trim: true,
-			},
-		},
-	},
+	// {
+	// 	field: 'mappedValue',
+	// 	name: 'Mapped Value',
+	// 	type: 'string',
+	// 	meta: {
+	// 		width: 'half',
+	// 		interface: 'input',
+	// 		options: {
+	// 			trim: true,
+	// 		},
+	// 	},
+	// },
 	{
 		field: 'tooltip',
 		name: 'Tooltip',
@@ -59,6 +59,29 @@ export default [
 		},
 		schema: {
 			default_value: false,
+		},
+	},
+	{
+		field: 'sortDirection',
+		name: 'Sort Direction',
+		type: 'string',
+		meta: {
+			interface: 'select-dropdown',
+			width: 'half',
+			options: {
+				choices: [
+					{
+						text: 'Ascending',
+						value: 'asc',
+					},
+					{
+						text: 'Descending',
+						value: 'desc',
+					},
+				],
+				placeholder: 'Select',
+				allowNone: true,
+			},
 		},
 	},
 	{
