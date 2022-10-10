@@ -5,7 +5,7 @@
 		"
 		:model-value="true"
 		persistent
-		@cancel="$router.push('/front-office/settings')"
+		@cancel="$router.push('/front-office/menus')"
 	>
 		<div class="create-menu-container">
 			<div class="list-menu-config">
@@ -47,7 +47,7 @@
 			</div>
 		</div>
 		<template #actions>
-			<v-button v-tooltip.bottom="`Save`" rounded icon :loading="isLoading" @click="saveSettingMenu">
+			<v-button v-tooltip.bottom="`Save`" rounded icon :loading="isLoading" @click="saveHandler">
 				<v-icon name="check" />
 			</v-button>
 		</template>
@@ -65,6 +65,10 @@ import ExtensionOptions from '../shared/extension-options.vue';
 import snakeCase from 'lodash/snakeCase';
 import { useItem } from '../../composables/use-item';
 
+const props = defineProps<{
+	projectId: number;
+}>();
+
 const emit = defineEmits(['refresh']);
 
 const collection = 'cms_menus';
@@ -72,11 +76,10 @@ const router = useRouter();
 const route = useRoute();
 const { validateItem } = useValidate();
 
-const projectId = route.params.projectId as string;
-const primaryKey = route.params.menuId as string;
+const primaryKey = route.params.id as string;
 
 const isLoading = ref<boolean>(false);
-const modelValue: Ref<Record<string, any>> = ref({ options: {}, project: projectId });
+const modelValue: Ref<Record<string, any>> = ref({ options: {}, project: props.projectId });
 const selectedMenu = computed(() => {
 	return listMenuConfig.find((e) => e.id === modelValue.value?.menu);
 });
@@ -109,7 +112,7 @@ function toggleMenuConfig(menu: MenuConfig) {
 	modelValue.value.menu = menu.id || null;
 }
 
-async function saveSettingMenu() {
+async function saveHandler() {
 	const dataForm = { ...modelValue.value, ...modelValue.value.options };
 
 	validationErrors.value = [];
@@ -118,9 +121,9 @@ async function saveSettingMenu() {
 
 	isLoading.value = true;
 	try {
-		edits.value = { ...dataForm, project: projectId };
+		edits.value = { ...dataForm, project: props.projectId };
 		await save();
-		router.push('/front-office/settings');
+		router.push('/front-office/menus');
 	} catch (err) {
 		// do nothing
 	}

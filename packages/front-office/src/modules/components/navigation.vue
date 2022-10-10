@@ -22,6 +22,11 @@ export default {
 					to: '/front-office/settings',
 				},
 				{
+					icon: 'menu',
+					name: 'Menus',
+					to: '/front-office/menus',
+				},
+				{
 					icon: 'article',
 					name: 'Pages',
 					to: '/front-office/pages',

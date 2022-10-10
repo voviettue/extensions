@@ -1,5 +1,6 @@
 import { defineModule } from '@directus/extensions-sdk';
 import ModuleComponent from './routes/module.vue';
+import MenuComponent from './routes/menu.vue';
 import SettingComponent from './routes/setting.vue';
 import PagesComponent from './routes/pages.vue';
 import QueriesComponent from './routes/queries.vue';
@@ -8,7 +9,7 @@ import PageDetailComponent from './components/pages/page-detail.vue';
 import NewQueryComponent from './components/queries/query-create.vue';
 import QueryDetailsComponent from './components/queries/query-details.vue';
 import NewWidgetComponent from './components/widgets/widget-create.vue';
-import MenuDetailComponent from './components/settings/menu-detail.vue';
+import MenuDetailComponent from './components/menus/menu-detail.vue';
 
 export default defineModule({
 	id: 'front-office',
@@ -26,6 +27,19 @@ export default defineModule({
 					children: [
 						{
 							path: 'project/:projectId/menu/:menuId',
+							name: 'setting-menu-detail',
+							components: {
+								menu_detail: MenuDetailComponent,
+							},
+						},
+					],
+				},
+				{
+					path: 'menus',
+					component: MenuComponent,
+					children: [
+						{
+							path: ':id',
 							name: 'setting-menu-detail',
 							components: {
 								menu_detail: MenuDetailComponent,

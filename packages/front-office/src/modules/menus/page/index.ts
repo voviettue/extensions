@@ -6,7 +6,13 @@ export default defineMenu({
 	name: 'Page',
 	icon: 'article',
 	options: () => {
-		const frontOfficeStore = useFrontOfficeStore();
+		const store = useFrontOfficeStore();
+		const pages = store.pages.map((item: any) => {
+			return {
+				value: item.id,
+				text: item.title,
+			};
+		});
 
 		const options = [
 			{
@@ -17,7 +23,7 @@ export default defineMenu({
 					required: true,
 					interface: 'select-dropdown',
 					options: {
-						choices: frontOfficeStore.pages,
+						choices: pages,
 					},
 				},
 			},
