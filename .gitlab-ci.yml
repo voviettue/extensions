@@ -3,7 +3,9 @@ image: node:16-alpine
 variables:
   DOMAIN: catex
   REPOSITORY: gigapress
+  NAMESPACE: giga-extensions
   TAG_VERSION_REGEX: /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/
+  RULES_CHANGES_PATH: "**/*"
 
 stages:
   - build
@@ -17,7 +19,8 @@ cache:
     - node_modules/
     - .pnpm-store
 
-build:
+# Templates
+.build:
   stage: build
   before_script:
     - export NODE_OPTIONS=--max_old_space_size=4096
@@ -27,8 +30,10 @@ build:
     - pnpm config set store-dir .pnpm-store
     - pnpm -v
     - pnpm install
+    - pnpm -F @gigapress/bundle-extensions-sdk build
+    - pnpm -F @gigapress/shared build
   script:
-    - pnpm -r build
+    - pnpm -F $PACKAGE_NAME build
   artifacts:
     expire_in: 1 hour
     paths:
@@ -36,12 +41,12 @@ build:
     exclude:
       - packages/**/node_modules/**/*
     when: on_success
-  only:
-    - dev
-    - tags
-    - TAG_VERSION_REGEX
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_TAG =~ $TAG_VERSION_REGEX
+      changes:
+        - $RULES_CHANGES_PATH
 
-.publish:
+.publish-base:
   stage: delivery
   variables:
     AWS_PROFILE: catex
@@ -49,27 +54,139 @@ build:
   before_script:
     - apk add --no-cache curl
     - apk add --no-cache python3 py3-pip
+    - apk add --no-cache jq
     - curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm@7
     - pnpm -v
     - pnpm install
     - pip install awscli
     - aws codeartifact login --region $AWS_REGION --tool npm --domain $DOMAIN --repository $REPOSITORY
-  dependencies:
-    - build
   cache: []
 
-publish-dev:
-  extends: .publish
+.publish-dev:
+  extends: .publish-base
   script:
+    - VERSION=$(cat $PACKAGE_PATH/package.json | jq -r .version)-dev
+    - aws codeartifact delete-package-versions --region $AWS_REGION --format npm --domain $DOMAIN --repository $REPOSITORY --namespace $NAMESPACE --package $CA_PACKAGE_NAME --versions $VERSION
     - pnpm add-suffix
-    - pnpm -r publish
-  only:
-    - dev
+    - pnpm -F $PACKAGE_NAME publish
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+      changes:
+        - $RULES_CHANGES_PATH
 
-publish-prod:
-  extends: .publish
+.publish-prod:
+  extends: .publish-base
   script:
-    - pnpm -r publish
-  only:
-    - tags
-    - TAG_VERSION_REGEX
+    - pnpm -F $PACKAGE_NAME publish
+  rules:
+    - if: $CI_COMMIT_TAG =~ $TAG_VERSION_REGEX
+      changes:
+        - $RULES_CHANGES_PATH
+
+# @giga-extensions/front-office
+front-office-build:
+  extends: .build
+  variables:
+    PACKAGE_NAME: "@giga-extensions/front-office"
+    RULES_CHANGES_PATH: "packages/front-office/**/*"
+
+front-office-publish-dev:
+  extends: .publish-dev
+  needs: ["front-office-build"]
+  dependencies:
+    - front-office-build
+  variables:
+    PACKAGE_NAME: "@giga-extensions/front-office"
+    RULES_CHANGES_PATH: "packages/front-office/**/*"
+    PACKAGE_PATH: "packages/front-office"
+    CA_PACKAGE_NAME: "front-office"
+
+front-office-publish-prod:
+  extends: .publish-prod
+  needs: ["front-office-build"]
+  dependencies:
+    - front-office-build
+  variables:
+    PACKAGE_NAME: "@giga-extensions/front-office"
+    RULES_CHANGES_PATH: "packages/front-office/**/*"
+
+# @giga-extensions/base
+base-build:
+  extends: .build
+  variables:
+    PACKAGE_NAME: "@giga-extensions/base"
+    RULES_CHANGES_PATH: "packages/base/**/*"
+
+base-publish-dev:
+  extends: .publish-dev
+  needs: ["base-build"]
+  dependencies:
+    - base-build
+  variables:
+    PACKAGE_NAME: "@giga-extensions/base"
+    RULES_CHANGES_PATH: "packages/base/**/*"
+    PACKAGE_PATH: "packages/base"
+    CA_PACKAGE_NAME: "base"
+
+base-publish-prod:
+  extends: .publish-prod
+  needs: ["base-build"]
+  dependencies:
+    - base-build
+  variables:
+    PACKAGE_NAME: "@giga-extensions/base"
+    RULES_CHANGES_PATH: "packages/base/**/*"
+
+# @giga-extensions/pro
+pro-build:
+  extends: .build
+  variables:
+    PACKAGE_NAME: "@giga-extensions/pro"
+    RULES_CHANGES_PATH: "packages/pro/**/*"
+
+pro-publish-dev:
+  extends: .publish-dev
+  needs: ["pro-build"]
+  dependencies:
+    - pro-build
+  variables:
+    PACKAGE_NAME: "@giga-extensions/pro"
+    RULES_CHANGES_PATH: "packages/pro/**/*"
+    PACKAGE_PATH: "packages/pro"
+    CA_PACKAGE_NAME: "pro"
+
+pro-publish-prod:
+  extends: .publish-prod
+  needs: ["pro-build"]
+  dependencies:
+    - pro-build
+  variables:
+    PACKAGE_NAME: "@giga-extensions/pro"
+    RULES_CHANGES_PATH: "packages/pro/**/*"
+
+# @giga-extensions/hipgnosis
+hipgnosis-build:
+  extends: .build
+  variables:
+    PACKAGE_NAME: "@giga-extensions/hipgnosis"
+    RULES_CHANGES_PATH: "packages/hipgnosis/**/*"
+
+hipgnosis-publish-dev:
+  extends: .publish-dev
+  needs: ["hipgnosis-build"]
+  dependencies:
+    - hipgnosis-build
+  variables:
+    PACKAGE_NAME: "@giga-extensions/hipgnosis"
+    RULES_CHANGES_PATH: "packages/hipgnosis/**/*"
+    PACKAGE_PATH: "packages/hipgnosis"
+    CA_PACKAGE_NAME: "hipgnosis"
+
+hipgnosis-publish-prod:
+  extends: .publish-prod
+  needs: ["hipgnosis-build"]
+  dependencies:
+    - hipgnosis-build
+  variables:
+    PACKAGE_NAME: "@giga-extensions/hipgnosis"
+    RULES_CHANGES_PATH: "packages/hipgnosis/**/*"

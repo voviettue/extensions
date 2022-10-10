@@ -1,0 +1,1 @@
+# @giga-extensions/front-office
