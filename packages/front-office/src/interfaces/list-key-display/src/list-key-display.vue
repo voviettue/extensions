@@ -78,10 +78,7 @@ export default {
 		};
 
 		async function setSort(values: any) {
-			const data = cloneDeep(modelValue.value);
-			const edits = { ...data, columns: values };
-
-			modelValue.value = edits;
+			modelValue.value = values;
 		}
 
 		function close() {
