@@ -26,6 +26,66 @@ export default [
 		},
 	},
 	{
+		field: 'style',
+		name: 'Style',
+		type: 'string',
+		meta: {
+			interface: 'select-dropdown',
+			width: 'half',
+			options: {
+				allowNone: true,
+				choices: [
+					{
+						text: 'Default',
+						value: null,
+					},
+					{
+						text: 'Bottom line',
+						value: 'bottom-line',
+					},
+					{
+						text: 'Connected line',
+						value: 'connected-line',
+					},
+					{
+						text: 'Covered border',
+						value: 'covered-border',
+					},
+				],
+			},
+		},
+	},
+	{
+		field: 'borderType',
+		name: 'Border type',
+		type: 'string',
+		meta: {
+			interface: 'select-dropdown',
+			width: 'half',
+			options: {
+				allowNone: true,
+				choices: [
+					{
+						text: 'Default',
+						value: null,
+					},
+					{
+						text: 'Solid',
+						value: 'solid',
+					},
+					{
+						text: 'Dashed',
+						value: 'dashed',
+					},
+					{
+						text: 'Dotted',
+						value: 'dotted',
+					},
+				],
+			},
+		},
+	},
+	{
 		field: 'textAlignLeft',
 		name: 'Text Align Left',
 		type: 'string',
