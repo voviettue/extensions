@@ -34,6 +34,13 @@
       "path": "dist/front-office-input-display-template.js",
       "source": "src/interfaces/input-display-template/index.ts",
       "host": "^9.15.0"
+    },
+    {
+      "name": "front-office-interface-list-key-display",
+      "type": "interface",
+      "path": "dist/front-office-list-key-display.js",
+      "source": "src/interfaces/list-key-display/index.ts",
+      "host": "^9.15.0"
     }
   ],
   "scripts": {

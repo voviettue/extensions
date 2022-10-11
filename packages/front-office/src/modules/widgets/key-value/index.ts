@@ -1,4 +1,5 @@
 import { defineWidget } from '../../utils/define-extension';
+import formFieldsDisplay from './config/form-fields-display';
 
 export default defineWidget({
 	id: 'keyValue',
@@ -8,7 +9,6 @@ export default defineWidget({
 		{
 			field: 'data',
 			name: 'Data',
-			// type: 'json',
 			meta: {
 				required: true,
 				interface: 'input-multiline',
@@ -16,40 +16,13 @@ export default defineWidget({
 			},
 		},
 		{
-			field: 'keyTransformation',
-			name: 'Key transformation',
+			field: 'keys',
+			name: 'Keys',
 			type: 'json',
 			meta: {
-				interface: 'list',
+				interface: 'list-key-display',
 				options: {
-					addLable: 'Add key transformation',
-					template: '{{ key }}  →  {{ value}}',
-					fields: [
-						{
-							field: 'key',
-							type: 'string',
-							name: 'Key',
-							meta: {
-								interface: 'input',
-								width: 'half',
-								options: {
-									placeholder: 'Key',
-								},
-							},
-						},
-						{
-							field: 'value',
-							name: 'Value',
-							type: 'string',
-							meta: {
-								interface: 'input',
-								width: 'half',
-								options: {
-									placeholder: 'Value',
-								},
-							},
-						},
-					],
+					formFields: formFieldsDisplay,
 				},
 			},
 		},
