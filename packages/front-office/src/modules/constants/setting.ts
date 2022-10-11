@@ -159,3 +159,30 @@ export const menuFields = [
 		},
 	},
 ];
+
+export const optionsFields = [
+	{
+		field: 'other_settings',
+		name: 'Other Settings',
+		type: 'alias',
+		meta: {
+			width: 'full',
+			options: { title: 'Other' },
+			interface: 'presentation-divider',
+			special: ['alias', 'no-data', 'group'],
+		},
+	},
+	{
+		field: 'custom_css',
+		name: 'Custom CSS',
+		type: 'text',
+		meta: {
+			interface: 'input-code',
+			options: {
+				language: 'css',
+				lineNumber: true,
+				template: 'body {\n\tbackground: lightgray;\n}',
+			},
+		},
+	},
+];

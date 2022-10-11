@@ -37,6 +37,14 @@
 				:primary-key="item?.id"
 				:validation-errors="validationErrors"
 			/>
+			<v-form
+				v-model="edits.options"
+				:loading="loading"
+				:initial-values="item"
+				:fields="optionsFields"
+				:primary-key="item?.id"
+				:validation-errors="validationErrors"
+			/>
 		</div>
 	</private-view>
 </template>
@@ -44,7 +52,7 @@
 <script lang="ts" setup>
 import Navigation from '../components/navigation.vue';
 import { useFrontOfficeStore } from '../stores/front-office';
-import { formFields, menuFields } from '../constants/setting';
+import { formFields, menuFields, optionsFields } from '../constants/setting';
 import { useItem } from '../composables/use-item';
 import { useValidate } from '../composables/use-validate';
 
