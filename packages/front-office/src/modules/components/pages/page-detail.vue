@@ -14,7 +14,7 @@
 			<navigation></navigation>
 		</template>
 		<template #actions>
-			<v-button v-tooltip.bottom="`Save`" rounded icon :disabled="!isAdmin" @click="savePage">
+			<v-button v-tooltip.bottom="`Save`" rounded icon :disabled="!isAdmin || !isEditing" @click="savePage">
 				<v-icon name="check" />
 			</v-button>
 		</template>
@@ -30,23 +30,34 @@
 			:primary-key="item?.id"
 			:validation-errors="validationErrors"
 		/>
+		<v-form
+			v-model="edits.options"
+			:loading="loading"
+			:initial-values="item"
+			:disabled="!isAdmin"
+			:fields="optionsFields"
+			:primary-key="item?.id"
+			:validation-errors="validationErrors"
+			:nested="true"
+		/>
 	</private-view>
 </template>
 
 <script setup lang="ts">
-import { computed, watch, onMounted } from 'vue';
+import { computed, watch } from 'vue';
 import Navigation from '../navigation.vue';
 import { useStores } from '@directus/extensions-sdk';
-import { useRoute, useRouter } from 'vue-router';
+import { useRoute } from 'vue-router';
 import { useItem } from '../../composables/use-item';
 import WidgetList from '../widgets/widget-list.vue';
-import { formFields } from '../../constants/page';
+import { formFields, optionsFields } from '../../constants/page';
 import { useValidate } from '../../composables/use-validate';
+import cloneDeep from 'lodash/cloneDeep';
+import isEqual from 'lodash/isEqual';
 
 const { useUserStore } = useStores();
 const { isAdmin } = useUserStore();
 const route = useRoute();
-const router = useRouter();
 const { validateItem } = useValidate();
 
 const collection = 'cms_pages';
@@ -54,41 +65,35 @@ const primaryKey = computed(() => {
 	return route.params.id;
 });
 
-const { edits, item, save, validationErrors, loading, refresh, getItem } = useItem(
-	collection,
-	primaryKey.value as string
-);
+const { edits, item, save, validationErrors, loading, getItem } = useItem(collection, primaryKey.value as string);
 
-watch(item, () => {
-	edits.value = { ...item.value };
+const isEditing = computed(() => {
+	return !isEqual(edits.value, item.value);
 });
 
-watch(
-	() => edits.value.endpoint,
-	(val: string) => {
-		if (!val?.startsWith('/')) edits.value.endpoint = `/${val || ''}`;
-	}
-);
+getItem().then(() => {
+	edits.value = cloneDeep(item.value);
+});
+
+watch(item, () => {
+	edits.value = cloneDeep(item.value);
+});
 
 async function savePage() {
 	validationErrors.value = validateItem(edits.value, formFields);
 	if (validationErrors.value.length) return;
 
-	await save();
-	if (!validationErrors.value.length) {
-		refresh();
-		router.push('/front-office/pages');
+	if (!edits.value.endpoint?.startsWith('/')) {
+		edits.value.endpoint = `/` + edits.value.endpoint;
 	}
+
+	await save();
 }
-onMounted(() => {
-	getItem();
-});
 </script>
 
 <style>
 .padding-box {
 	padding: var(--content-padding);
-	padding-top: 0;
 }
 .padding-box .page-detail-container {
 	--form-vertical-gap: 2rem;
