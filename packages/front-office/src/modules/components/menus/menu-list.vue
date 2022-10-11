@@ -1,8 +1,9 @@
 <template>
 	<div class="grid menus-management">
-		<div class="field-label type-label">
-			<span class="field-name"><v-text-overflow text="Menu" /></span>
-		</div>
+		<!-- <h2 class="name type-label">
+			Menus
+			<span class="instant-save">Saves automatically</span>
+		</h2> -->
 		<v-notice v-if="menus === undefined || menus.length === 0">No items</v-notice>
 		<draggable
 			class="menu-grid"
@@ -65,8 +66,12 @@ async function refresh() {
 	padding-bottom: 0;
 	max-width: 800px;
 
-	.field-label {
-		margin-bottom: 8px;
+	.name {
+		margin-bottom: 12px;
+		.instant-save {
+			margin-left: 4px;
+			color: var(--warning);
+		}
 	}
 }
 

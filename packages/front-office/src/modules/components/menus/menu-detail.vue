@@ -1,8 +1,6 @@
 <template>
 	<v-drawer
-		:title="
-			primaryKey === '+' ? `Creating Item in ${formatTitle(collection)}` : `Editing Item in ${formatTitle(collection)}`
-		"
+		:title="primaryKey === '+' ? 'Creating Menu' : 'Editing Menu'"
 		:model-value="true"
 		persistent
 		@cancel="$router.push('/front-office/menus')"

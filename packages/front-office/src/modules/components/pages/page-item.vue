@@ -62,4 +62,8 @@ withDefaults(defineProps<{ page: Record<string, any>; updateVisiable: Function; 
 		opacity: 1;
 	}
 }
+.page :deep(.ctx-toggle) {
+	right: 8px;
+	top: 8px;
+}
 </style>

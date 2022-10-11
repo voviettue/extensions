@@ -167,7 +167,7 @@ function getClass(el: Record<string, any>) {
 	}
 }
 .widget {
-	height: 52px;
+	height: 48px;
 
 	:deep(.input) {
 		border: var(--border-width) solid var(--border-subdued) !important;

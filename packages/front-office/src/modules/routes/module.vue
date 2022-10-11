@@ -22,9 +22,22 @@ onMounted(async () => {
 });
 </script>
 
-<style scoped>
+<style lang="scss">
 .module-front-office {
 	--form-horizontal-gap: 32px;
 	--form-vertical-gap: 32px;
+
+	#main-content {
+		padding-bottom: 100px;
+	}
+
+	.v-form {
+		--content-padding: 32px;
+		--content-padding-bottom: 32px;
+	}
+
+	.v-divider {
+		margin: 0px !important;
+	}
 }
 </style>

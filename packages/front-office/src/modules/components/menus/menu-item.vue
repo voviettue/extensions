@@ -201,7 +201,7 @@ function close() {
 <style lang="scss" scoped>
 .group {
 	position: relative;
-	min-height: 52px;
+	min-height: 48px;
 	padding: 8px;
 	padding-top: 40px;
 	padding-bottom: 8px;
@@ -261,7 +261,7 @@ function close() {
 }
 .menu {
 	--input-padding: 8px;
-	--input-height: 52px;
+	--input-height: 48px;
 	.type {
 		color: var(--foreground-subdued);
 		font-family: var(--family-monospace);

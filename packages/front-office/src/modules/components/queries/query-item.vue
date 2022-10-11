@@ -56,4 +56,8 @@ const queryIcon = computed(() => {
 		opacity: 1;
 	}
 }
+.query :deep(.ctx-toggle) {
+	right: 8px;
+	top: 8px;
+}
 </style>

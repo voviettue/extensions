@@ -36,6 +36,7 @@
 				:fields="menuFields"
 				:primary-key="item?.id"
 				:validation-errors="validationErrors"
+				:nested="true"
 			/>
 			<v-form
 				v-model="edits.options"
@@ -44,6 +45,7 @@
 				:fields="optionsFields"
 				:primary-key="item?.id"
 				:validation-errors="validationErrors"
+				:nested="true"
 			/>
 		</div>
 	</private-view>
@@ -79,7 +81,7 @@ async function saveHandler() {
 }
 </script>
 
-<style lang="scss">
+<!-- <style lang="scss">
 .cms-settings-body {
 	--content-padding-bottom: 32px;
 	padding: var(--content-padding);
@@ -89,4 +91,4 @@ async function saveHandler() {
 		margin: 0px !important;
 	}
 }
-</style>
+</style> -->
