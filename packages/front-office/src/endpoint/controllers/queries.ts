@@ -32,13 +32,13 @@ async function execute(req: any, res: any, ctx: ApiExtensionContext) {
 		data = await queryService.execute(queryId, req.body);
 	} catch (e: any) {
 		error = e;
-		error.errMessage = e.message;
+		error.errMessage = e?.message;
 	}
 
 	await queryService.createLog(queryId, data, error);
 
 	if (error) {
-		throw new BaseException(error.message, error.status, error?.code);
+		throw new BaseException(error?.message, error?.status, error?.code);
 	}
 
 	return data;

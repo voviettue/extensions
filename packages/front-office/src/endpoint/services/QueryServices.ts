@@ -165,7 +165,7 @@ export class QueryService {
 		} catch (e: any) {
 			const message =
 				(e?.response?.data?.errors && e?.response?.data?.errors[0]?.message) || e?.response?.data?.message || '';
-			const statusCode = e.response.status;
+			const statusCode = e?.response?.status;
 			throw new BaseException(message, statusCode, e?.code);
 		}
 	}
