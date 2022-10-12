@@ -81,6 +81,43 @@ export default [
 		},
 	},
 	{
+		field: 'layout',
+		name: 'Layout',
+		type: 'text',
+		meta: {
+			interface: 'select-dropdown',
+			width: 'half',
+			options: {
+				choices: [
+					{
+						value: 'auto',
+						text: 'Auto',
+					},
+					{
+						value: 'fixed',
+						text: 'Fixed',
+					},
+				],
+			},
+		},
+		schema: {
+			default_value: 'auto',
+		},
+	},
+	{
+		field: 'height',
+		name: 'Height',
+		type: 'string',
+		meta: {
+			width: 'half',
+			interface: 'input',
+			options: {
+				trim: true,
+				placeholder: 'input height in px',
+			},
+		},
+	},
+	{
 		field: 'strippedRow',
 		name: 'Stripped row',
 		type: 'boolean',
@@ -114,19 +151,6 @@ export default [
 		},
 		schema: {
 			default_value: false,
-		},
-	},
-	{
-		field: 'height',
-		name: 'Height',
-		type: 'string',
-		meta: {
-			interface: 'input',
-			width: 'half',
-			options: {
-				trim: true,
-				placeholder: 'Input value',
-			},
 		},
 	},
 	{
