@@ -1,15 +1,4 @@
 export const formFields = [
-	// {
-	// 	field: 'project_setup',
-	// 	name: 'Project Setup',
-	// 	type: 'alias',
-	// 	meta: {
-	// 		width: 'full',
-	// 		field: 'project_setup',
-	// 		interface: 'group-detail',
-	// 		special: ['alias', 'no-data', 'group'],
-	// 	},
-	// },
 	{
 		field: 'project_name',
 		name: 'Project Name',
@@ -20,7 +9,6 @@ export const formFields = [
 			options: {
 				trim: true,
 			},
-			// group: 'project_setup',
 		},
 	},
 	{
@@ -30,7 +18,6 @@ export const formFields = [
 		meta: {
 			interface: 'select-color',
 			width: 'half',
-			// group: 'project_setup',
 		},
 	},
 	{
@@ -41,7 +28,6 @@ export const formFields = [
 		meta: {
 			width: 'half',
 			interface: 'file-image',
-			// group: 'project_setup',
 		},
 	},
 	{
@@ -55,7 +41,6 @@ export const formFields = [
 			options: {
 				template: '{{ title }}',
 			},
-			// group: 'project_setup',
 		},
 	},
 ];
@@ -153,6 +138,92 @@ export const menuFields = [
 					{
 						text: 'Monaco',
 						value: 'Monaco',
+					},
+				],
+			},
+		},
+	},
+];
+
+export const pageFields = [
+	{
+		field: 'page_settings',
+		name: 'Page Settings',
+		type: 'alias',
+		meta: {
+			width: 'full',
+			options: { icon: 'article', title: 'Page' },
+			interface: 'presentation-divider',
+			special: ['alias', 'no-data', 'group'],
+		},
+	},
+	{
+		field: 'layoutWidth',
+		name: 'Layout width',
+		type: 'text',
+		meta: {
+			interface: 'select-dropdown',
+			width: 'half',
+			options: {
+				choices: [
+					{
+						value: 'fixed',
+						text: 'Fixed',
+					},
+					{
+						value: 'fluid',
+						text: 'Fluid',
+					},
+				],
+			},
+		},
+		schema: {
+			default_value: 'fixed',
+		},
+	},
+	{
+		field: 'maxWidth',
+		name: 'Max Width',
+		type: 'text',
+		meta: {
+			width: 'half',
+			interface: 'select-dropdown',
+			options: {
+				allowNone: true,
+				allowOther: true,
+				placeholder: 'Default',
+				choices: [
+					{
+						value: '1280px',
+						text: '1280px',
+					},
+					{
+						value: '1366px',
+						text: '1366px',
+					},
+					{
+						value: '1440px',
+						text: '1440px',
+					},
+					{
+						value: '1536px',
+						text: '1536px',
+					},
+					{
+						value: '1600px',
+						text: '1600px',
+					},
+					{
+						value: '1792px',
+						text: '1792px',
+					},
+					{
+						value: '1920px',
+						text: '1920px',
+					},
+					{
+						value: '2560px',
+						text: '2560px',
 					},
 				],
 			},

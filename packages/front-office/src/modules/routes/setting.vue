@@ -39,6 +39,14 @@
 				:nested="true"
 			/>
 			<v-form
+				v-model="edits.page_options"
+				:loading="loading"
+				:initial-values="item"
+				:fields="pageFields"
+				:primary-key="item?.id"
+				:validation-errors="validationErrors"
+			/>
+			<v-form
 				v-model="edits.options"
 				:loading="loading"
 				:initial-values="item"
@@ -54,7 +62,7 @@
 <script lang="ts" setup>
 import Navigation from '../components/navigation.vue';
 import { useFrontOfficeStore } from '../stores/front-office';
-import { formFields, menuFields, optionsFields } from '../constants/setting';
+import { formFields, menuFields, pageFields, optionsFields } from '../constants/setting';
 import { useItem } from '../composables/use-item';
 import { useValidate } from '../composables/use-validate';
 
@@ -64,6 +72,7 @@ const frontOfficeStore = useFrontOfficeStore();
 frontOfficeStore.hydrate();
 
 const { item, edits, save, loading, saving, validationErrors, getItem } = useItem(collection, '');
+
 getItem().then(() => {
 	edits.value = { ...item.value };
 });
@@ -80,15 +89,3 @@ async function saveHandler() {
 	}
 }
 </script>
-
-<!-- <style lang="scss">
-.cms-settings-body {
-	--content-padding-bottom: 32px;
-	padding: var(--content-padding);
-	padding-top: 0;
-
-	.v-divider {
-		margin: 0px !important;
-	}
-}
-</style> -->
