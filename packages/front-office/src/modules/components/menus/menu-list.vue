@@ -1,10 +1,10 @@
 <template>
 	<div class="grid menus-management">
-		<!-- <h2 class="name type-label">
-			Menus
-			<span class="instant-save">Saves automatically</span>
-		</h2> -->
-		<v-notice v-if="menus === undefined || menus.length === 0">No items</v-notice>
+		<v-info v-if="menus.length === 0" icon="menu" title="No Menu">
+			<template #append>
+				<v-button to="/front-office/menus/+">Create Menu</v-button>
+			</template>
+		</v-info>
 		<draggable
 			class="menu-grid"
 			:model-value="menus.filter((item) => item?.parent == null)"

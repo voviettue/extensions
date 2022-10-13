@@ -54,7 +54,6 @@
 <script setup lang="ts">
 import { ref, Ref, computed, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import formatTitle from '@directus/format-title';
 import { useValidate } from '../../composables/use-validate';
 import listMenuConfig from '../../menus';
 import { ExtensionOptionsContext, MenuConfig } from '../../types/extensions';
