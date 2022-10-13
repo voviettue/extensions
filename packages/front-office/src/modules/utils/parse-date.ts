@@ -4,7 +4,7 @@ import parse from 'date-fns/parse';
 export default function (value: any) {
 	if (typeof value !== 'string') return null;
 
-	const formats = ["yyyy-MM-dd'T'HH:mm:ss", 'yyyy-MM-dd'];
+	const formats = ["yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", "yyyy-MM-dd'T'HH:mm:ss", 'yyyy-MM-dd'];
 	let date = null;
 
 	for (const format of formats) {
@@ -14,5 +14,6 @@ export default function (value: any) {
 			break;
 		}
 	}
+
 	return date;
 }
