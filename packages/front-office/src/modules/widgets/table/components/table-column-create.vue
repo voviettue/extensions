@@ -83,6 +83,7 @@ export default {
 			key: null,
 			label: null,
 			hidden: false,
+			columnWrapping: false,
 			tooltip: null,
 		});
 

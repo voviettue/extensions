@@ -6,7 +6,6 @@ export default [
 		meta: {
 			width: 'half',
 			interface: 'input',
-			required: true,
 			options: {
 				trim: true,
 			},
@@ -19,24 +18,11 @@ export default [
 		meta: {
 			width: 'half',
 			interface: 'input',
-			required: true,
 			options: {
 				trim: true,
 			},
 		},
 	},
-	// {
-	// 	field: 'mappedValue',
-	// 	name: 'Mapped Value',
-	// 	type: 'string',
-	// 	meta: {
-	// 		width: 'half',
-	// 		interface: 'input',
-	// 		options: {
-	// 			trim: true,
-	// 		},
-	// 	},
-	// },
 	{
 		field: 'tooltip',
 		name: 'Tooltip',
@@ -56,9 +42,6 @@ export default [
 		meta: {
 			width: 'half',
 			interface: 'boolean',
-		},
-		schema: {
-			default_value: false,
 		},
 	},
 	{
@@ -272,6 +255,15 @@ export default [
 		meta: {
 			interface: 'select-color',
 			width: 'half',
+		},
+	},
+	{
+		field: 'columnWrapping',
+		name: 'Column Wrapping',
+		type: 'boolean',
+		meta: {
+			width: 'half',
+			interface: 'boolean',
 		},
 	},
 ];
