@@ -31,34 +31,26 @@
 	</v-menu>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { computed } from 'vue';
 import get from 'lodash/get';
 
-export default {
-	props: {
-		column: {
-			type: Object,
-			required: true,
-		},
-		noDuplicate: {
-			type: Boolean,
-			default: false,
-		},
-		noDelete: {
-			type: Boolean,
-			default: false,
-		},
-	},
-	emits: ['toggleVisibility', 'delete', 'openDetail'],
-	setup(props) {
-		const hidden = computed(() => {
-			return get(props.column, 'hidden', false);
-		});
+interface Props {
+	column: any;
+	noDuplicate: boolean;
+	noDelete: boolean;
+}
+const props = withDefaults(defineProps<Props>(), {
+	column: null,
+	noDuplicate: false,
+	noDelete: false,
+});
 
-		return { hidden };
-	},
-};
+const emit = defineEmits(['toggleVisibility', 'delete', 'openDetail']);
+
+const hidden = computed(() => {
+	return get(props.column, 'hidden', false);
+});
 </script>
 <style scoped>
 .v-list-item.danger {

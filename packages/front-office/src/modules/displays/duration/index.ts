@@ -32,6 +32,9 @@ export default defineDisplay({
 					allowOther: false,
 				},
 			},
+			schema: {
+				default_value: 'hh:mm',
+			},
 		},
 		{
 			field: 'type',

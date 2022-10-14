@@ -52,105 +52,82 @@
 		</div>
 	</v-drawer>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import { ref, Ref, computed, watch } from 'vue';
-import formatTitle from '@directus/format-title';
 import { useValidate } from '../../../composables/use-validate';
 import listDisplayConfig from '../../../displays';
 import { ExtensionOptionsContext, DisplayConfig } from '../../../types/extensions';
 import formFields from '../config/column-fields';
 import ExtensionOptions from '../../../components/shared/extension-options.vue';
 import snakeCase from 'lodash/snakeCase';
+import { getDefaultValuesFromFields } from '../../../composables/get-default-values-from-fields';
+import { Field } from '@directus/shared/types';
 
-export default {
-	components: { ExtensionOptions },
-	props: {
-		isOpen: {
-			type: Boolean,
-			default: false,
-		},
-	},
-	emits: ['close', 'create'],
-	setup(props, { emit }) {
-		const { validateItem } = useValidate();
+interface Props {
+	isOpen: boolean;
+}
+const props = withDefaults(defineProps<Props>(), {
+	isOpen: false,
+});
 
-		const isLoading = ref<boolean>(false);
-		const validationErrors: Ref<Record<string, any>[]> = ref([]);
-		const modelValue: Ref<Record<string, any>> = ref({ hidden: false, displayOptions: {} });
-		const selectedDisplay: Ref<DisplayConfig | null> = ref(null);
+const emit = defineEmits(['close', 'create']);
 
-		const initialValues = ref({
-			key: null,
-			label: null,
-			hidden: false,
-			columnWrapping: false,
-			tooltip: null,
-		});
+const { validateItem } = useValidate();
 
-		watch(
-			() => modelValue.value.label,
-			(val: any) => {
-				modelValue.value.key = snakeCase(val);
-			}
-		);
+const isLoading = ref<boolean>(false);
+const validationErrors: Ref<Record<string, any>[]> = ref([]);
+const modelValue: Ref<Record<string, any>> = ref({ hidden: false, displayOptions: {} });
+const selectedDisplay: Ref<DisplayConfig | null> = ref(null);
 
-		const optionsFields = computed(() => {
-			const options = selectedDisplay.value?.displayOptions ?? [];
-			if (typeof options === 'function') {
-				const ctx = { values: modelValue.value } as ExtensionOptionsContext;
-				return options(ctx);
-			}
+watch(
+	() => modelValue.value.label,
+	(val: any) => {
+		modelValue.value.key = snakeCase(val);
+	}
+);
 
-			return options;
-		});
+const optionsFields = computed(() => {
+	const options = selectedDisplay.value?.displayOptions ?? [];
+	if (typeof options === 'function') {
+		const ctx = { values: modelValue.value } as ExtensionOptionsContext;
+		return options(ctx);
+	}
 
-		const tabs = computed(() => {
-			return [
-				{ value: 'properties', text: 'Properties' },
-				{ value: 'displayValue', text: 'Display Value' },
-			];
-		});
+	return options;
+});
 
-		const currentTab = ref<string>('properties');
+const defaultValues = computed(() => {
+	return getDefaultValuesFromFields(optionsFields.value as Field[]);
+});
 
-		return {
-			currentTab,
-			tabs,
-			listDisplayConfig,
-			close,
-			isLoading,
-			saveTableColumn,
-			formatTitle,
-			formFields,
-			optionsFields,
-			modelValue,
-			validationErrors,
-			selectedDisplay,
-			toggleDisplayConfig,
-			initialValues,
-		};
+const tabs = computed(() => {
+	return [
+		{ value: 'properties', text: 'Properties' },
+		{ value: 'displayValue', text: 'Display Value' },
+	];
+});
 
-		function toggleDisplayConfig(display: DisplayConfig) {
-			selectedDisplay.value = display.id !== selectedDisplay.value?.id ? display : null;
-			modelValue.value.display = selectedDisplay.value?.id || '';
-		}
+const currentTab = ref<string>('properties');
 
-		async function saveTableColumn() {
-			const dataForm = { ...modelValue.value, ...modelValue.value.displayOptions };
+function toggleDisplayConfig(display: DisplayConfig) {
+	selectedDisplay.value = display.id !== selectedDisplay.value?.id ? display : null;
+	modelValue.value.display = selectedDisplay.value?.id || '';
+	modelValue.value.displayOptions = defaultValues.value;
+}
 
-			validationErrors.value = [];
-			validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
-			if (validationErrors.value.length) return;
+async function saveTableColumn() {
+	const dataForm = { ...modelValue.value, ...modelValue.value.displayOptions };
+	validationErrors.value = [];
+	validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
+	if (validationErrors.value.length) return;
 
-			isLoading.value = true;
+	isLoading.value = true;
 
-			emit('create', modelValue.value);
-			modelValue.value = {};
+	emit('create', modelValue.value);
+	modelValue.value = {};
 
-			isLoading.value = false;
-		}
-	},
-};
+	isLoading.value = false;
+}
 </script>
 <style scoped>
 .create-column-container {
