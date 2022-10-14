@@ -53,9 +53,8 @@
 		</div>
 	</v-drawer>
 </template>
-<script lang="ts">
+<script setup lang="ts">
 import { ref, Ref, computed, watch, onMounted } from 'vue';
-import formatTitle from '@directus/format-title';
 import { useValidate } from '../../../composables/use-validate';
 import listDisplayConfig from '../../../displays';
 import { ExtensionOptionsContext, DisplayConfig } from '../../../types/extensions';
@@ -63,106 +62,85 @@ import formFields from '../config/column-fields';
 import ExtensionOptions from '../../../components/shared/extension-options.vue';
 import snakeCase from 'lodash/snakeCase';
 
-export default {
-	components: { ExtensionOptions },
-	props: {
-		column: {
-			type: Object,
-			default: null,
-		},
-		isOpen: {
-			type: Boolean,
-			default: false,
-		},
+interface Props {
+	column: any;
+	isOpen: boolean;
+}
+const props = withDefaults(defineProps<Props>(), {
+	column: null,
+	isOpen: false,
+});
+
+const emit = defineEmits(['close', 'update']);
+
+const { validateItem } = useValidate();
+
+const isLoading = ref<boolean>(false);
+const validationErrors: Ref<Record<string, any>[]> = ref([]);
+const modelValue: Ref<Record<string, any>> = ref(props.column);
+const selectedDisplay: Ref<DisplayConfig | null> = ref(
+	listDisplayConfig.find((display: DisplayConfig) => display.id == props.column.display) as DisplayConfig
+);
+const currentTab = ref<string>();
+
+watch(
+	() => modelValue.value.label,
+	(val: any) => {
+		modelValue.value.key = snakeCase(val);
+	}
+);
+
+watch(
+	() => props.column,
+	(val: any) => {
+		modelValue.value = val;
 	},
-	emits: ['close', 'update'],
-	setup(props, { emit }) {
-		const { validateItem } = useValidate();
+	{ deep: true, immediate: true }
+);
 
-		const isLoading = ref<boolean>(false);
-		const validationErrors: Ref<Record<string, any>[]> = ref([]);
-		const modelValue: Ref<Record<string, any>> = ref(props.column);
-		const selectedDisplay: Ref<DisplayConfig | null> = ref(
-			listDisplayConfig.find((display: DisplayConfig) => display.id == props.column.display) as DisplayConfig
-		);
-		const currentTab = ref<string>();
+onMounted(async () => {
+	currentTab.value = 'properties';
+});
 
-		watch(
-			() => modelValue.value.label,
-			(val: any) => {
-				modelValue.value.key = snakeCase(val);
-			}
-		);
+const optionsFields = computed(() => {
+	const options = selectedDisplay.value?.displayOptions ?? [];
+	if (typeof options === 'function') {
+		const ctx = { values: modelValue.value } as ExtensionOptionsContext;
+		return options(ctx);
+	}
 
-		watch(
-			() => props.column,
-			(val: any) => {
-				modelValue.value = val;
-			},
-			{ deep: true, immediate: true }
-		);
+	return options;
+});
 
-		onMounted(async () => {
-			currentTab.value = 'properties';
-		});
+const tabs = computed(() => {
+	return [
+		{ value: 'properties', text: 'Properties' },
+		{ value: 'displayValue', text: 'Display Value' },
+	];
+});
 
-		const optionsFields = computed(() => {
-			const options = selectedDisplay.value?.displayOptions ?? [];
-			if (typeof options === 'function') {
-				const ctx = { values: modelValue.value } as ExtensionOptionsContext;
-				return options(ctx);
-			}
+function toggleDisplayConfig(display: DisplayConfig) {
+	selectedDisplay.value = display.id !== selectedDisplay.value?.id ? display : null;
+	modelValue.value.display = selectedDisplay.value?.id || '';
+}
 
-			return options;
-		});
+async function saveTableColumn() {
+	const dataForm = { ...modelValue.value, ...modelValue.value.displayOptions };
 
-		const tabs = computed(() => {
-			return [
-				{ value: 'properties', text: 'Properties' },
-				{ value: 'displayValue', text: 'Display Value' },
-			];
-		});
+	validationErrors.value = [];
+	validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
+	if (validationErrors.value.length) return;
 
-		return {
-			tabs,
-			currentTab,
-			listDisplayConfig,
-			close,
-			isLoading,
-			saveTableColumn,
-			formatTitle,
-			formFields,
-			optionsFields,
-			modelValue,
-			validationErrors,
-			selectedDisplay,
-			toggleDisplayConfig,
-		};
+	isLoading.value = true;
 
-		function toggleDisplayConfig(display: DisplayConfig) {
-			selectedDisplay.value = display.id !== selectedDisplay.value?.id ? display : null;
-			modelValue.value.display = selectedDisplay.value?.id || '';
-		}
+	emit('update', modelValue.value);
 
-		async function saveTableColumn() {
-			const dataForm = { ...modelValue.value, ...modelValue.value.displayOptions };
+	isLoading.value = false;
+}
 
-			validationErrors.value = [];
-			validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
-			if (validationErrors.value.length) return;
-
-			isLoading.value = true;
-
-			emit('update', modelValue.value);
-
-			isLoading.value = false;
-		}
-
-		function close() {
-			emit('close');
-		}
-	},
-};
+function close() {
+	emit('close');
+}
 </script>
 <style scoped>
 .edit-column-container {
