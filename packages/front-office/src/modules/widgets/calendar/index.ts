@@ -27,7 +27,7 @@ export default defineWidget({
 
 		currentData = values?.options?.data;
 		const bindData = useBindData(currentData);
-		const data = parseJson(bindData, []);
+		const data = Array.isArray(parseJson(bindData, [])) ? parseJson(bindData, []) : [];
 		const object = data?.[0] ?? {};
 		const fields = Object.keys(object).map(
 			(key: string) =>
