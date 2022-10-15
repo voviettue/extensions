@@ -97,7 +97,10 @@ const optionsFields = computed(() => {
 });
 
 const defaultValues = computed(() => {
-	return getDefaultValuesFromFields(optionsFields.value as Field[]);
+	const options = selectedDisplay.value?.displayOptions ?? [];
+	if (typeof options === 'function') return;
+
+	return getDefaultValuesFromFields(options as Field[]);
 });
 
 const tabs = computed(() => {
@@ -112,7 +115,7 @@ const currentTab = ref<string>('properties');
 function toggleDisplayConfig(display: DisplayConfig) {
 	selectedDisplay.value = display.id !== selectedDisplay.value?.id ? display : null;
 	modelValue.value.display = selectedDisplay.value?.id || '';
-	modelValue.value.displayOptions = defaultValues.value;
+	modelValue.value.displayOptions = defaultValues.value.value;
 }
 
 async function saveTableColumn() {
