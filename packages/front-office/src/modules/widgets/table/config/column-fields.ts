@@ -258,6 +258,16 @@ export default [
 		},
 	},
 	{
+		field: 'width',
+		name: 'Column Width',
+		type: 'string',
+		meta: {
+			interface: 'input',
+			placeholder: 'input width in px',
+			width: 'half',
+		},
+	},
+	{
 		field: 'columnWrapping',
 		name: 'Column Wrapping',
 		type: 'boolean',

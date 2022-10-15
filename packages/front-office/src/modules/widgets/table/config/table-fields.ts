@@ -1,6 +1,6 @@
 export default [
 	{
-		field: 'headerOptions',
+		field: 'actionOptions',
 		type: 'alias',
 		meta: {
 			interface: 'presentation-divider',
@@ -45,6 +45,40 @@ export default [
 		meta: {
 			interface: 'radio',
 			width: 'half',
+		},
+	},
+	{
+		field: 'headerOptions',
+		type: 'alias',
+		meta: {
+			interface: 'presentation-divider',
+			options: {
+				icon: 'table',
+				title: 'Header',
+			},
+			special: ['alias', 'no-data'],
+		},
+	},
+	{
+		field: 'headerBackground',
+		name: 'Background',
+		type: 'string',
+		meta: {
+			width: 'half',
+			interface: 'select-color',
+		},
+		schema: {
+			default_value: '#ffffff',
+		},
+	},
+	{
+		field: 'headerColor',
+		name: 'Text Color',
+		type: 'string',
+		meta: {
+			width: 'half',
+			interface: 'select-color',
+			placeholder: 'Default',
 		},
 	},
 	{

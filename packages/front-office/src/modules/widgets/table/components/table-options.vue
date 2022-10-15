@@ -48,7 +48,7 @@ import { computed, ref } from 'vue';
 import cloneDeep from 'lodash/cloneDeep';
 import TableColumn from './table-column.vue';
 import TableColumnCreate from './table-column-create.vue';
-import optionsFields from '../config/table-options-fields';
+import optionsFields from '../config/table-fields';
 import Draggable from 'vuedraggable';
 
 interface Props {
@@ -176,6 +176,10 @@ function deleteColumn(value: any, index: number) {
 .form {
 	display: grid;
 	gap: var(--form-vertical-gap) var(--form-horizontal-gap);
+
+	:deep(.add-margin-top) {
+		margin-top: 1rem !important;
+	}
 }
 
 .table-column-grid {
