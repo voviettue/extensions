@@ -15,6 +15,7 @@ import textInput from './text-input';
 import numberInput from './number-input';
 import dateTimeInput from './datetime-input';
 import select from './select';
+import tabs from './tabs';
 
 export default [
 	text,
@@ -34,4 +35,5 @@ export default [
 	numberInput,
 	dateTimeInput,
 	select,
+	tabs,
 ];
