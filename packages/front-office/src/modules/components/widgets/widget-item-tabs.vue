@@ -1,49 +1,82 @@
 <template>
-	<div class="widget-select">
-		<!-- if widget is container  -->
-		<widget-item-group
-			v-if="config?.group"
-			:widget="widget"
-			:list-widget="listWidget"
-			:update-visiable="updateVisiable"
-			:delete-widget="deleteWidget"
-			:update-parent="updateParent"
-			@reload="$emit('reload')"
-		></widget-item-group>
+	<div v-if="widget.options?.tabs?.length > 0">
+		<draggable
+			class="widget-grid group full nested"
+			:model-value="widget.options?.tabs"
+			:force-fallback="true"
+			handle=".drag-handle"
+			:group="{ name: 'tabs' }"
+			:animation="150"
+			:fallback-on-body="true"
+			:invert-swap="true"
+			@update:model-value="updateOrderTab"
+		>
+			<template #header>
+				<div class="header full">
+					<v-icon class="drag-handle" name="drag_indicator" @click.stop />
+					<v-text-overflow class="name" :text="widget.name" />
+					<v-icon v-if="widget.hidden" v-tooltip="`Hidden widget`" name="visibility_off" class="hidden-icon" small />
+					<widget-options
+						:widget="widget"
+						:update-visiable="updateVisiable"
+						:delete-widget="deleteWidget"
+						class="option"
+					/>
+				</div>
+			</template>
 
-		<!-- if widget is tabs  -->
-		<widget-item-tabs
-			v-else-if="config?.tabs"
-			:widget="widget"
-			:list-widget="listWidget"
-			:update-visiable="updateVisiable"
-			:delete-widget="deleteWidget"
-			:update-parent="updateParentTab"
-			@reload="$emit('reload')"
-		></widget-item-tabs>
-
-		<widget-item-simple
-			v-else
-			:widget="widget"
-			:update-visiable="updateVisiable"
-			:delete-widget="deleteWidget"
-		></widget-item-simple>
+			<template #item="{ element }">
+				<div class="widget-select grid-half">
+					<widget-item-group
+						:widget="widget"
+						:list-widget="listWidget"
+						:class="gridTab"
+						:nested-widgets="getWidgetByIds(element.widgets)"
+						:update-visiable="updateVisiable"
+						:delete-widget="deleteWidget"
+						:update-parent="(value) => updateParent(value, element)"
+						@reload="$emit('reload')"
+					>
+						<template #header>
+							<div class="header full">
+								<v-icon class="drag-handle" name="drag_indicator" @click.stop />
+								<v-text-overflow class="name" :text="element.label" />
+								<v-icon
+									v-if="element?.hidden"
+									v-tooltip="`Hidden tab`"
+									name="visibility_off"
+									class="hidden-icon"
+									small
+								/>
+								<!-- TODO -->
+								<!-- <widget-options
+									:widget="widget"
+									:update-visiable="updateVisiable"
+									:delete-widget="deleteWidget"
+									class="option"
+								/> -->
+							</div>
+						</template>
+					</widget-item-group>
+				</div>
+			</template>
+		</draggable>
 	</div>
 </template>
+
 <script setup lang="ts">
 import { computed, defineEmits } from 'vue';
-import formFields from '../../widgets';
-import { useApi } from '@directus/extensions-sdk';
-import WidgetItemSimple from './widget-item-simple.vue';
 import WidgetItemGroup from './widget-item-group.vue';
-import WidgetItemTabs from './widget-item-tabs.vue';
-import cloneDeep from 'lodash/cloneDeep';
+import Draggable from 'vuedraggable';
+import WidgetOptions from './widget-options.vue';
+import { useApi } from '@directus/extensions-sdk';
 
 interface Props {
 	widget: Record<string, any>;
 	listWidget: Record<string, any>[];
 	updateVisiable: (widget: any) => void;
 	deleteWidget: (widget: any) => void;
+	updateParent?: (widgets: any, el: any) => void;
 }
 const emit = defineEmits(['reload']);
 const api = useApi();
@@ -60,51 +93,36 @@ const props = withDefaults(defineProps<Props>(), {
 		width: 'full',
 		page: null,
 	}),
+	updateParent: () => null,
 });
 
-const config = computed(() => formFields.find((e) => e.id === props.widget.widget));
-
-async function updateParent(widgets) {
-	try {
-		const data = widgets.map((item, index) => {
-			return {
-				...item,
-				sort: index,
-				parent: props.widget.id,
-			};
-		});
-		const apis = data.map((k: any) => {
-			return api.patch(`/items/cms_widgets/${k.id}`, k);
-		});
-		await Promise.allSettled(apis);
-		emit('reload');
-	} catch {
-		//
+const gridTab = computed(() => {
+	let grid: string;
+	switch (props.widget?.options?.tabs?.length) {
+		case 1:
+			grid = 'grid-full';
+			break;
+		case 2:
+			grid = 'grid-half';
+			break;
+		default:
+			grid = 'grid-two';
+			break;
 	}
-}
+	return grid;
+});
 
-async function updateParentTab(widgets, el) {
-	const isValid = !widgets?.find((e: any) => !e?.widget);
-	if (!isValid) return;
+const getWidgetByIds = (ids: (string | number)[]) => {
+	return props.listWidget
+		?.filter((item) => ids.includes(item?.id))
+		.sort((a: any, b: any) => (a.sort ?? 1000) - (b.sort ?? 1000));
+};
 
-	const tabs = cloneDeep(props.widget.options?.tabs);
-	const idWidgets = widgets?.map((e: any) => e?.id);
-	const idx = tabs?.findIndex((e: any) => e.id === el.id);
-	tabs[idx].widgets = idWidgets;
-
-	const data = widgets.map((item, index) => {
-		return {
-			...item,
-			sort: index,
-			parent: props.widget.id,
-		};
-	});
+async function updateOrderTab(tabs: any) {
+	const inValid = tabs?.find((e: any) => !e?.label && !e?.widgets);
+	if (inValid || tabs?.length !== props.widget?.options?.tabs?.length) return;
 
 	try {
-		const apis = data.map((k: any) => {
-			return api.patch(`/items/cms_widgets/${k.id}`, k);
-		});
-		await Promise.allSettled(apis);
 		await api.patch(`/items/cms_widgets/${props.widget.id}`, { options: { tabs: tabs } });
 		emit('reload');
 	} catch {
@@ -117,6 +135,7 @@ async function updateParentTab(widgets, el) {
 .drag-handle {
 	cursor: grab !important;
 }
+
 .widget-select {
 	margin: 0px 4px;
 }

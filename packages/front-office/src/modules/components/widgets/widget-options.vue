@@ -49,20 +49,27 @@ import { Ref, ref } from 'vue';
 import { useStores } from '@directus/extensions-sdk';
 const { useUserStore } = useStores();
 const { isAdmin } = useUserStore();
-withDefaults(defineProps<{ widget: Record<string, any>; updateVisiable: () => void; deleteWidget: () => void }>(), {
-	widget: () => ({
-		custom_css: null,
-		hidden: false,
-		html_class: null,
-		id: 1,
-		name: '',
-		options: null,
-		parent: null,
-		sort: null,
-		widget: null,
-		width: 'full',
-	}),
-});
+withDefaults(
+	defineProps<{
+		widget: Record<string, any>;
+		updateVisiable: (widget: any) => void;
+		deleteWidget: (widget: any) => void;
+	}>(),
+	{
+		widget: () => ({
+			custom_css: null,
+			hidden: false,
+			html_class: null,
+			id: 1,
+			name: '',
+			options: null,
+			parent: null,
+			sort: null,
+			widget: null,
+			width: 'full',
+		}),
+	}
+);
 
 const deleteDialog: Ref<boolean> = ref(false);
 </script>

@@ -1,52 +1,59 @@
 <template>
-	<div class="widget-select">
-		<!-- if widget is container  -->
-		<widget-item-group
-			v-if="config?.group"
-			:widget="widget"
-			:list-widget="listWidget"
-			:update-visiable="updateVisiable"
-			:delete-widget="deleteWidget"
-			:update-parent="updateParent"
-			@reload="$emit('reload')"
-		></widget-item-group>
+	<draggable
+		class="widget-grid group full nested"
+		:model-value="nestedWidgets"
+		:force-fallback="true"
+		handle=".drag-handle"
+		:group="{ name: 'widgets' }"
+		:animation="150"
+		:fallback-on-body="true"
+		:invert-swap="true"
+		@update:model-value="updateParent"
+	>
+		<template #header>
+			<slot name="header">
+				<div class="header full">
+					<v-icon class="drag-handle" name="drag_indicator" @click.stop />
+					<v-text-overflow class="name" :text="widget.name" />
+					<v-icon v-if="widget.hidden" v-tooltip="`Hidden widget`" name="visibility_off" class="hidden-icon" small />
+					<widget-options
+						:widget="widget"
+						:update-visiable="updateVisiable"
+						:delete-widget="deleteWidget"
+						class="option"
+					/>
+				</div>
+			</slot>
+		</template>
 
-		<!-- if widget is tabs  -->
-		<widget-item-tabs
-			v-else-if="config?.tabs"
-			:widget="widget"
-			:list-widget="listWidget"
-			:update-visiable="updateVisiable"
-			:delete-widget="deleteWidget"
-			:update-parent="updateParentTab"
-			@reload="$emit('reload')"
-		></widget-item-tabs>
-
-		<widget-item-simple
-			v-else
-			:widget="widget"
-			:update-visiable="updateVisiable"
-			:delete-widget="deleteWidget"
-		></widget-item-simple>
-	</div>
+		<template #item="{ element }">
+			<widget-item
+				v-tooltip="`${element.name}`"
+				:widget="element"
+				:list-widget="listWidget"
+				:update-visiable="updateVisiable"
+				:delete-widget="deleteWidget"
+				:class="getClass(element)"
+				@reload="$emit('reload')"
+			/>
+		</template>
+	</draggable>
 </template>
 <script setup lang="ts">
 import { computed, defineEmits } from 'vue';
-import formFields from '../../widgets';
-import { useApi } from '@directus/extensions-sdk';
-import WidgetItemSimple from './widget-item-simple.vue';
-import WidgetItemGroup from './widget-item-group.vue';
-import WidgetItemTabs from './widget-item-tabs.vue';
-import cloneDeep from 'lodash/cloneDeep';
+import WidgetOptions from './widget-options.vue';
+import WidgetItem from './widget-item.vue';
+import Draggable from 'vuedraggable';
 
 interface Props {
 	widget: Record<string, any>;
 	listWidget: Record<string, any>[];
+	nestedWidgets?: Record<string, any>[] | null;
 	updateVisiable: (widget: any) => void;
 	deleteWidget: (widget: any) => void;
+	updateParent?: (widgets: any) => void;
 }
 const emit = defineEmits(['reload']);
-const api = useApi();
 const props = withDefaults(defineProps<Props>(), {
 	widget: () => ({
 		custom_css: null,
@@ -60,55 +67,33 @@ const props = withDefaults(defineProps<Props>(), {
 		width: 'full',
 		page: null,
 	}),
+	nestedWidgets: () => null,
+});
+const nestedWidgets = computed(() => {
+	return (
+		props.nestedWidgets ||
+		props.listWidget
+			?.filter((item) => props.widget?.id === item.parent)
+			.sort((a: any, b: any) => (a.sort ?? 1000) - (b.sort ?? 1000))
+	);
 });
 
-const config = computed(() => formFields.find((e) => e.id === props.widget.widget));
-
-async function updateParent(widgets) {
-	try {
-		const data = widgets.map((item, index) => {
-			return {
-				...item,
-				sort: index,
-				parent: props.widget.id,
-			};
-		});
-		const apis = data.map((k: any) => {
-			return api.patch(`/items/cms_widgets/${k.id}`, k);
-		});
-		await Promise.allSettled(apis);
-		emit('reload');
-	} catch {
-		//
-	}
-}
-
-async function updateParentTab(widgets, el) {
-	const isValid = !widgets?.find((e: any) => !e?.widget);
-	if (!isValid) return;
-
-	const tabs = cloneDeep(props.widget.options?.tabs);
-	const idWidgets = widgets?.map((e: any) => e?.id);
-	const idx = tabs?.findIndex((e: any) => e.id === el.id);
-	tabs[idx].widgets = idWidgets;
-
-	const data = widgets.map((item, index) => {
-		return {
-			...item,
-			sort: index,
-			parent: props.widget.id,
-		};
-	});
-
-	try {
-		const apis = data.map((k: any) => {
-			return api.patch(`/items/cms_widgets/${k.id}`, k);
-		});
-		await Promise.allSettled(apis);
-		await api.patch(`/items/cms_widgets/${props.widget.id}`, { options: { tabs: tabs } });
-		emit('reload');
-	} catch {
-		//
+function getClass(el: Record<string, any>) {
+	switch (el.width) {
+		case 'full':
+			return 'grid-full';
+		case 'half':
+			return 'grid-half';
+		case '1':
+			return 'grid-one';
+		case '2':
+			return 'grid-two';
+		case '3':
+			return 'grid-three';
+		case '4':
+			return 'grid-four';
+		case '5':
+			return 'grid-five';
 	}
 }
 </script>
@@ -117,6 +102,7 @@ async function updateParentTab(widgets, el) {
 .drag-handle {
 	cursor: grab !important;
 }
+
 .widget-select {
 	margin: 0px 4px;
 }
@@ -286,48 +272,6 @@ async function updateParentTab(widgets, el) {
 
 .drag-handle {
 	cursor: grab !important;
-}
-
-.menu {
-	:deep(.input) {
-		border: var(--border-width) solid var(--border-subdued) !important;
-	}
-
-	:deep(.input:hover) {
-		background-color: var(--card-face-color) !important;
-		border: var(--border-width) solid var(--border-normal-alt) !important;
-	}
-
-	.label {
-		display: flex;
-		flex-grow: 1;
-		align-items: center;
-		align-self: stretch;
-		overflow: hidden;
-		cursor: pointer;
-
-		.label-inner {
-			overflow: hidden;
-			white-space: nowrap;
-			text-overflow: ellipsis;
-
-			.name {
-				margin-right: 8px;
-				margin-left: 8px;
-				font-family: var(--family-monospace);
-			}
-		}
-	}
-
-	.type {
-		color: var(--foreground-subdued);
-		font-family: var(--family-monospace);
-		transition: opacity var(--fast) var(--transition);
-		opacity: 0;
-	}
-	&:hover .type {
-		opacity: 1;
-	}
 }
 
 .sortable-ghost {
