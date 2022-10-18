@@ -12,7 +12,6 @@ export default defineDisplay({
 			type: 'string',
 			meta: {
 				interface: 'select-dropdown',
-				required: true,
 				width: 'half',
 				options: {
 					choices: [

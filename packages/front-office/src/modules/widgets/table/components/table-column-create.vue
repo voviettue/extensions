@@ -60,8 +60,6 @@ import { ExtensionOptionsContext, DisplayConfig } from '../../../types/extension
 import formFields from '../config/column-fields';
 import ExtensionOptions from '../../../components/shared/extension-options.vue';
 import snakeCase from 'lodash/snakeCase';
-import { getDefaultValuesFromFields } from '../../../composables/get-default-values-from-fields';
-import { Field } from '@directus/shared/types';
 
 interface Props {
 	isOpen: boolean;
@@ -96,13 +94,6 @@ const optionsFields = computed(() => {
 	return options;
 });
 
-const defaultValues = computed(() => {
-	const options = selectedDisplay.value?.displayOptions ?? [];
-	if (typeof options === 'function') return;
-
-	return getDefaultValuesFromFields(options as Field[]);
-});
-
 const tabs = computed(() => {
 	return [
 		{ value: 'properties', text: 'Properties' },
@@ -115,7 +106,6 @@ const currentTab = ref<string>('properties');
 function toggleDisplayConfig(display: DisplayConfig) {
 	selectedDisplay.value = display.id !== selectedDisplay.value?.id ? display : null;
 	modelValue.value.display = selectedDisplay.value?.id || '';
-	modelValue.value.displayOptions = defaultValues.value.value;
 }
 
 async function saveTableColumn() {
