@@ -34,7 +34,7 @@
 		<v-dialog v-model="deleteDialog" @esc="deleteDialog = false">
 			<v-card>
 				<v-card-title>
-					{{ `Are you sure you want to delete this widget "${widget.name}"? This action can not be undone.` }}
+					{{ `Are you sure you want to delete this widget "${widgetName}"? This action can not be undone.` }}
 				</v-card-title>
 				<v-card-actions>
 					<v-button secondary @click="deleteDialog = false">Cancel</v-button>
@@ -45,11 +45,11 @@
 	</div>
 </template>
 <script setup lang="ts">
-import { Ref, ref } from 'vue';
+import { Ref, ref, computed } from 'vue';
 import { useStores } from '@directus/extensions-sdk';
 const { useUserStore } = useStores();
 const { isAdmin } = useUserStore();
-withDefaults(
+const props = withDefaults(
 	defineProps<{
 		widget: Record<string, any>;
 		updateVisiable: (widget: any) => void;
@@ -72,6 +72,7 @@ withDefaults(
 );
 
 const deleteDialog: Ref<boolean> = ref(false);
+const widgetName = computed(() => props.widget?.name || props.widget?.label);
 </script>
 <style scoped>
 .v-list-item.danger {

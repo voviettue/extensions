@@ -1,8 +1,8 @@
 <template>
-	<div v-if="widget.options?.tabs?.length > 0">
+	<div>
 		<draggable
 			class="widget-grid group full nested"
-			:model-value="widget.options?.tabs"
+			:model-value="tabs"
 			:force-fallback="true"
 			handle=".drag-handle"
 			:group="{ name: 'tabs' }"
@@ -26,16 +26,15 @@
 			</template>
 
 			<template #item="{ element }">
-				<div class="widget-select grid-half">
+				<div class="widget-select grid-full">
 					<widget-item-group
-						:widget="widget"
+						:key="element.key"
+						:widget="element"
 						:list-widget="listWidget"
-						:class="gridTab"
 						:nested-widgets="getWidgetByIds(element.widgets)"
 						:update-visiable="updateVisiable"
 						:delete-widget="deleteWidget"
-						:update-parent="(value) => updateParent(value, element)"
-						@reload="$emit('reload')"
+						:update-parent="(value) => updateParentTab(value, element)"
 					>
 						<template #header>
 							<div class="header full">
@@ -48,13 +47,12 @@
 									class="hidden-icon"
 									small
 								/>
-								<!-- TODO -->
-								<!-- <widget-options
-									:widget="widget"
-									:update-visiable="updateVisiable"
-									:delete-widget="deleteWidget"
+								<widget-options
+									:widget="element"
+									:update-visiable="updateVisiableTab"
+									:delete-widget="deleteTab"
 									class="option"
-								/> -->
+								/>
 							</div>
 						</template>
 					</widget-item-group>
@@ -65,11 +63,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineEmits } from 'vue';
+import { ref, Ref, watch, computed, defineEmits } from 'vue';
 import WidgetItemGroup from './widget-item-group.vue';
 import Draggable from 'vuedraggable';
 import WidgetOptions from './widget-options.vue';
 import { useApi } from '@directus/extensions-sdk';
+import { useRoute } from 'vue-router';
+import { useNotification } from '../../composables/use-notification';
+import remove from 'lodash/remove';
 
 interface Props {
 	widget: Record<string, any>;
@@ -80,6 +81,9 @@ interface Props {
 }
 const emit = defineEmits(['reload']);
 const api = useApi();
+const route = useRoute();
+
+const { notify } = useNotification();
 const props = withDefaults(defineProps<Props>(), {
 	widget: () => ({
 		custom_css: null,
@@ -96,34 +100,84 @@ const props = withDefaults(defineProps<Props>(), {
 	updateParent: () => null,
 });
 
-const gridTab = computed(() => {
-	let grid: string;
-	switch (props.widget?.options?.tabs?.length) {
-		case 1:
-			grid = 'grid-full';
-			break;
-		case 2:
-			grid = 'grid-half';
-			break;
-		default:
-			grid = 'grid-two';
-			break;
+const tabs: Ref<Record<string, any>[]> = ref(props.widget?.options?.tabs);
+
+watch(
+	() => route.name,
+	async () => {
+		const res = await api.get(`/items/cms_widgets/${props.widget.id}`);
+		tabs.value = res?.data?.data?.options?.tabs;
 	}
-	return grid;
-});
+);
+
+async function updateVisiableTab(tab) {
+	const idx = tabs.value?.findIndex((e: any) => e.key === tab.key);
+	tabs.value[idx].hidden = !tab?.hidden;
+	try {
+		await api.patch(`/items/cms_widgets/${props.widget.id}`, { options: { tabs: tabs.value } });
+		emit('reload');
+	} catch {
+		//
+	}
+}
+
+async function deleteTab(tab) {
+	remove(tabs.value, (e: any) => e.key === tab.key);
+	const widgets = props.listWidget?.filter((item) => tab?.widgets?.includes(item?.id));
+
+	try {
+		const apis = widgets.map((k: any) => {
+			return api.delete(`/items/cms_widgets/${k.id}`);
+		});
+		await Promise.allSettled(apis);
+		await api.patch(`/items/cms_widgets/${props.widget.id}`, { options: { tabs: tabs.value } });
+		notify({ title: 'Items deleted' });
+		emit('reload');
+	} catch {
+		//
+	}
+}
 
 const getWidgetByIds = (ids: (string | number)[]) => {
+	if (!ids) return [];
+
 	return props.listWidget
 		?.filter((item) => ids.includes(item?.id))
 		.sort((a: any, b: any) => (a.sort ?? 1000) - (b.sort ?? 1000));
 };
 
-async function updateOrderTab(tabs: any) {
-	const inValid = tabs?.find((e: any) => !e?.label && !e?.widgets);
-	if (inValid || tabs?.length !== props.widget?.options?.tabs?.length) return;
+async function updateOrderTab(values: any) {
+	try {
+		const res = await api.patch(`/items/cms_widgets/${props.widget.id}`, { options: { tabs: values } });
+		tabs.value = res?.data?.data?.options?.tabs;
+		emit('reload');
+	} catch {
+		//
+	}
+}
+
+async function updateParentTab(widgets, el) {
+	const isValid = !widgets?.find((e: any) => !e?.widget);
+	if (!isValid) return;
+
+	const idWidgets = widgets?.map((e: any) => e?.id);
+	const idx = tabs.value?.findIndex((e: any) => e.key === el.key);
+	tabs.value[idx].widgets = idWidgets;
+
+	const data = widgets?.map((item, index) => {
+		return {
+			id: item.id,
+			sort: index,
+			parent: props.widget.id,
+		};
+	});
 
 	try {
-		await api.patch(`/items/cms_widgets/${props.widget.id}`, { options: { tabs: tabs } });
+		const apis = data.map((k: any) => {
+			return api.patch(`/items/cms_widgets/${k.id}`, k);
+		});
+		await Promise.allSettled(apis);
+		await api.patch(`/items/cms_widgets/${props.widget.id}`, { options: { tabs: tabs.value } });
 		emit('reload');
 	} catch {
 		//

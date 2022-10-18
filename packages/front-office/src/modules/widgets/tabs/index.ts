@@ -44,10 +44,25 @@ export default defineWidget({
 								},
 							},
 							{
+								field: 'widgets',
+								name: 'Widgets',
+								type: 'json',
+								meta: {
+									hidden: true,
+									interface: 'select-dropdown',
+									choices: [],
+									allowNone: true,
+								},
+								schema: {
+									default_value: [],
+								},
+							},
+							{
 								field: 'hidden',
 								name: 'Hidden',
 								type: 'boolean',
 								meta: {
+									placeholder: 'Select widget',
 									interface: 'boolean',
 								},
 								schema: {

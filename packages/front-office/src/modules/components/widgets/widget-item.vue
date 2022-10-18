@@ -18,7 +18,6 @@
 			:list-widget="listWidget"
 			:update-visiable="updateVisiable"
 			:delete-widget="deleteWidget"
-			:update-parent="updateParentTab"
 			@reload="$emit('reload')"
 		></widget-item-tabs>
 
@@ -37,7 +36,6 @@ import { useApi } from '@directus/extensions-sdk';
 import WidgetItemSimple from './widget-item-simple.vue';
 import WidgetItemGroup from './widget-item-group.vue';
 import WidgetItemTabs from './widget-item-tabs.vue';
-import cloneDeep from 'lodash/cloneDeep';
 
 interface Props {
 	widget: Record<string, any>;
@@ -77,35 +75,6 @@ async function updateParent(widgets) {
 			return api.patch(`/items/cms_widgets/${k.id}`, k);
 		});
 		await Promise.allSettled(apis);
-		emit('reload');
-	} catch {
-		//
-	}
-}
-
-async function updateParentTab(widgets, el) {
-	const isValid = !widgets?.find((e: any) => !e?.widget);
-	if (!isValid) return;
-
-	const tabs = cloneDeep(props.widget.options?.tabs);
-	const idWidgets = widgets?.map((e: any) => e?.id);
-	const idx = tabs?.findIndex((e: any) => e.id === el.id);
-	tabs[idx].widgets = idWidgets;
-
-	const data = widgets.map((item, index) => {
-		return {
-			...item,
-			sort: index,
-			parent: props.widget.id,
-		};
-	});
-
-	try {
-		const apis = data.map((k: any) => {
-			return api.patch(`/items/cms_widgets/${k.id}`, k);
-		});
-		await Promise.allSettled(apis);
-		await api.patch(`/items/cms_widgets/${props.widget.id}`, { options: { tabs: tabs } });
 		emit('reload');
 	} catch {
 		//
