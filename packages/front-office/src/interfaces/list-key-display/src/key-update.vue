@@ -61,6 +61,7 @@ import listDisplayConfig from '../../../modules/displays';
 import { ExtensionOptionsContext, DisplayConfig } from '../../../modules/types/extensions';
 import ExtensionOptions from '../../../modules/components/shared/extension-options.vue';
 import snakeCase from 'lodash/snakeCase';
+import cloneDeep from 'lodash/cloneDeep';
 
 export default {
 	components: { ExtensionOptions },
@@ -111,8 +112,11 @@ export default {
 
 		const optionsFields = computed(() => {
 			const options = selectedDisplay.value?.displayOptions ?? [];
+			const values = cloneDeep(modelValue.value);
+			values.options = values.displayOptions;
+
 			if (typeof options === 'function') {
-				const ctx = { values: modelValue.value } as ExtensionOptionsContext;
+				const ctx = { values } as ExtensionOptionsContext;
 				return options(ctx);
 			}
 
@@ -144,6 +148,7 @@ export default {
 		function toggleDisplayConfig(display: DisplayConfig) {
 			selectedDisplay.value = display.id !== selectedDisplay.value?.id ? display : null;
 			modelValue.value.display = selectedDisplay.value?.id || '';
+			validationErrors.value = [];
 		}
 
 		async function save() {
@@ -204,8 +209,8 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 128px;
-	height: 100px;
+	width: 116px;
+	height: 90px;
 	margin-bottom: 8px;
 	border: var(--border-width) solid var(--border-subdued);
 	border-radius: var(--border-radius);

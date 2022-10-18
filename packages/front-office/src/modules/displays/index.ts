@@ -1,11 +1,12 @@
 import button from './button';
 import date from './date';
+import duration from './duration';
+import iconButton from './icon-button';
+import image from './image';
+import label from './label';
 import link from './link';
 import number from './number';
 import percentage from './percentage';
 import text from './text';
-import label from './label';
-import duration from './duration';
-import iconButton from './icon-button';
 
-export default [button, date, link, number, percentage, text, label, duration, iconButton];
+export default [text, number, label, link, image, date, duration, percentage, button, iconButton];
