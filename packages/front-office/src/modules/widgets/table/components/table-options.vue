@@ -60,12 +60,29 @@ const props = defineProps<Props>();
 const emit = defineEmits(['input', 'update:modelValue']);
 
 const isOpenCreate = ref<boolean>(false);
+
 const optionsValues = computed({
 	get() {
 		if (props.value === undefined || props.value === null) {
 			return {};
 		}
-		return props.value;
+		const values = cloneDeep(props.value);
+		// @TODO: use interface list-display
+		// map value for display image
+		if (values?.columns) {
+			values.columns = values.columns.map((column: any) => {
+				if (
+					column?.display === 'image' &&
+					column?.displayOptions?.project_logo === undefined &&
+					column?.displayOptions?.defaultImg
+				) {
+					column.displayOptions.project_logo = column.displayOptions.defaultImg;
+					delete column.displayOptions.defaultImg;
+				}
+				return column;
+			});
+		}
+		return values;
 	},
 	set(values: any) {
 		emit('input', values);
