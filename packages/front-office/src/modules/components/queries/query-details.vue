@@ -26,7 +26,7 @@
 				<v-icon name="check" />
 			</v-button>
 			<v-button
-				v-if="modelValue.query !== 'json'"
+				v-if="displayExecute"
 				v-tooltip.bottom="'Execute'"
 				rounded
 				icon
@@ -91,6 +91,7 @@ import ExtensionOptionsComponent from '../shared/extension-options.vue';
 import QueryLogSidebar from './query-log-sidebar.vue';
 import isEqual from 'lodash/isEqual';
 import isEmpty from 'lodash/isEmpty';
+import isJson from '../../../endpoint/utils/is-json';
 
 const api = useApi();
 const route = useRoute();
@@ -120,7 +121,9 @@ const { item, edits, getItem, saving, save, validationErrors, fieldsWithPermissi
 if (primaryKey !== '+') {
 	getItem().then(() => {
 		initialValues.value = { ...item.value } || {};
-		initialValues.value.output = initialValues.value?.output && JSON.parse(initialValues.value.output);
+		initialValues.value.output = isJson(initialValues.value?.output)
+			? JSON.parse(initialValues.value.output)
+			: initialValues.value?.output;
 		modelValue.value = Object.assign({}, initialValues.value);
 	});
 }
@@ -158,6 +161,10 @@ const selectedQuery = computed(() => {
 	return queryConfigList.find((e) => e.id === modelValue.value?.query);
 });
 
+const displayExecute = computed(() => {
+	return modelValue.value?.query !== 'json' && modelValue.value?.query !== 'js-object';
+});
+
 async function execute() {
 	try {
 		if (hasEdits.value) {
@@ -183,7 +190,7 @@ async function execute() {
 
 async function update() {
 	try {
-		edits.value = { ...initialValues.value, ...modelValue.value, ...modelValue.value.options };
+		edits.value = { ...initialValues.value, ...modelValue.value.options, ...modelValue.value };
 		fieldsWithPermissions.value = [...defaultFields.value, ...optionsFields.value];
 
 		if (selectedQuery.value?.beforeSave) {
@@ -221,6 +228,7 @@ async function updateAndNavigate() {
 
 <style scoped>
 .field-fault {
+	--form-vertical-gap: 2rem;
 	padding-bottom: 1.25rem;
 }
 </style>

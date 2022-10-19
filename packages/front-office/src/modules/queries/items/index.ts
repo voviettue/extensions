@@ -22,9 +22,36 @@ export default defineQuery({
 				name: 'Per Page',
 				type: 'integer',
 				meta: {
-					interface: 'input',
+					interface: 'select-dropdown',
 					options: {
-						trim: true,
+						choices: [
+							{
+								text: '5',
+								value: 5,
+							},
+							{
+								text: '10',
+								value: 10,
+							},
+							{
+								text: '20',
+								value: 20,
+							},
+							{
+								text: '50',
+								value: 50,
+							},
+							{
+								text: '100',
+								value: 100,
+							},
+							{
+								text: '200',
+								value: 200,
+							},
+						],
+						allowOther: true,
+						allowNone: true,
 					},
 				},
 				schema: {

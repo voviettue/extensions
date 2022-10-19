@@ -1,21 +1,23 @@
 export default function renderTemplate(template: string, params: any): string {
-	const regex = /({{.*?}})/g;
-	const matches = typeof template === 'string' ? [...template.matchAll(regex)] : [];
-	let result = template;
+	if (!template) return template;
 
-	matches.forEach((match) => {
-		const block = match[0];
-		const statement = 'return ' + block.replace('{{', '').replace('}}', '');
-		try {
+	try {
+		const regex = /({{.*?}})/g;
+		const matches = [...String(template).matchAll(regex)];
+		let result = template;
+
+		for (const match of matches) {
+			const block = match.shift()!;
+			const statement = 'return ' + block.replace('{{', '').replace('}}', '');
 			// eslint-disable-next-line no-new-func
 			const fn = new Function('$param', statement);
 			const value = fn(params) ?? block;
 			const replacement = typeof value === 'string' ? value : JSON.stringify(value);
 			result = result.replace(block, replacement);
-		} catch (err) {
-			// do nothing
 		}
-	});
 
-	return result;
+		return result;
+	} catch {
+		return template;
+	}
 }

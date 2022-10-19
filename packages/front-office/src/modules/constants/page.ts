@@ -5,8 +5,8 @@ export const formFields = [
 		type: 'alias',
 		meta: {
 			width: 'full',
-			field: 'page_setup',
-			interface: 'group-detail',
+			options: { icon: 'settings', title: 'Page Setup' },
+			interface: 'presentation-divider',
 			special: ['alias', 'no-data', 'group'],
 		},
 	},
@@ -21,7 +21,6 @@ export const formFields = [
 			options: {
 				trim: true,
 			},
-			group: 'page_setup',
 		},
 	},
 	{
@@ -35,7 +34,6 @@ export const formFields = [
 			options: {
 				trim: true,
 			},
-			group: 'page_setup',
 		},
 	},
 	{
@@ -50,7 +48,6 @@ export const formFields = [
 			options: {
 				trim: true,
 			},
-			group: 'page_setup',
 		},
 	},
 	{
@@ -60,7 +57,71 @@ export const formFields = [
 		meta: {
 			width: 'half',
 			interface: 'boolean',
-			group: 'page_setup',
+		},
+	},
+];
+
+export const optionsFields = [
+	{
+		field: 'styles',
+		name: 'Styles',
+		type: 'alias',
+		meta: {
+			width: 'full',
+			options: { title: 'Styles' },
+			interface: 'presentation-divider',
+			special: ['alias', 'no-data', 'group'],
+		},
+	},
+	{
+		field: 'maxWidth',
+		name: 'Max Width',
+		type: 'text',
+		meta: {
+			width: 'half',
+			interface: 'select-dropdown',
+			allowNone: true,
+			allowOther: true,
+			placeholder: 'Default',
+			options: {
+				allowNone: true,
+				allowOther: true,
+				placeholder: 'Default',
+				choices: [
+					{
+						value: '1280px',
+						text: '1280px',
+					},
+					{
+						value: '1366px',
+						text: '1366px',
+					},
+					{
+						value: '1440px',
+						text: '1440px',
+					},
+					{
+						value: '1536px',
+						text: '1536px',
+					},
+					{
+						value: '1600px',
+						text: '1600px',
+					},
+					{
+						value: '1792px',
+						text: '1792px',
+					},
+					{
+						value: '1920px',
+						text: '1920px',
+					},
+					{
+						value: '2560px',
+						text: '2560px',
+					},
+				],
+			},
 		},
 	},
 ];

@@ -16,7 +16,7 @@
 			<template #header>
 				<div class="header full">
 					<v-icon class="drag-handle" name="drag_indicator" @click.stop />
-					<span class="name">{{ widget.name }}</span>
+					<v-text-overflow class="name" :text="widget.name" />
 					<v-icon v-if="widget.hidden" v-tooltip="`Hidden widget`" name="visibility_off" class="hidden-icon" small />
 					<widget-options
 						:widget="widget"
@@ -167,7 +167,7 @@ function getClass(el: Record<string, any>) {
 	}
 }
 .widget {
-	height: 52px;
+	height: 48px;
 
 	:deep(.input) {
 		border: var(--border-width) solid var(--border-subdued) !important;

@@ -40,6 +40,9 @@ export default defineWidget({
 					],
 				},
 			},
+			schema: {
+				default_value: 'md',
+			},
 		},
 		{
 			field: 'disable',
@@ -132,17 +135,20 @@ export default defineWidget({
 							value: 'light',
 						},
 						{
-							text: 'Dart',
-							value: 'dart',
+							text: 'Dark',
+							value: 'dark',
 						},
 					],
 				},
+			},
+			schema: {
+				default_value: 'primary',
 			},
 		},
 		{
 			field: 'borderRadius',
 			name: 'Border Radius',
-			type: 'number',
+			type: 'integer',
 			meta: {
 				interface: 'input',
 				width: 'half',
@@ -150,6 +156,9 @@ export default defineWidget({
 					trim: true,
 					placeholder: 'Enter border width size in px',
 				},
+			},
+			schema: {
+				default_value: 0,
 			},
 		},
 		{
@@ -187,17 +196,15 @@ export default defineWidget({
 			},
 		},
 		{
-			field: 'onclick',
-			name: 'Event Onclick',
-			type: 'text',
+			field: 'onClick',
+			name: 'On Click (Javascript)',
 			meta: {
-				interface: 'input-code',
 				width: 'full',
+				interface: 'input-javascript',
 				options: {
-					language: 'javascript',
-					lineNumber: true,
-					template: '() => {}',
+					minLine: 4,
 				},
+				note: 'Type "/" to see all of variables and function are supported.',
 			},
 		},
 	],

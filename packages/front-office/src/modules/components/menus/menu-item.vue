@@ -29,12 +29,7 @@
 			</template>
 
 			<template #item="{ element }">
-				<menu-item
-					:menu="element"
-					:menu-list="menuList"
-					@refresh="$emit('refresh')"
-					@set-nested-sort="$emit('setNestedSort', $event)"
-				/>
+				<menu-item :menu="element" @refresh="$emit('refresh')" @set-nested-sort="$emit('setNestedSort', $event)" />
 			</template>
 		</draggable>
 
@@ -44,15 +39,11 @@
 			</template>
 
 			<template #input>
-				<div
-					v-tooltip="`${menu.key}`"
-					class="label"
-					@click="$router.push(`/front-office/settings/project/${menu.project}/menu/${menu.id}`)"
-				>
+				<div v-tooltip="`${menu.key}`" class="label" @click="$router.push(`/front-office/menus/${menu.id}`)">
 					<div class="label-inner">
 						<v-icon v-if="!!menu.icon" class="drag-handle" :name="menu.icon" @click.stop />
 						<span class="name">{{ menu.label }}</span>
-						<small class="type">{{ config?.key }}</small>
+						<small class="type">{{ config?.name }}</small>
 					</div>
 				</div>
 			</template>
@@ -84,157 +75,136 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useApi } from '@directus/extensions-sdk';
-import MenuItemSelectMenu from './menu-item-select-menu.vue';
-import formatTitle from '@directus/format-title';
+import MenuItemSelectMenu from './menu-options.vue';
 import listMenuConfig from '../../menus';
 import { useNotification } from '../../composables/use-notification';
 import Draggable from 'vuedraggable';
+import { useFrontOfficeStore } from '../../stores/front-office';
+import { storeToRefs } from 'pinia';
 
-export default {
-	components: { Draggable, MenuItemSelectMenu },
-	props: {
-		menu: {
-			type: Object,
-			default: null,
-		},
-		menuList: {
-			type: Array,
-			default: () => [],
-		},
-	},
-	emits: ['refresh', 'setNestedSort'],
-	setup(props, { emit }) {
-		const collection = 'cms_menus';
-		const api = useApi();
-		const { notify, unexpectedError } = useNotification();
+const props = defineProps<{
+	menu: Record<string, any>;
+}>();
+const emit = defineEmits(['refresh', 'setNestedSort']);
 
-		const { deleteActive, deleting, deleteMenuItem } = useDeleteMenuItem();
+const collection = 'cms_menus';
+const api = useApi();
+const store = useFrontOfficeStore();
+const { menus } = storeToRefs(store);
+const { notify, unexpectedError } = useNotification();
+const { deleteActive, deleting, deleteMenuItem } = useDeleteMenuItem();
 
-		const hidden = computed(() => props.menu?.hidden === true);
+const hidden = computed(() => props.menu?.hidden === true);
 
-		const nestedMenus = computed(() => {
-			return props.menuList
-				?.filter((item) => props.menu?.id == item.parent)
-				.sort((a: any, b: any) => (a.sort ?? 1000) - (b.sort ?? 1000));
+const nestedMenus = computed(() => {
+	return menus.value
+		?.filter((item: any) => props.menu?.id == item?.parent)
+		.sort((a: any, b: any) => (a.sort ?? 1000) - (b.sort ?? 1000));
+});
+
+const config = computed(() => listMenuConfig.find((e) => e.id === props.menu.menu));
+
+async function onGroupSortChange(items: Array<Record<string, any>>) {
+	let updateValues: Array<Record<string, any>> = [];
+	if (items.length == 0) {
+		updateValues = nestedMenus.value.map((item: any) => {
+			return { ...item, parent: null };
 		});
-
-		const config = computed(() => listMenuConfig.find((e) => e.id === props.menu.menu));
-
-		return {
-			nestedMenus,
-			config,
-			onGroupSortChange,
-			hidden,
-			formatTitle,
-			toggleVisibility,
-			deleteActive,
-			deleting,
-			deleteMenuItem,
-			duplicateMenuItem,
-			close,
-		};
-
-		async function onGroupSortChange(items: Array<Record<string, any>>) {
-			let updateValues: Array<Record<string, any>> = [];
-			if (items.length == 0) {
-				updateValues = nestedMenus.value.map((item: any) => {
-					return { ...item, parent: null };
-				});
-			} else {
-				updateValues = items.map((item: any, index: number) => {
-					return {
-						...item,
-						parent: props.menu.id,
-						sort: index,
-					};
-				});
-			}
-
-			emit('setNestedSort', updateValues);
-		}
-
-		async function toggleVisibility() {
-			const data = { hidden: !props.menu?.hidden };
-
-			try {
-				await api.patch(`/items/${collection}/${props.menu?.id}`, data);
-
-				close();
-			} catch {
-				//
-			}
-		}
-
-		async function duplicateMenuItem() {
-			let menuLabel = props.menu.label;
-			let menuKey = props.menu.key;
-
-			do {
-				menuLabel = 'Copy ' + menuLabel;
-				menuKey = 'copy_' + menuKey;
-
-				if (!props.menuList.find((menu: any) => menu.key == menuKey)) break;
-				// eslint-disable-next-line no-constant-condition
-			} while (true);
-
-			const data = {
-				...props.menu,
-				...{
-					label: menuLabel,
-					key: menuKey,
-				},
-			};
-			delete data.id;
-
-			try {
-				await api.post(`/items/${collection}`, data);
-
-				close();
-			} catch (err) {
-				unexpectedError(err);
-			}
-		}
-
-		function useDeleteMenuItem() {
-			const deleteActive = ref(false);
-			const deleting = ref(false);
-
+	} else {
+		updateValues = items.map((item: any, index: number) => {
 			return {
-				deleteActive,
-				deleting,
-				deleteMenuItem,
+				...item,
+				parent: props.menu.id,
+				sort: index,
 			};
+		});
+	}
 
-			async function deleteMenuItem() {
-				try {
-					await api.delete(`/items/${collection}/${props.menu?.id}`);
+	emit('setNestedSort', updateValues);
+}
 
-					close();
-				} catch {
-					notify({ title: `Couldn't delete menu`, type: 'error' });
-				}
+async function toggleVisibility() {
+	const data = { hidden: !props.menu?.hidden };
 
-				deleting.value = false;
-				deleteActive.value = false;
-			}
+	try {
+		await api.patch(`/items/${collection}/${props.menu?.id}`, data);
+
+		close();
+	} catch {
+		//
+	}
+}
+
+async function duplicateMenuItem() {
+	let menuLabel = props.menu.label;
+	let menuKey = props.menu.key;
+
+	do {
+		menuLabel = 'Copy ' + menuLabel;
+		menuKey = 'copy_' + menuKey;
+
+		if (!menus.value.find((menu: any) => menu.key == menuKey)) break;
+		// eslint-disable-next-line no-constant-condition
+	} while (true);
+
+	const data = {
+		...props.menu,
+		sort: null,
+		label: menuLabel,
+		key: menuKey,
+	};
+	delete data.id;
+
+	try {
+		await api.post(`/items/${collection}`, data);
+
+		close();
+	} catch (err) {
+		unexpectedError(err);
+	}
+}
+
+function useDeleteMenuItem() {
+	const deleteActive = ref(false);
+	const deleting = ref(false);
+
+	return {
+		deleteActive,
+		deleting,
+		deleteMenuItem,
+	};
+
+	async function deleteMenuItem() {
+		try {
+			await api.delete(`/items/${collection}/${props.menu?.id}`);
+			notify({ title: 'Item deleted' });
+
+			close();
+		} catch {
+			notify({ title: `Couldn't delete menu`, type: 'error' });
 		}
 
-		function close() {
-			emit('refresh');
-		}
-	},
-};
+		deleting.value = false;
+		deleteActive.value = false;
+	}
+}
+
+function close() {
+	emit('refresh');
+}
+// },
+// };
 </script>
 <style lang="scss" scoped>
 .group {
 	position: relative;
-	min-height: var(--input-height);
-	padding: var(--input-padding);
+	min-height: 48px;
+	padding: 8px;
 	padding-top: 40px;
-	padding-bottom: 16px;
+	padding-bottom: 8px;
 	border-radius: var(--border-radius);
 
 	> * {
@@ -289,7 +259,19 @@ export default {
 		}
 	}
 }
-
+.menu {
+	--input-padding: 8px;
+	--input-height: 48px;
+	.type {
+		color: var(--foreground-subdued);
+		font-family: var(--family-monospace);
+		transition: opacity var(--fast) var(--transition);
+		opacity: 0;
+	}
+	&:hover .type {
+		opacity: 1;
+	}
+}
 .menu-grid {
 	position: relative;
 	display: grid;

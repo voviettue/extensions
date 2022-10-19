@@ -11,7 +11,7 @@
 		</template>
 
 		<template #actions>
-			<v-button rounded icon :loading="saving" @click="saveAndRefresh">
+			<v-button rounded icon :loading="saving" @click="saveHandler">
 				<v-icon name="check" />
 			</v-button>
 		</template>
@@ -20,119 +20,72 @@
 			<navigation></navigation>
 		</template>
 
-		<menu-list :menus="item?.menus" :project-id="item?.id" />
-
-		<v-form v-model="edits" :loading="loading" :initial-values="item" :fields="formFields" :primary-key="item?.id" />
+		<div class="padding-box cms-settings-body">
+			<v-form
+				v-model="edits"
+				:loading="loading"
+				:initial-values="item"
+				:fields="formFields"
+				:primary-key="item?.id"
+				:validation-errors="validationErrors"
+			/>
+			<v-form
+				v-model="edits.menu_options"
+				:loading="loading"
+				:initial-values="item"
+				:fields="menuFields"
+				:primary-key="item?.id"
+				:validation-errors="validationErrors"
+				:nested="true"
+			/>
+			<v-form
+				v-model="edits.page_options"
+				:loading="loading"
+				:initial-values="item"
+				:fields="pageFields"
+				:primary-key="item?.id"
+				:validation-errors="validationErrors"
+			/>
+			<v-form
+				v-model="edits.options"
+				:loading="loading"
+				:initial-values="item"
+				:fields="optionsFields"
+				:primary-key="item?.id"
+				:validation-errors="validationErrors"
+				:nested="true"
+			/>
+		</div>
 	</private-view>
 </template>
 
-<script lang="ts">
-import { ref, onMounted } from 'vue';
-
+<script lang="ts" setup>
 import Navigation from '../components/navigation.vue';
-import MenuList from '../components/settings/menu-list.vue';
-import { useApi } from '@directus/extensions-sdk';
-import { getEndpoint } from '@directus/shared/utils';
-import { useNotification } from '../composables/use-notification';
 import { useFrontOfficeStore } from '../stores/front-office';
-import { formFields } from '../constants/setting';
+import { formFields, menuFields, pageFields, optionsFields } from '../constants/setting';
+import { useItem } from '../composables/use-item';
+import { useValidate } from '../composables/use-validate';
 
-export default {
-	components: { Navigation, MenuList },
-	setup() {
-		const collection = 'cms_settings';
-		const api = useApi();
-		const { notify } = useNotification();
-		const frontOfficeStore = useFrontOfficeStore();
-		frontOfficeStore.hydrate();
+const collection = 'cms_settings';
+const { validateItem } = useValidate();
+const frontOfficeStore = useFrontOfficeStore();
+frontOfficeStore.hydrate();
 
-		const item = ref();
-		const edits = ref();
-		const error = ref();
-		const loading = ref<boolean>(false);
-		const saving = ref<boolean>(false);
+const { item, edits, save, loading, saving, validationErrors, getItem } = useItem(collection, '');
 
-		onMounted(async () => {
-			await refresh();
-		});
+getItem().then(() => {
+	edits.value = { ...item.value };
+});
 
-		return {
-			collection,
-			item,
-			loading,
-			error,
-			edits,
-			saving,
-			refresh,
-			saveAndRefresh,
-			formFields,
-		};
+async function saveHandler() {
+	validationErrors.value = validateItem(edits.value, formFields);
+	if (validationErrors.value.length) return;
 
-		async function saveAndRefresh() {
-			try {
-				await save();
-				refresh();
-			} catch {
-				// Save shows unexpected error dialog
-			}
-		}
-
-		async function getItem() {
-			loading.value = true;
-			error.value = null;
-
-			try {
-				const response = await api.get(getEndpoint(collection), {
-					params: {
-						fields: ['*', 'menus.*'],
-					},
-				});
-				item.value = { ...response.data.data };
-			} catch (err) {
-				error.value = err;
-			} finally {
-				loading.value = false;
-			}
-		}
-
-		async function save() {
-			saving.value = true;
-
-			try {
-				let response = await api.patch(getEndpoint(collection), edits.value);
-
-				notify({ title: 'Settings updated' });
-
-				item.value = { ...response.data.data };
-				edits.value = {};
-
-				return response.data.data;
-			} catch (err: any) {
-				// eslint-disable-next-line no-console
-				console.log(err);
-			} finally {
-				saving.value = false;
-			}
-		}
-
-		async function refresh() {
-			error.value = null;
-			loading.value = false;
-			saving.value = false;
-
-			await getItem();
-		}
-	},
-};
+	try {
+		await save();
+		edits.value = { ...item.value };
+	} catch (err) {
+		// do nothing
+	}
+}
 </script>
-
-<style>
-.v-form {
-	padding: var(--content-padding);
-	padding-bottom: var(--content-padding-bottom);
-}
-.padding-box {
-	padding: var(--content-padding);
-	padding-top: 0;
-}
-</style>

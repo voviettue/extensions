@@ -10,20 +10,61 @@ export default defineWidget({
 			values.options.defaultImage = null;
 		}
 
+		const dynamicField =
+			values?.options?.type === 'file'
+				? {
+						field: 'file',
+						name: 'File ID',
+						type: 'string',
+						meta: {
+							interface: 'input',
+							width: 'full',
+							options: {
+								trim: true,
+								placeholder: '3a7d4ed4-415a-474b-a1a8-981e433fe6e4',
+							},
+						},
+				  }
+				: {
+						field: 'url',
+						name: 'URL',
+						type: 'string',
+						meta: {
+							interface: 'input',
+							width: 'full',
+							options: {
+								trim: true,
+								placeholder: 'https://example.com',
+							},
+						},
+				  };
+
 		return [
 			{
-				field: 'url',
-				name: 'URL',
+				field: 'type',
+				name: 'Type',
 				type: 'string',
 				meta: {
-					interface: 'input',
+					interface: 'select-radio',
 					width: 'full',
 					options: {
-						trim: true,
-						placeholder: 'https://example.com',
+						choices: [
+							{
+								value: 'url',
+								text: 'Url',
+							},
+							{
+								value: 'file',
+								text: 'File',
+							},
+						],
 					},
 				},
+				schema: {
+					default_value: 'url',
+				},
 			},
+			dynamicField,
 			{
 				collection: 'cms_settings',
 				field: 'project_logo',

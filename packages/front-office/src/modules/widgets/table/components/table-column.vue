@@ -40,35 +40,26 @@
 	</div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { ref, computed } from 'vue';
 import TableColumnSelectMenu from './table-column-select-menu.vue';
 import TableColumnDetail from './table-column-detail.vue';
 
-export default {
-	components: { TableColumnSelectMenu, TableColumnDetail },
-	props: {
-		column: {
-			type: Object,
-			default: null,
-		},
-	},
-	emits: ['update', 'toggleVisibility', 'delete'],
-	setup(props, { emit }) {
-		const isOpenDetail = ref<boolean>(false);
-		const hidden = computed(() => props.column?.hidden === true);
+interface Props {
+	column: any;
+}
+const props = withDefaults(defineProps<Props>(), {
+	column: null,
+});
 
-		return {
-			hidden,
-			isOpenDetail,
-			close,
-		};
+const emit = defineEmits(['update', 'toggleVisibility', 'delete']);
 
-		function close() {
-			isOpenDetail.value = false;
-		}
-	},
-};
+const isOpenDetail = ref<boolean>(false);
+const hidden = computed(() => props.column?.hidden === true);
+
+function close() {
+	isOpenDetail.value = false;
+}
 </script>
 <style lang="scss" scoped>
 .table-column-select {

@@ -1,4 +1,6 @@
 import { defineModule } from '@directus/extensions-sdk';
+import ModuleComponent from './routes/module.vue';
+import MenuComponent from './routes/menu.vue';
 import SettingComponent from './routes/setting.vue';
 import PagesComponent from './routes/pages.vue';
 import QueriesComponent from './routes/queries.vue';
@@ -7,8 +9,7 @@ import PageDetailComponent from './components/pages/page-detail.vue';
 import NewQueryComponent from './components/queries/query-create.vue';
 import QueryDetailsComponent from './components/queries/query-details.vue';
 import NewWidgetComponent from './components/widgets/widget-create.vue';
-import NewMenuComponent from './components/settings/menu-create.vue';
-import MenuDetailComponent from './components/settings/menu-detail.vue';
+import MenuDetailComponent from './components/menus/menu-detail.vue';
 
 export default defineModule({
 	id: 'front-office',
@@ -16,75 +17,84 @@ export default defineModule({
 	icon: 'web',
 	routes: [
 		{
-			path: '',
-			redirect: '/front-office/settings',
-		},
-		{
-			path: '/front-office/settings',
-			component: SettingComponent,
+			path: '/front-office',
+			component: ModuleComponent,
+			redirect: '/front-office/pages',
 			children: [
 				{
-					path: 'project/:projectId/menu/+',
-					name: 'setting-menu-create',
-					components: {
-						add_menu: NewMenuComponent,
-					},
+					path: 'settings',
+					component: SettingComponent,
+					children: [
+						{
+							path: 'project/:projectId/menu/:menuId',
+							name: 'setting-menu-detail',
+							components: {
+								menu_detail: MenuDetailComponent,
+							},
+						},
+					],
 				},
 				{
-					path: 'project/:projectId/menu/:menuId',
-					name: 'setting-menu-detail',
-					components: {
-						update_menu: MenuDetailComponent,
-					},
+					path: 'menus',
+					component: MenuComponent,
+					children: [
+						{
+							path: ':id',
+							name: 'setting-menu-detail',
+							components: {
+								menu_detail: MenuDetailComponent,
+							},
+						},
+					],
 				},
-			],
-		},
-		{
-			name: 'front-office-page',
-			path: '/front-office/pages',
-			component: PagesComponent,
-			children: [
 				{
-					path: '+',
-					name: 'page-add-new',
-					components: {
-						add: NewPageComponent,
-					},
+					name: 'front-office-page',
+					path: 'pages',
+					component: PagesComponent,
+					children: [
+						{
+							path: '+',
+							name: 'page-add-new',
+							components: {
+								add: NewPageComponent,
+							},
+						},
+					],
 				},
-			],
-		},
-		{
-			name: 'page-detail',
-			path: '/front-office/pages/:id',
-			component: PageDetailComponent,
-			children: [
 				{
-					path: 'widget/:widgetId',
-					name: 'page-add-new-widget',
-					components: {
-						addWidget: NewWidgetComponent,
-					},
+					name: 'page-detail',
+					path: 'pages/:id',
+					component: PageDetailComponent,
+					children: [
+						{
+							path: 'widget/:widgetId',
+							name: 'page-add-new-widget',
+							components: {
+								addWidget: NewWidgetComponent,
+							},
+						},
+					],
 				},
-			],
-		},
-		{
-			name: 'front-office-query',
-			path: '/front-office/queries',
-			component: QueriesComponent,
-			children: [
 				{
-					path: '+',
-					name: 'query-add-new',
-					components: {
-						add: NewQueryComponent,
-					},
+					name: 'front-office-query',
+					path: 'queries',
+					component: QueriesComponent,
+					children: [
+						{
+							path: '+',
+							name: 'query-add-new',
+							components: {
+								add: NewQueryComponent,
+							},
+						},
+					],
+				},
+				{
+					name: 'query-details',
+					path: 'queries/:id',
+					component: QueryDetailsComponent,
 				},
 			],
-		},
-		{
-			name: 'query-details',
-			path: '/front-office/queries/:id',
-			component: QueryDetailsComponent,
 		},
 	],
 });

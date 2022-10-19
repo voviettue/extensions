@@ -55,6 +55,5 @@ export default {
 <style>
 .padding-box {
 	padding: var(--content-padding);
-	padding-top: 0;
 }
 </style>

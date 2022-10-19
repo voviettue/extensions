@@ -1,5 +1,5 @@
 <template>
-	<v-drawer :title="`Creating Table Column`" :model-value="isOpen" persistent @cancel="$emit('close')">
+	<v-drawer :title="`Editing Key`" :model-value="isOpen" persistent @cancel="close">
 		<template #sidebar>
 			<v-tabs v-model="currentTab" vertical>
 				<v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value">
@@ -9,25 +9,25 @@
 		</template>
 
 		<template #actions>
-			<v-button v-tooltip.bottom="`Save`" rounded icon :loading="isLoading" @click="saveTableColumn">
+			<v-button v-tooltip.bottom="`Save`" rounded icon :loading="isLoading" @click="save">
 				<v-icon name="check" />
 			</v-button>
 		</template>
 
-		<div class="create-column-container">
+		<div class="edit-keys-container">
 			<v-form
 				v-if="currentTab == 'properties'"
 				v-model="modelValue"
-				class="field-fault"
+				class="field-default"
 				:fields="formFields"
-				:initial-values="initialValues"
 				:validation-errors="validationErrors"
 			/>
-			<div v-if="currentTab == 'displayValue'" class="list-column-config">
+
+			<div v-if="currentTab == 'displayValue'" class="list-display-config">
 				<button
 					v-for="displayConfig of listDisplayConfig"
 					:key="displayConfig.id"
-					class="column-config-item"
+					class="display-config-item"
 					:class="selectedDisplay?.id === displayConfig.id ? 'active' : 'gray'"
 					@click="toggleDisplayConfig(displayConfig)"
 				>
@@ -54,38 +54,42 @@
 	</v-drawer>
 </template>
 <script lang="ts">
-import { ref, Ref, computed, watch } from 'vue';
+import { ref, Ref, computed, watch, onMounted } from 'vue';
 import formatTitle from '@directus/format-title';
-import { useValidate } from '../../../composables/use-validate';
-import listDisplayConfig from '../../../displays';
-import { ExtensionOptionsContext, DisplayConfig } from '../../../types/extensions';
-import { formFields } from '../../../constants/column';
-import ExtensionOptions from '../../shared/extension-options.vue';
+import { useValidate } from '../../../modules/composables/use-validate';
+import listDisplayConfig from '../../../modules/displays';
+import { ExtensionOptionsContext, DisplayConfig } from '../../../modules/types/extensions';
+import ExtensionOptions from '../../../modules/components/shared/extension-options.vue';
 import snakeCase from 'lodash/snakeCase';
+import cloneDeep from 'lodash/cloneDeep';
 
 export default {
 	components: { ExtensionOptions },
 	props: {
+		item: {
+			type: Object,
+			default: null,
+		},
 		isOpen: {
 			type: Boolean,
 			default: false,
 		},
+		formFields: {
+			type: Array,
+			default: () => [],
+		},
 	},
-	emits: ['close', 'create'],
+	emits: ['close', 'update'],
 	setup(props, { emit }) {
 		const { validateItem } = useValidate();
 
 		const isLoading = ref<boolean>(false);
 		const validationErrors: Ref<Record<string, any>[]> = ref([]);
-		const modelValue: Ref<Record<string, any>> = ref({ hidden: false, displayOptions: {} });
-		const selectedDisplay: Ref<DisplayConfig | null> = ref(null);
-
-		const initialValues = ref({
-			key: null,
-			label: null,
-			hidden: false,
-			tooltip: null,
-		});
+		const modelValue: Ref<Record<string, any>> = ref(props.item);
+		const selectedDisplay: Ref<DisplayConfig | null> = ref(
+			listDisplayConfig.find((display: DisplayConfig) => display.id == props.item.display) as DisplayConfig
+		);
+		const currentTab = ref<string>();
 
 		watch(
 			() => modelValue.value.label,
@@ -94,10 +98,25 @@ export default {
 			}
 		);
 
+		watch(
+			() => props.item,
+			(val: any) => {
+				modelValue.value = val;
+			},
+			{ deep: true, immediate: true }
+		);
+
+		onMounted(async () => {
+			currentTab.value = 'properties';
+		});
+
 		const optionsFields = computed(() => {
 			const options = selectedDisplay.value?.displayOptions ?? [];
+			const values = cloneDeep(modelValue.value);
+			values.options = values.displayOptions;
+
 			if (typeof options === 'function') {
-				const ctx = { values: modelValue.value } as ExtensionOptionsContext;
+				const ctx = { values } as ExtensionOptionsContext;
 				return options(ctx);
 			}
 
@@ -111,49 +130,49 @@ export default {
 			];
 		});
 
-		const currentTab = ref<string>('properties');
-
 		return {
-			currentTab,
 			tabs,
+			currentTab,
 			listDisplayConfig,
 			close,
 			isLoading,
-			saveTableColumn,
+			save,
 			formatTitle,
-			formFields,
 			optionsFields,
 			modelValue,
 			validationErrors,
 			selectedDisplay,
 			toggleDisplayConfig,
-			initialValues,
 		};
 
 		function toggleDisplayConfig(display: DisplayConfig) {
 			selectedDisplay.value = display.id !== selectedDisplay.value?.id ? display : null;
 			modelValue.value.display = selectedDisplay.value?.id || '';
+			validationErrors.value = [];
 		}
 
-		async function saveTableColumn() {
+		async function save() {
 			const dataForm = { ...modelValue.value, ...modelValue.value.displayOptions };
 
 			validationErrors.value = [];
-			validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
+			validationErrors.value = validateItem(dataForm, [...props.formFields, ...optionsFields.value]);
 			if (validationErrors.value.length) return;
 
 			isLoading.value = true;
 
-			emit('create', modelValue.value);
-			modelValue.value = {};
+			emit('update', modelValue.value);
 
 			isLoading.value = false;
+		}
+
+		function close() {
+			emit('close');
 		}
 	},
 };
 </script>
 <style scoped>
-.create-column-container {
+.edit-keys-container {
 	padding: 20px;
 }
 
@@ -177,7 +196,7 @@ export default {
 	}
 }
 
-.column-config-item {
+.display-config-item {
 	min-height: 100px;
 	overflow: hidden;
 	text-align: center;
@@ -190,8 +209,8 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 160px;
-	height: 100px;
+	width: 116px;
+	height: 90px;
 	margin-bottom: 8px;
 	border: var(--border-width) solid var(--border-subdued);
 	border-radius: var(--border-radius);
@@ -229,23 +248,23 @@ export default {
 	box-shadow: 0 0 8px var(--primary-75);
 }
 
-.column-config-item:hover .preview {
+.display-config-item:hover .preview {
 	border-color: var(--border-normal);
 }
 
-.column-config-item.active .preview {
+.display-config-item.active .preview {
 	background-color: var(--primary-alt);
 	border-color: var(--primary);
 }
 
-.column-config-item.gray .preview {
+.display-config-item.gray .preview {
 	--primary: var(--foreground-subdued);
 	--primary-50: var(--foreground-subdued);
 
 	background-color: var(--background-subdued);
 }
 
-.column-config-item.gray .preview .fallback {
+.display-config-item.gray .preview .fallback {
 	--v-icon-color: var(--foreground-subdued);
 
 	box-shadow: 0 0 8px var(--foreground-subdued);
@@ -258,7 +277,7 @@ export default {
 	margin-top: 2rem;
 }
 
-.field-fault {
+.field-default {
 	padding: 0;
 }
 

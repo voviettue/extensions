@@ -32,7 +32,7 @@ export default defineQuery({
 			},
 			{
 				field: 'primaryValue',
-				name: 'Primary Value',
+				name: 'Primary Key Value',
 				type: 'string',
 				meta: {
 					width: 'full',

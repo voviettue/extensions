@@ -1,5 +1,5 @@
 <template>
-	<v-drawer :title="`Editing Table Column`" :model-value="isOpen" persistent @cancel="close">
+	<v-drawer :title="`Creating Table Column`" :model-value="isOpen" persistent @cancel="$emit('close')">
 		<template #sidebar>
 			<v-tabs v-model="currentTab" vertical>
 				<v-tab v-for="tab in tabs" :key="tab.value" :value="tab.value">
@@ -14,7 +14,7 @@
 			</v-button>
 		</template>
 
-		<div class="edit-column-container">
+		<div class="create-column-container">
 			<v-form
 				v-if="currentTab == 'properties'"
 				v-model="modelValue"
@@ -22,7 +22,6 @@
 				:fields="formFields"
 				:validation-errors="validationErrors"
 			/>
-
 			<div v-if="currentTab == 'displayValue'" class="list-column-config">
 				<button
 					v-for="displayConfig of listDisplayConfig"
@@ -53,119 +52,82 @@
 		</div>
 	</v-drawer>
 </template>
-<script lang="ts">
-import { ref, Ref, computed, watch, onMounted } from 'vue';
-import formatTitle from '@directus/format-title';
+<script setup lang="ts">
+import { ref, Ref, computed, watch } from 'vue';
 import { useValidate } from '../../../composables/use-validate';
 import listDisplayConfig from '../../../displays';
 import { ExtensionOptionsContext, DisplayConfig } from '../../../types/extensions';
-import { formFields } from '../../../constants/column';
-import ExtensionOptions from '../../shared/extension-options.vue';
+import formFields from '../config/column-fields';
+import ExtensionOptions from '../../../components/shared/extension-options.vue';
 import snakeCase from 'lodash/snakeCase';
+import cloneDeep from 'lodash/cloneDeep';
 
-export default {
-	components: { ExtensionOptions },
-	props: {
-		column: {
-			type: Object,
-			default: null,
-		},
-		isOpen: {
-			type: Boolean,
-			default: false,
-		},
-	},
-	emits: ['close', 'update'],
-	setup(props, { emit }) {
-		const { validateItem } = useValidate();
+interface Props {
+	isOpen: boolean;
+}
+const props = withDefaults(defineProps<Props>(), {
+	isOpen: false,
+});
 
-		const isLoading = ref<boolean>(false);
-		const validationErrors: Ref<Record<string, any>[]> = ref([]);
-		const modelValue: Ref<Record<string, any>> = ref(props.column);
-		const selectedDisplay: Ref<DisplayConfig | null> = ref(
-			listDisplayConfig.find((display: DisplayConfig) => display.id == props.column.display) as DisplayConfig
-		);
-		const currentTab = ref<string>();
+const emit = defineEmits(['close', 'create']);
 
-		watch(
-			() => modelValue.value.label,
-			(val: any) => {
-				modelValue.value.key = snakeCase(val);
-			}
-		);
+const { validateItem } = useValidate();
 
-		watch(
-			() => props.column,
-			(val: any) => {
-				modelValue.value = val;
-			},
-			{ deep: true, immediate: true }
-		);
+const isLoading = ref<boolean>(false);
+const validationErrors: Ref<Record<string, any>[]> = ref([]);
+const modelValue: Ref<Record<string, any>> = ref({ hidden: false, displayOptions: {} });
+const selectedDisplay: Ref<DisplayConfig | null> = ref(null);
 
-		onMounted(async () => {
-			currentTab.value = 'properties';
-		});
+watch(
+	() => modelValue.value.label,
+	(val: any) => {
+		modelValue.value.key = snakeCase(val);
+	}
+);
 
-		const optionsFields = computed(() => {
-			const options = selectedDisplay.value?.displayOptions ?? [];
-			if (typeof options === 'function') {
-				const ctx = { values: modelValue.value } as ExtensionOptionsContext;
-				return options(ctx);
-			}
+const optionsFields = computed(() => {
+	const options = selectedDisplay.value?.displayOptions ?? [];
+	const values = cloneDeep(modelValue.value);
+	values.options = values.displayOptions;
+	if (typeof options === 'function') {
+		const ctx = { values } as ExtensionOptionsContext;
+		return options(ctx);
+	}
 
-			return options;
-		});
+	return options;
+});
 
-		const tabs = computed(() => {
-			return [
-				{ value: 'properties', text: 'Properties' },
-				{ value: 'displayValue', text: 'Display Value' },
-			];
-		});
+const tabs = computed(() => {
+	return [
+		{ value: 'properties', text: 'Properties' },
+		{ value: 'displayValue', text: 'Display Value' },
+	];
+});
 
-		return {
-			tabs,
-			currentTab,
-			listDisplayConfig,
-			close,
-			isLoading,
-			saveTableColumn,
-			formatTitle,
-			formFields,
-			optionsFields,
-			modelValue,
-			validationErrors,
-			selectedDisplay,
-			toggleDisplayConfig,
-		};
+const currentTab = ref<string>('properties');
 
-		function toggleDisplayConfig(display: DisplayConfig) {
-			selectedDisplay.value = display.id !== selectedDisplay.value?.id ? display : null;
-			modelValue.value.display = selectedDisplay.value?.id || '';
-		}
+function toggleDisplayConfig(display: DisplayConfig) {
+	selectedDisplay.value = display.id !== selectedDisplay.value?.id ? display : null;
+	modelValue.value.display = selectedDisplay.value?.id || '';
+	validationErrors.value = [];
+}
 
-		async function saveTableColumn() {
-			const dataForm = { ...modelValue.value, ...modelValue.value.displayOptions };
+async function saveTableColumn() {
+	const dataForm = { ...modelValue.value, ...modelValue.value.displayOptions };
+	validationErrors.value = [];
+	validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
+	if (validationErrors.value.length) return;
 
-			validationErrors.value = [];
-			validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
-			if (validationErrors.value.length) return;
+	isLoading.value = true;
 
-			isLoading.value = true;
+	emit('create', modelValue.value);
+	modelValue.value = {};
 
-			emit('update', modelValue.value);
-
-			isLoading.value = false;
-		}
-
-		function close() {
-			emit('close');
-		}
-	},
-};
+	isLoading.value = false;
+}
 </script>
 <style scoped>
-.edit-column-container {
+.create-column-container {
 	padding: 20px;
 }
 
@@ -202,8 +164,8 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 160px;
-	height: 100px;
+	width: 116px;
+	height: 90px;
 	margin-bottom: 8px;
 	border: var(--border-width) solid var(--border-subdued);
 	border-radius: var(--border-radius);

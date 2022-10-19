@@ -1,11 +1,11 @@
 <template>
 	<v-drawer
-		:title="`Editing Item in ${formatTitle(collection)}`"
+		:title="primaryKey === '+' ? 'Creating Menu' : 'Editing Menu'"
 		:model-value="true"
 		persistent
-		@cancel="$router.push('/front-office/settings')"
+		@cancel="$router.push('/front-office/menus')"
 	>
-		<div class="edit-menu-container">
+		<div class="create-menu-container">
 			<div class="list-menu-config">
 				<button
 					v-for="menuConfig of listMenuConfig"
@@ -24,9 +24,9 @@
 					<div v-if="selectedMenu" class="group">
 						<v-form
 							v-model="modelValue"
+							primary-key="+"
 							class="field-fault"
 							:fields="formFields"
-							:initial-values="initialValues"
 							:validation-errors="validationErrors"
 						/>
 
@@ -45,128 +45,92 @@
 			</div>
 		</div>
 		<template #actions>
-			<v-button v-tooltip.bottom="`Save`" rounded icon :loading="isLoading" @click="saveSettingMenu">
+			<v-button v-tooltip.bottom="`Save`" rounded icon :loading="isLoading" @click="saveHandler">
 				<v-icon name="check" />
 			</v-button>
 		</template>
 	</v-drawer>
 </template>
-<script lang="ts">
-import { ref, Ref, computed, onMounted, watch } from 'vue';
-import { useApi } from '@directus/extensions-sdk';
-import { useRoute, useRouter } from 'vue-router';
-import formatTitle from '@directus/format-title';
+<script setup lang="ts">
+import { ref, Ref, computed, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useValidate } from '../../composables/use-validate';
 import listMenuConfig from '../../menus';
 import { ExtensionOptionsContext, MenuConfig } from '../../types/extensions';
 import { formFields } from '../../constants/menu';
 import ExtensionOptions from '../shared/extension-options.vue';
-import { useNotification } from '../../composables/use-notification';
 import snakeCase from 'lodash/snakeCase';
+import { useItem } from '../../composables/use-item';
 
-export default {
-	components: { ExtensionOptions },
-	emits: ['refresh'],
-	setup(props, { emit }) {
-		const collection = 'cms_menus';
-		const api = useApi();
-		const { notify, unexpectedError } = useNotification();
+const props = defineProps<{
+	projectId: number;
+}>();
 
-		const { validateItem } = useValidate();
-		const route = useRoute();
-		const router = useRouter();
+const emit = defineEmits(['refresh']);
 
-		const isLoading = ref<boolean>(false);
-		const validationErrors: Ref<Record<string, any>[]> = ref([]);
-		const modelValue: Ref<Record<string, any>> = ref({ options: {} });
-		const selectedMenu: Ref<MenuConfig | null> = ref(null);
+const collection = 'cms_menus';
+const router = useRouter();
+const route = useRoute();
+const { validateItem } = useValidate();
 
-		const initialValues = ref({
-			label: null,
-			key: null,
-			icon: null,
-			hidden: false,
-			parent: null,
-		});
+const primaryKey = route.params.id as string;
 
-		watch(
-			() => modelValue.value.label,
-			(val: any) => {
-				modelValue.value.key = snakeCase(val);
-			}
-		);
+const isLoading = ref<boolean>(false);
+const modelValue: Ref<Record<string, any>> = ref({ options: {}, project: props.projectId });
+const selectedMenu = computed(() => {
+	return listMenuConfig.find((e) => e.id === modelValue.value?.menu);
+});
+const { item, edits, getItem, save, validationErrors } = useItem(collection, primaryKey);
 
-		const optionsFields = computed(() => {
-			const options = selectedMenu.value?.options ?? [];
-			if (typeof options === 'function') {
-				const ctx = { values: modelValue.value } as ExtensionOptionsContext;
-				return options(ctx);
-			}
-
-			return options;
-		});
-
-		onMounted(async () => {
-			await getMenuDetail();
-
-			selectedMenu.value = listMenuConfig.find((menu: MenuConfig) => menu.id == modelValue.value.menu) as MenuConfig;
-		});
-
-		return {
-			listMenuConfig,
-			close,
-			isLoading,
-			saveSettingMenu,
-			collection,
-			formatTitle,
-			formFields,
-			optionsFields,
-			modelValue,
-			validationErrors,
-			selectedMenu,
-			toggleMenuConfig,
-			initialValues,
-		};
-
-		function toggleMenuConfig(menu: MenuConfig) {
-			selectedMenu.value = menu.id !== selectedMenu.value?.id ? menu : null;
-			modelValue.value.menu = selectedMenu.value?.id || '';
+if (primaryKey === '+') {
+	watch(
+		() => modelValue.value.label,
+		(val) => {
+			modelValue.value.key = snakeCase(val);
 		}
+	);
+} else {
+	getItem().then(() => {
+		modelValue.value = { ...item.value };
+	});
+}
 
-		async function getMenuDetail() {
-			try {
-				const menuDetailResponse = await api.get(`/items/${collection}/${route.params.menuId}`);
-				modelValue.value = { ...menuDetailResponse?.data?.data } || {};
-			} catch {
-				//
-			}
-		}
+const optionsFields = computed(() => {
+	const options = selectedMenu.value?.options ?? [];
+	if (typeof options === 'function') {
+		const ctx = { values: modelValue.value } as ExtensionOptionsContext;
+		return options(ctx);
+	}
 
-		async function saveSettingMenu() {
-			const dataForm = { ...modelValue.value, ...modelValue.value.options };
+	return options;
+});
 
-			validationErrors.value = [];
-			validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
-			if (validationErrors.value.length) return;
+function toggleMenuConfig(menu: MenuConfig) {
+	modelValue.value.menu = menu.id || null;
+}
 
-			isLoading.value = true;
-			try {
-				await api.patch(`/items/${collection}/${route.params.menuId}`, modelValue.value);
-				notify({ title: 'Item updated' });
+async function saveHandler() {
+	const dataForm = { ...modelValue.value, ...modelValue.value.options };
 
-				router.push('/front-office/settings');
-			} catch (err) {
-				unexpectedError(err);
-			}
+	validationErrors.value = [];
+	validationErrors.value = validateItem(dataForm, [...formFields, ...optionsFields.value]);
+	if (validationErrors.value.length) return;
 
-			isLoading.value = false;
-			emit('refresh');
-		}
-	},
-};
+	isLoading.value = true;
+	try {
+		edits.value = { ...dataForm, project: props.projectId };
+		await save();
+		router.push('/front-office/menus');
+	} catch (err) {
+		// do nothing
+	}
+
+	isLoading.value = false;
+	emit('refresh');
+}
 </script>
 <style scoped>
-.edit-menu-container {
+.create-menu-container {
 	padding: 20px;
 }
 
@@ -195,6 +159,7 @@ export default {
 	overflow: hidden;
 	text-align: center;
 	margin-right: 2rem;
+	margin-bottom: 2rem;
 }
 
 .preview {
@@ -203,7 +168,7 @@ export default {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 160px;
+	width: 128px;
 	height: 100px;
 	margin-bottom: 8px;
 	border: var(--border-width) solid var(--border-subdued);
@@ -265,6 +230,7 @@ export default {
 }
 
 .group {
+	--form-vertical-gap: 2rem;
 	background-color: var(--background-subdued);
 	border-top: 3px solid var(--border-normal);
 	padding: 2.125rem;

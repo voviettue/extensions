@@ -28,7 +28,7 @@
 			</div>
 
 			<transition-expand>
-				<div v-if="!!modelValue?.widget" class="group">
+				<div v-if="!!modelValue?.widget" class="group" style="grid-row: 2 / auto">
 					<v-form
 						v-model="modelValue"
 						primary-key="+"
@@ -132,8 +132,7 @@ function onChangeWidgets(widget: WidgetConfig) {
 async function handleChangeWidgets() {
 	validationErrors.value = [];
 	const dataForm = { ...initialValues.value, ...modelValue.value, ...modelValue.value.options };
-	const widgetOptionsFields: Record<string, any> =
-		selectedWidget.value?.extendOptions ?? selectedWidget.value?.options ?? [];
+	const widgetOptionsFields = Array.isArray(optionsFields.value) ? optionsFields.value : [];
 	validationErrors.value = validateItem(dataForm, [...formFields, ...widgetOptionsFields]);
 	if (validationErrors.value.length) return;
 	isLoading.value = true;
@@ -164,7 +163,7 @@ async function handleChangeWidgets() {
 .widget-item {
 	min-height: 100px;
 	overflow: hidden;
-	text-align: left;
+	text-align: center;
 	margin-right: 2rem;
 	margin-bottom: 2rem;
 }
@@ -175,7 +174,7 @@ async function handleChangeWidgets() {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 160px;
+	width: 128px;
 	height: 100px;
 	margin-bottom: 8px;
 	border: var(--border-width) solid var(--border-subdued);
@@ -217,6 +216,7 @@ async function handleChangeWidgets() {
 	box-shadow: 0 0 8px var(--foreground-subdued);
 }
 .group {
+	--form-vertical-gap: 2rem;
 	background-color: var(--background-subdued);
 	border-top: 3px solid var(--border-normal);
 	padding: 2.125rem;

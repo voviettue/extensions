@@ -1,37 +1,51 @@
 import { defineStore } from 'pinia';
 import { useApi } from '@directus/extensions-sdk';
+import { parseQuery } from '../utils/parse-query';
 
 export const useFrontOfficeStore = defineStore({
 	id: 'frontOfficeStore',
 	state: () => ({
-		pageList: [],
-		menuList: [],
+		hydrated: false,
+		pages: [],
+		menus: [],
+		queries: [] as any[],
 		logList: [],
 		api: useApi(),
 	}),
+	getters: {
+		context() {
+			const $query: any = {};
+			for (const query of this.queries) {
+				$query[query.key] = parseQuery(query);
+			}
+
+			return { $query };
+		},
+	},
 	actions: {
 		async hydrate() {
-			await this.getPageList();
-			await this.getMenuList();
+			await Promise.all([this.hydratePages(), this.hydrateMenus(), this.hydrateQueries()]);
+			this.hydrated = true;
 		},
-		async getPageList() {
-			const pageListResponse = await this.api.get<any>(`/items/cms_pages`, { params: { limit: -1 } });
-			this.pageList = (pageListResponse?.data?.data || []).map((item: any) => {
-				return { text: item.title, value: item.id };
-			});
+		async hydratePages() {
+			const res = await this.api.get<any>(`/items/cms_pages`, { params: { limit: -1 } });
+			this.pages = (res?.data?.data || []).sort((a: any, b: any) => (a.sort ?? 1000) - (b.sort ?? 1000));
 		},
-		async getMenuList() {
-			const menuListResponse = await this.api.get<any>(`/items/cms_menus`, { params: { limit: -1 } });
-			this.menuList = (menuListResponse?.data?.data || []).sort(
-				(a: any, b: any) => (a.sort ?? 1000) - (b.sort ?? 1000)
-			);
+		async hydrateMenus() {
+			const res = await this.api.get<any>(`/items/cms_menus`, { params: { limit: -1, sort: ['-id'] } });
+			this.menus = (res?.data?.data || []).sort((a: any, b: any) => (a.sort ?? 1000) - (b.sort ?? 1000));
 		},
-		async updateMenuItems(items: Array<Record<string, any>>) {
+		async hydrateQueries() {
+			const res = await this.api.get<any>(`/items/cms_queries`, { params: { limit: -1 } });
+			this.queries = (res?.data?.data || []).sort((a: any, b: any) => (a.sort ?? 1000) - (b.sort ?? 1000));
+		},
+		async updateMenus(items: Array<Record<string, any>>) {
 			const apis = items.map(async (item: any) => {
 				return await this.api.patch<any>(`/items/cms_menus/${item.id}`, item);
 			});
 			await Promise.allSettled(apis);
 		},
+
 		async getLogListByQuery(query?: any) {
 			const logListResponse = await this.api.get<any>(`/activity`, query);
 			this.logList = (logListResponse?.data?.data || []).map((e: any) => {

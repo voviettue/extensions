@@ -11,7 +11,7 @@
 			</v-list-item>
 
 			<v-list-item clickable @click="$emit('toggleVisibility')">
-				<template v-if="column?.hidden === false">
+				<template v-if="hidden === false">
 					<v-list-item-icon><v-icon name="visibility_off" /></v-list-item-icon>
 					<v-list-item-content>Hide</v-list-item-content>
 				</template>
@@ -31,24 +31,26 @@
 	</v-menu>
 </template>
 
-<script lang="ts">
-export default {
-	props: {
-		column: {
-			type: Object,
-			required: true,
-		},
-		noDuplicate: {
-			type: Boolean,
-			default: false,
-		},
-		noDelete: {
-			type: Boolean,
-			default: false,
-		},
-	},
-	emits: ['toggleVisibility', 'delete', 'openDetail'],
-};
+<script setup lang="ts">
+import { computed } from 'vue';
+import get from 'lodash/get';
+
+interface Props {
+	column: any;
+	noDuplicate: boolean;
+	noDelete: boolean;
+}
+const props = withDefaults(defineProps<Props>(), {
+	column: null,
+	noDuplicate: false,
+	noDelete: false,
+});
+
+const emit = defineEmits(['toggleVisibility', 'delete', 'openDetail']);
+
+const hidden = computed(() => {
+	return get(props.column, 'hidden', false);
+});
 </script>
 <style scoped>
 .v-list-item.danger {

@@ -1,8 +1,9 @@
 <template>
 	<div class="widgets">
-		<div class="field-label type-label">
-			<span class="field-name"><v-text-overflow text="Widgets" /></span>
-		</div>
+		<h2 class="name type-label">
+			Widgets
+			<span class="instant-save">Saves automatically</span>
+		</h2>
 		<v-info v-if="items.length === 0" icon="web" title="No Widgets"></v-info>
 
 		<v-list v-else class="draggable-list">
@@ -31,7 +32,7 @@
 			</draggable>
 		</v-list>
 		<div class="new-widget">
-			<v-button :to="`/front-office/pages/${id}/widget/+`" full-width>Create Widget</v-button>
+			<v-button :to="`/front-office/pages/${id}/widget/+`">Create Widget</v-button>
 		</div>
 
 		<router-view name="addWidget"></router-view>
@@ -131,10 +132,16 @@ onMounted(() => {
 
 <style scope lang="scss">
 .widgets {
-	max-width: 1000px;
-}
-.field-label {
-	margin-bottom: 10px;
+	max-width: 100%;
+
+	.name {
+		margin-bottom: 12px;
+
+		.instant-save {
+			margin-left: 4px;
+			color: var(--warning);
+		}
+	}
 }
 .new-widget {
 	margin-top: 20px;

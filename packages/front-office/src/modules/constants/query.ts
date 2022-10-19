@@ -4,9 +4,8 @@ export function formFields({ values }) {
 			collection: 'cms_queries',
 			field: 'output',
 			name: 'Output',
-			type: 'json',
 			meta: {
-				interface: 'code',
+				interface: 'input-code',
 				readonly: true,
 				placeholder: 'Enter code here...',
 			},
@@ -112,7 +111,7 @@ export function formFields({ values }) {
 		excludeField.push('output');
 	}
 
-	if (values.query === 'json') {
+	if (values.query === 'json' || values.query === 'js-object') {
 		excludeField.push('refresh_on_load');
 		excludeField.push('timeout');
 	}

@@ -1,4 +1,4 @@
-export const formFields = [
+export default [
 	{
 		field: 'label',
 		name: 'Column Name',
@@ -6,7 +6,6 @@ export const formFields = [
 		meta: {
 			width: 'half',
 			interface: 'input',
-			required: true,
 			options: {
 				trim: true,
 			},
@@ -15,19 +14,6 @@ export const formFields = [
 	{
 		field: 'key',
 		name: 'Column Key',
-		type: 'string',
-		meta: {
-			width: 'half',
-			interface: 'input',
-			required: true,
-			options: {
-				trim: true,
-			},
-		},
-	},
-	{
-		field: 'mappedValue',
-		name: 'Mapped Value',
 		type: 'string',
 		meta: {
 			width: 'half',
@@ -56,6 +42,29 @@ export const formFields = [
 		meta: {
 			width: 'half',
 			interface: 'boolean',
+		},
+	},
+	{
+		field: 'sortDirection',
+		name: 'Sort Direction',
+		type: 'string',
+		meta: {
+			interface: 'select-dropdown',
+			width: 'half',
+			options: {
+				choices: [
+					{
+						text: 'Ascending',
+						value: 'asc',
+					},
+					{
+						text: 'Descending',
+						value: 'desc',
+					},
+				],
+				placeholder: 'Select',
+				allowNone: true,
+			},
 		},
 	},
 	{
@@ -246,6 +255,25 @@ export const formFields = [
 		meta: {
 			interface: 'select-color',
 			width: 'half',
+		},
+	},
+	{
+		field: 'width',
+		name: 'Column Width',
+		type: 'string',
+		meta: {
+			interface: 'input',
+			placeholder: 'input width in px',
+			width: 'half',
+		},
+	},
+	{
+		field: 'columnWrapping',
+		name: 'Column Wrapping',
+		type: 'boolean',
+		meta: {
+			width: 'half',
+			interface: 'boolean',
 		},
 	},
 ];
