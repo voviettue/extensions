@@ -6,24 +6,6 @@ export default defineWidget({
 	icon: 'settings_overscan',
 	group: true,
 	options: [
-		// {
-		// 	field: 'columns',
-		// 	name: 'Grid Columns',
-		// 	type: 'integer',
-		// 	meta: {
-		// 		interface: 'input',
-		// 		width: 'half',
-		// 	},
-		// },
-		// {
-		// 	field: 'gap',
-		// 	name: 'Grid Gap',
-		// 	type: 'integer',
-		// 	meta: {
-		// 		interface: 'input',
-		// 		width: 'half',
-		// 	},
-		// },
 		{
 			field: 'background',
 			name: 'Background',
@@ -86,6 +68,35 @@ export default defineWidget({
 			meta: {
 				interface: 'input',
 				width: 'half',
+				options: {
+					placeholder: '0px',
+				},
+			},
+		},
+		{
+			field: 'padding',
+			name: 'Padding',
+			type: 'string',
+			meta: {
+				interface: 'input',
+				width: 'half',
+				options: {
+					placeholder: '0px',
+				},
+				note: 'Spacing between its content and its border.<br><a target="_blank" tabindex="-1" href="https://developer.mozilla.org/en-US/docs/Web/CSS/padding">Learn more</a>',
+			},
+		},
+		{
+			field: 'gap',
+			name: 'Grid Gap',
+			type: 'string',
+			meta: {
+				interface: 'input',
+				width: 'half',
+				options: {
+					placeholder: '24px',
+				},
+				note: 'Spacing between the widgets.<br><a target="_blank" tabindex="-1" href="https://developer.mozilla.org/en-US/docs/Web/CSS/gap">Learn more</a>',
 			},
 		},
 	],
