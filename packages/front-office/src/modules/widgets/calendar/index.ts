@@ -61,6 +61,116 @@ export default defineWidget({
 				},
 			},
 			{
+				field: 'conditionStyle',
+				name: 'Conditional Styles',
+				tyle: 'json',
+				meta: {
+					interface: 'list',
+					options: {
+						addLabel: 'Create New',
+						template: '{{ conditionField }} {{ operator }} {{ value }}',
+						fields: [
+							{
+								field: 'conditionField',
+								name: 'Condition Field',
+								type: 'string',
+								meta: {
+									interface: 'select-dropdown',
+									options: {
+										choices: fields?.map((e) => ({
+											text: e?.name,
+											value: e?.field,
+										})),
+										allowNone: true,
+										allowOther: true,
+									},
+								},
+							},
+							{
+								field: 'operator',
+								name: 'Operator',
+								type: 'string',
+								schema: {
+									default_value: 'eq',
+								},
+								meta: {
+									interface: 'select-dropdown',
+									width: 'half',
+									options: {
+										allowNone: true,
+										choices: [
+											{
+												text: 'Default',
+												value: null,
+											},
+											{
+												text: `$t:operators.eq`,
+												value: 'eq',
+											},
+											{
+												text: `$t:operators.neq`,
+												value: 'neq',
+											},
+											{
+												text: `$t:operators.contains`,
+												value: 'contains',
+											},
+											{
+												text: `$t:operators.starts_with`,
+												value: 'starts_with',
+											},
+											{
+												text: `$t:operators.gt`,
+												value: 'gt',
+											},
+											{
+												text: `$t:operators.gte`,
+												value: 'gte',
+											},
+											{
+												text: `$t:operators.lt`,
+												value: 'lt',
+											},
+											{
+												text: `$t:operators.lte`,
+												value: 'lte',
+											},
+										],
+									},
+								},
+							},
+							{
+								field: 'value',
+								name: 'Value',
+								type: 'string',
+								meta: {
+									interface: 'input',
+									width: 'half',
+								},
+							},
+							{
+								field: 'textColor',
+								name: 'Color',
+								type: 'string',
+								meta: {
+									interface: 'select-color',
+									width: 'half',
+								},
+							},
+							{
+								field: 'background',
+								name: 'Background',
+								type: 'string',
+								meta: {
+									interface: 'select-color',
+									width: 'half',
+								},
+							},
+						],
+					},
+				},
+			},
+			{
 				field: 'displayTemplate',
 				name: 'Display template',
 				meta: {
