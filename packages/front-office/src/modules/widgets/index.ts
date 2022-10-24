@@ -13,6 +13,7 @@ import iconButton from './icon-button';
 import calendar from './calendar';
 import textInput from './text-input';
 import numberInput from './number-input';
+import select from './select';
 
 export default [
 	text,
@@ -30,4 +31,5 @@ export default [
 	calendar,
 	textInput,
 	numberInput,
+	select,
 ];
