@@ -74,10 +74,10 @@ const optionsValues = computed({
 				if (
 					column?.display === 'image' &&
 					column?.displayOptions?.project_logo === undefined &&
-					column?.displayOptions?.defaultImg
+					column?.displayOptions?.defaultImage
 				) {
-					column.displayOptions.project_logo = column.displayOptions.defaultImg;
-					delete column.displayOptions.defaultImg;
+					column.displayOptions.project_logo = column.displayOptions.defaultImage;
+					delete column.displayOptions.defaultImage;
 				}
 				return column;
 			});

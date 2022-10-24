@@ -12,9 +12,9 @@ export default defineWidget({
 				if (
 					key.display === 'image' &&
 					key?.displayOptions?.project_logo === undefined &&
-					key?.displayOptions?.defaultImg
+					key?.displayOptions?.defaultImage
 				) {
-					key.displayOptions.project_logo = key.displayOptions.defaultImg;
+					key.displayOptions.project_logo = key.displayOptions.defaultImage;
 				}
 				return key;
 			});
@@ -269,7 +269,7 @@ export default defineWidget({
 		const keys = values.options?.keys || [];
 		values.options.keys = keys.map((key: any) => {
 			if (key?.display === 'image' && key?.displayOptions?.project_logo) {
-				key.displayOptions.defaultImg = key.displayOptions.project_logo;
+				key.displayOptions.defaultImage = key.displayOptions.project_logo;
 				delete key.displayOptions.project_logo;
 			}
 			return key;
