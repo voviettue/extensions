@@ -204,10 +204,6 @@ export default defineWidget({
 								text: 'Month view',
 								value: 'dayGridMonth',
 							},
-							{
-								text: 'Year View',
-								value: 'timeGridYear',
-							},
 						],
 					},
 				},
