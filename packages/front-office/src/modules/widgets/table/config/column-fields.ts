@@ -244,6 +244,10 @@ export default [
 						text: 'Monaco',
 						value: 'Monaco',
 					},
+					{
+						text: 'Inter',
+						value: 'Inter',
+					},
 				],
 			},
 		},

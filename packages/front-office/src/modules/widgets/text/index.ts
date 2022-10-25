@@ -303,6 +303,10 @@ export default defineWidget({
 											text: 'Monaco',
 											value: 'Monaco',
 										},
+										{
+											text: 'Inter',
+											value: 'Inter',
+										},
 									],
 								},
 							},
@@ -525,6 +529,10 @@ export default defineWidget({
 						{
 							text: 'Monaco',
 							value: 'Monaco',
+						},
+						{
+							text: 'Inter',
+							value: 'Inter',
 						},
 					],
 				},

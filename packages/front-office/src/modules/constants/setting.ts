@@ -139,6 +139,10 @@ export const menuFields = [
 						text: 'Monaco',
 						value: 'Monaco',
 					},
+					{
+						text: 'Inter',
+						value: 'Inter',
+					},
 				],
 			},
 		},
