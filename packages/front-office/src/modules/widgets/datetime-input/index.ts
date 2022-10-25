@@ -300,8 +300,8 @@ export default defineWidget({
 								value: 'Lato',
 							},
 							{
-								text: 'Nato Sans',
-								value: 'Nato Sans',
+								text: 'Noto Sans',
+								value: 'Noto Sans',
 							},
 							{
 								text: 'Roboto',
