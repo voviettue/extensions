@@ -1,4 +1,6 @@
 import { defineWidget } from '../../utils/define-extension';
+import { validationsField } from '../fields';
+import { sizeChoices, fontFamilyChoices, shadowChoices } from '../choices';
 
 export default defineWidget({
 	id: 'text-input',
@@ -20,6 +22,17 @@ export default defineWidget({
 				},
 			},
 			{
+				field: 'validation_group',
+				name: 'Validation',
+				type: 'alias',
+				meta: {
+					width: 'full',
+					options: { title: 'Validation' },
+					interface: 'presentation-divider',
+					special: ['alias', 'no-data', 'group'],
+				},
+			},
+			{
 				field: 'required',
 				name: 'Required',
 				type: 'boolean',
@@ -28,32 +41,16 @@ export default defineWidget({
 					interface: 'Boolean',
 				},
 			},
+			validationsField,
 			{
-				field: 'minLength',
-				name: 'Min Length',
-				type: 'integer',
+				field: 'general_group',
+				name: 'General',
+				type: 'alias',
 				meta: {
-					interface: 'input',
-					width: 'half',
-					options: {
-						trim: true,
-						placeholder: 'Enter min length character',
-						min: 0,
-					},
-				},
-			},
-			{
-				field: 'maxLength',
-				name: 'Max Length',
-				type: 'integer',
-				meta: {
-					interface: 'input',
-					width: 'half',
-					options: {
-						trim: true,
-						placeholder: 'Enter max length character',
-						min: 0,
-					},
+					width: 'full',
+					options: { title: 'General' },
+					interface: 'presentation-divider',
+					special: ['alias', 'no-data', 'group'],
 				},
 			},
 			{
@@ -266,32 +263,8 @@ export default defineWidget({
 					options: {
 						allowOther: true,
 						allowNone: true,
-						choices: [
-							{
-								text: 'XS - 0.75rem',
-								value: '0.75rem',
-							},
-							{
-								text: 'SM - 0.875rem',
-								value: '0.875rem',
-							},
-							{
-								text: 'LG - 1.125rem',
-								value: '1.125rem',
-							},
-							{
-								text: 'XL - 1.25rem',
-								value: '1.25rem',
-							},
-							{
-								text: '2XL - 1.5rem',
-								value: '1.5rem',
-							},
-							{
-								text: '3XL - 1.875rem',
-								value: '1.875rem',
-							},
-						],
+						placeholder: 'Default',
+						choices: sizeChoices,
 					},
 				},
 			},
@@ -304,40 +277,8 @@ export default defineWidget({
 					width: 'half',
 					options: {
 						allowNone: true,
-						choices: [
-							{
-								text: 'Arial',
-								value: 'Arial',
-							},
-							{
-								text: 'Cambria',
-								value: 'Cambria',
-							},
-							{
-								text: 'Courier New',
-								value: 'Courier New',
-							},
-							{
-								text: 'Lato',
-								value: 'Lato',
-							},
-							{
-								text: 'Noto Sans',
-								value: 'Noto Sans',
-							},
-							{
-								text: 'Roboto',
-								value: 'Roboto',
-							},
-							{
-								text: 'Monaco',
-								value: 'Monaco',
-							},
-							{
-								text: 'Inter',
-								value: 'Inter',
-							},
-						],
+						choices: fontFamilyChoices,
+						placeholder: 'Default',
 					},
 				},
 			},
@@ -366,28 +307,7 @@ export default defineWidget({
 					width: 'half',
 					options: {
 						allowNone: true,
-						choices: [
-							{
-								text: 'SM',
-								value: 'sm',
-							},
-							{
-								text: 'MD',
-								value: 'md',
-							},
-							{
-								text: 'LG',
-								value: 'lg',
-							},
-							{
-								text: 'XL',
-								value: 'xl',
-							},
-							{
-								text: '2XL',
-								value: '2xl',
-							},
-						],
+						choices: shadowChoices,
 					},
 				},
 				schema: {

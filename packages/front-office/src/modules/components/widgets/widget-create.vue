@@ -150,9 +150,14 @@ async function handleChangeWidgets() {
 	}
 }
 </script>
-<style scoped>
+<style scoped lang="scss">
 .new-widget-container {
 	margin: 1.25rem 2rem;
+
+	:deep(.v-divider) {
+		margin-top: 20px;
+		margin-bottom: 0;
+	}
 }
 .content {
 	padding: var(--content-padding);
