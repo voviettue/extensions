@@ -34,7 +34,7 @@
 		<v-dialog v-model="deleteDialog" @esc="deleteDialog = false">
 			<v-card>
 				<v-card-title>
-					{{ `Are you sure you want to delete this widget "${widget.name}"? This action can not be undone.` }}
+					{{ `Are you sure you want to delete this widget "${widgetName}"? This action can not be undone.` }}
 				</v-card-title>
 				<v-card-actions>
 					<v-button secondary @click="deleteDialog = false">Cancel</v-button>
@@ -45,26 +45,34 @@
 	</div>
 </template>
 <script setup lang="ts">
-import { Ref, ref } from 'vue';
+import { Ref, ref, computed } from 'vue';
 import { useStores } from '@directus/extensions-sdk';
 const { useUserStore } = useStores();
 const { isAdmin } = useUserStore();
-withDefaults(defineProps<{ widget: Record<string, any>; updateVisiable: () => void; deleteWidget: () => void }>(), {
-	widget: () => ({
-		custom_css: null,
-		hidden: false,
-		html_class: null,
-		id: 1,
-		name: '',
-		options: null,
-		parent: null,
-		sort: null,
-		widget: null,
-		width: 'full',
-	}),
-});
+const props = withDefaults(
+	defineProps<{
+		widget: Record<string, any>;
+		updateVisiable: (widget: any) => void;
+		deleteWidget: (widget: any) => void;
+	}>(),
+	{
+		widget: () => ({
+			custom_css: null,
+			hidden: false,
+			html_class: null,
+			id: 1,
+			name: '',
+			options: null,
+			parent: null,
+			sort: null,
+			widget: null,
+			width: 'full',
+		}),
+	}
+);
 
 const deleteDialog: Ref<boolean> = ref(false);
+const widgetName = computed(() => props.widget?.name || props.widget?.label);
 </script>
 <style scoped>
 .v-list-item.danger {

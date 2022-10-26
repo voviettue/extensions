@@ -1,50 +1,40 @@
 <template>
 	<div class="widget-select">
-		<!-- if widget is container  -->
-		<widget-item-group
-			v-if="config?.group"
-			:widget="widget"
-			:list-widget="listWidget"
-			:update-visiable="updateVisiable"
-			:delete-widget="deleteWidget"
-			:update-parent="updateParent"
-			@reload="$emit('reload')"
-		></widget-item-group>
+		<v-input v-tooltip="`${widget.name}`" class="widget" readonly>
+			<template #prepend>
+				<v-icon class="drag-handle" name="drag_indicator" @click.stop />
+			</template>
 
-		<!-- if widget is tabs  -->
-		<widget-item-tabs
-			v-else-if="config?.tabs"
-			:widget="widget"
-			:list-widget="listWidget"
-			:update-visiable="updateVisiable"
-			:delete-widget="deleteWidget"
-			@reload="$emit('reload')"
-		></widget-item-tabs>
+			<template #input>
+				<div class="label" @click="$router.push({ path: `/front-office/pages/${widget.page}/widget/${widget.id}` })">
+					<div class="label-inner">
+						<v-icon v-if="!!config?.icon" class="drag-handle" :name="config.icon" @click.stop />
+						<span class="name">{{ widget.name }}</span>
+						<small class="type">{{ config?.name }}</small>
+					</div>
+				</div>
+			</template>
 
-		<widget-item-simple
-			v-else
-			:widget="widget"
-			:update-visiable="updateVisiable"
-			:delete-widget="deleteWidget"
-		></widget-item-simple>
+			<template #append>
+				<div class="icons">
+					<v-icon v-if="widget.hidden" v-tooltip="`Hidden menu`" name="visibility_off" class="hidden-icon" small />
+					<widget-options :widget="widget" :update-visiable="updateVisiable" :delete-widget="deleteWidget" />
+				</div>
+			</template>
+		</v-input>
 	</div>
 </template>
 <script setup lang="ts">
-import { computed, defineEmits } from 'vue';
+import { computed } from 'vue';
+import WidgetOptions from './widget-options.vue';
 import formFields from '../../widgets';
-import { useApi } from '@directus/extensions-sdk';
-import WidgetItemSimple from './widget-item-simple.vue';
-import WidgetItemGroup from './widget-item-group.vue';
-import WidgetItemTabs from './widget-item-tabs.vue';
 
 interface Props {
 	widget: Record<string, any>;
-	listWidget: Record<string, any>[];
 	updateVisiable: (widget: any) => void;
 	deleteWidget: (widget: any) => void;
 }
-const emit = defineEmits(['reload']);
-const api = useApi();
+
 const props = withDefaults(defineProps<Props>(), {
 	widget: () => ({
 		custom_css: null,
@@ -61,46 +51,34 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const config = computed(() => formFields.find((e) => e.id === props.widget.widget));
-
-async function updateParent(widgets) {
-	try {
-		const data = widgets.map((item, index) => {
-			return {
-				...item,
-				sort: index,
-				parent: props.widget.id,
-			};
-		});
-		const apis = data.map((k: any) => {
-			return api.patch(`/items/cms_widgets/${k.id}`, k);
-		});
-		await Promise.allSettled(apis);
-		emit('reload');
-	} catch {
-		//
-	}
-}
 </script>
 
 <style scoped lang="scss">
 .drag-handle {
 	cursor: grab !important;
 }
+/* .page-item {
+	margin-bottom: 10px;
+}
+.page-icon {
+	margin-right: 10px;
+}
+.page-endpoint.hidden {
+	color: #ccc;
+	opacity: 0.5;
+} */
+
 .widget-select {
 	margin: 0px 4px;
 }
 
-.widget-select:deep(.widget-grid) {
-	grid-gap: 10px;
-}
+// .widget-select:deep(.widget-grid.group.full.nested) {
+// 	// margin: 4px 0;
 
-.widget-select:deep(.widget-grid.group.full.nested) {
-	// margin: 4px 0;
-
-	.widget-select {
-		margin: 0px 4px;
-	}
-}
+// 	.widget-select {
+// 		margin: 0px 4px;
+// 	}
+// }
 .widget {
 	height: 48px;
 
@@ -211,16 +189,21 @@ async function updateParent(widgets) {
 	}
 }
 
-.widget-grid {
-	position: relative;
-	// display: grid;
-	// grid-gap: 8px;
-	// grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-
-	& + & {
-		margin-top: 8px;
-	}
+.menu-select {
+	margin: 4px;
 }
+
+// .menu-select:deep(.widget-grid) {
+// 	grid-gap: 0;
+// }
+
+// .menu-select:deep(.widget-grid.group.full.nested) {
+// 	margin: 4px 0;
+
+// 	.menu-select {
+// 		margin: 4px;
+// 	}
+// }
 
 .full,
 .fill {
@@ -305,35 +288,6 @@ async function updateParent(widgets) {
 
 	> * {
 		opacity: 0;
-	}
-}
-.widget-grid {
-	width: 100%;
-	display: grid;
-	grid-template-columns: repeat(6, minmax(0, 1fr));
-	gap: 10px;
-	padding-left: 8px;
-	padding-right: 8px;
-	.grid-full {
-		grid-column: span 6 / span 6;
-	}
-	.grid-half {
-		grid-column: span 3 / span 6;
-	}
-	.grid-one {
-		grid-column: span 1 / span 6;
-	}
-	.grid-two {
-		grid-column: span 2 / span 6;
-	}
-	.grid-three {
-		grid-column: span 3 / span 6;
-	}
-	.grid-four {
-		grid-column: span 4 / span 6;
-	}
-	.grid-five {
-		grid-column: span 5 / span 6;
 	}
 }
 </style>
