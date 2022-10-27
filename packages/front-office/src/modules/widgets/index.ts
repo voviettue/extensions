@@ -17,6 +17,7 @@ import dateTimeInput from './datetime-input';
 import select from './select';
 import tabs from './tabs';
 import tags from './tags';
+import menuButton from './menu-button';
 
 export default [
 	text,
@@ -38,4 +39,5 @@ export default [
 	select,
 	tabs,
 	tags,
+	menuButton,
 ];
