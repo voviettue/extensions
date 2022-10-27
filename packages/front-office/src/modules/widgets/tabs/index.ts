@@ -17,7 +17,7 @@ export default defineWidget({
 					interface: 'list',
 					options: {
 						addLable: 'Add tab',
-						template: 'Tab: {{ label }}',
+						template: '{{ label }}',
 						fields: [
 							{
 								field: 'key',
@@ -58,11 +58,20 @@ export default defineWidget({
 								},
 							},
 							{
+								field: 'icon',
+								name: 'Icon',
+								type: 'string',
+								meta: {
+									width: 'half',
+									interface: 'select-icon',
+								},
+							},
+							{
 								field: 'hidden',
 								name: 'Hidden',
 								type: 'boolean',
 								meta: {
-									placeholder: 'Select widget',
+									width: 'half',
 									interface: 'boolean',
 								},
 								schema: {
@@ -87,6 +96,27 @@ export default defineWidget({
 						})),
 						placeholder: 'Select tab',
 						allowNone: true,
+					},
+				},
+			},
+			{
+				field: 'border',
+				name: 'Border Color',
+				type: 'string',
+				meta: {
+					interface: 'select-color',
+					width: 'half',
+				},
+			},
+			{
+				field: 'borderRadius',
+				name: 'Border Radius',
+				type: 'string',
+				meta: {
+					interface: 'input',
+					width: 'half',
+					options: {
+						placeholder: '0px',
 					},
 				},
 			},
