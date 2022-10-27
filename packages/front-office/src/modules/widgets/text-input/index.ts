@@ -1,6 +1,6 @@
 import { defineWidget } from '../../utils/define-extension';
 import { validationsField } from '../fields';
-import { sizeChoices, fontFamilyChoices, shadowChoices } from '../choices';
+import { sizeChoices, fontFamilyChoices, shadowChoices, borderChoices } from '../choices';
 
 export default defineWidget({
 	id: 'text-input',
@@ -39,7 +39,6 @@ export default defineWidget({
 				meta: {
 					interface: 'input',
 					width: 'full',
-					required: true,
 					options: {
 						trim: true,
 						placeholder: 'Enter label to be displayed',
@@ -54,7 +53,6 @@ export default defineWidget({
 					interface: 'select-dropdown',
 					width: 'half',
 					options: {
-						allowNone: true,
 						choices: [
 							{
 								text: 'Left',
@@ -72,6 +70,18 @@ export default defineWidget({
 				},
 			},
 			{
+				field: 'hideLabel',
+				name: 'Hide Label',
+				type: 'boolean',
+				meta: {
+					width: 'half',
+					interface: 'Boolean',
+				},
+				schema: {
+					default_value: false,
+				},
+			},
+			{
 				field: 'alignment',
 				name: 'Alignment',
 				type: 'string',
@@ -79,7 +89,6 @@ export default defineWidget({
 					interface: 'select-dropdown',
 					width: 'half',
 					options: {
-						allowNone: true,
 						choices: [
 							{
 								text: 'Left',
@@ -111,19 +120,6 @@ export default defineWidget({
 				},
 				schema: {
 					default_value: 2,
-				},
-			},
-
-			{
-				field: 'hideLabel',
-				name: 'Hide Label',
-				type: 'boolean',
-				meta: {
-					width: 'half',
-					interface: 'Boolean',
-				},
-				schema: {
-					default_value: false,
 				},
 			},
 			{
@@ -396,15 +392,14 @@ export default defineWidget({
 				name: 'Border Radius',
 				type: 'integer',
 				meta: {
-					interface: 'input',
+					interface: 'select-dropdown',
 					width: 'half',
 					options: {
-						trim: true,
-						placeholder: 'Enter border width size in px',
+						allowOther: true,
+						allowNone: true,
+						choices: borderChoices,
+						placeholder: 'Default',
 					},
-				},
-				schema: {
-					default_value: 0,
 				},
 			},
 			{
@@ -418,9 +413,6 @@ export default defineWidget({
 						allowNone: true,
 						choices: shadowChoices,
 					},
-				},
-				schema: {
-					default_value: 'md',
 				},
 			},
 		];

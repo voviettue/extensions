@@ -83,6 +83,29 @@ const shadowChoices = [
 	},
 ];
 
+const borderChoices = [
+	{
+		text: 'None',
+		value: '0px',
+	},
+	{
+		text: '0.125rem',
+		value: '0.125rem',
+	},
+	{
+		text: '0.25rem',
+		value: '0.15rem',
+	},
+	{
+		text: '0.375rem',
+		value: '0.375rem',
+	},
+	{
+		text: '0.5rem',
+		value: '0.5rem',
+	},
+];
+
 const validationRuleChoices = [
 	{
 		value: 'is',
@@ -150,4 +173,4 @@ const validationRuleChoices = [
 	},
 ];
 
-export { sizeChoices, fontFamilyChoices, shadowChoices, validationRuleChoices };
+export { sizeChoices, fontFamilyChoices, shadowChoices, borderChoices, validationRuleChoices };
