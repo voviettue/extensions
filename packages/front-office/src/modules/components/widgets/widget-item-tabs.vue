@@ -14,6 +14,7 @@
 			<template #header>
 				<div class="header full">
 					<v-icon class="drag-handle" name="drag_indicator" @click.stop />
+					<v-icon v-if="!!config?.icon" class="drag-handle" :name="config.icon" @click.stop />
 					<v-text-overflow class="name" :text="widget.name" />
 					<v-icon v-if="widget.hidden" v-tooltip="`Hidden widget`" name="visibility_off" class="hidden-icon" small />
 					<widget-options
@@ -67,6 +68,7 @@ import { ref, Ref, watch, computed, defineEmits } from 'vue';
 import WidgetItemGroup from './widget-item-group.vue';
 import Draggable from 'vuedraggable';
 import WidgetOptions from './widget-options.vue';
+import formFields from '../../widgets';
 import { useApi } from '@directus/extensions-sdk';
 import { useRoute } from 'vue-router';
 import { useNotification } from '../../composables/use-notification';
@@ -109,6 +111,8 @@ watch(
 		tabs.value = res?.data?.data?.options?.tabs;
 	}
 );
+
+const config = computed(() => formFields.find((e) => e.id === props.widget.widget));
 
 async function updateVisiableTab(tab) {
 	const idx = tabs.value?.findIndex((e: any) => e.key === tab.key);
@@ -311,6 +315,7 @@ async function updateParentTab(widgets, el) {
 
 		.name {
 			flex-grow: 1;
+			margin-bottom: 0;
 		}
 	}
 }
