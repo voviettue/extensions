@@ -1,4 +1,6 @@
 import { defineWidget } from '../../utils/define-extension';
+import { validationsField } from '../fields';
+import { sizeChoices, fontFamilyChoices, shadowChoices, borderChoices } from '../choices';
 
 export default defineWidget({
 	id: 'datetime-input',
@@ -13,119 +15,6 @@ export default defineWidget({
 				meta: {
 					interface: 'datetime',
 					width: 'half',
-				},
-			},
-			{
-				field: 'required',
-				name: 'Required',
-				type: 'boolean',
-				meta: {
-					width: 'half',
-					interface: 'Boolean',
-				},
-			},
-			{
-				field: 'tooltip',
-				name: 'Tooltip',
-				type: 'string',
-				meta: {
-					interface: 'input',
-					width: 'full',
-					options: {
-						trim: true,
-						placeholder: 'Enter tooltip to be displayed',
-					},
-				},
-			},
-			{
-				field: 'leftIcon',
-				name: 'Left Icon',
-				type: 'string',
-				meta: {
-					width: 'half',
-					interface: 'select-icon',
-				},
-			},
-			{
-				field: 'rightIcon',
-				name: 'Right Icon',
-				type: 'string',
-				meta: {
-					width: 'half',
-					interface: 'select-icon',
-				},
-			},
-			{
-				field: 'visible',
-				name: 'Visible',
-				type: 'boolean',
-				meta: {
-					width: 'half',
-					interface: 'Boolean',
-				},
-			},
-			{
-				field: 'disable',
-				name: 'Disable',
-				type: 'boolean',
-				meta: {
-					width: 'half',
-					interface: 'Boolean',
-				},
-			},
-			{
-				field: 'errorMessage',
-				name: 'Error message',
-				type: 'string',
-				meta: {
-					interface: 'input',
-					width: 'full',
-					options: {
-						trim: true,
-						placeholder: 'Enter error message to be displayed',
-					},
-				},
-			},
-			{
-				field: 'reset',
-				name: 'Reset On Submit',
-				type: 'boolean',
-				meta: {
-					width: 'half',
-					interface: 'Boolean',
-				},
-			},
-			{
-				field: 'autoFocus',
-				name: 'Autofocus',
-				type: 'boolean',
-				meta: {
-					width: 'half',
-					interface: 'Boolean',
-				},
-			},
-			{
-				field: 'minDate',
-				name: 'Min Date',
-				type: 'date',
-				meta: {
-					interface: 'datetime',
-					width: 'half',
-					options: {
-						format: 'long',
-					},
-				},
-			},
-			{
-				field: 'maxDate',
-				name: 'Max Date',
-				type: 'date',
-				meta: {
-					interface: 'datetime',
-					width: 'half',
-					options: {
-						format: 'short',
-					},
 				},
 			},
 			{
@@ -148,6 +37,17 @@ export default defineWidget({
 							},
 						],
 					},
+				},
+			},
+			{
+				field: 'labelOptions',
+				type: 'alias',
+				meta: {
+					interface: 'presentation-divider',
+					options: {
+						title: 'Label',
+					},
+					special: ['alias', 'no-data', 'group'],
 				},
 			},
 			{
@@ -185,6 +85,34 @@ export default defineWidget({
 						],
 					},
 				},
+				schema: {
+					default_value: 'left',
+				},
+			},
+			{
+				field: 'alignment',
+				name: 'Label Alignment',
+				type: 'string',
+				meta: {
+					interface: 'select-dropdown',
+					width: 'half',
+					options: {
+						allowNone: true,
+						choices: [
+							{
+								text: 'Left',
+								value: 'left',
+							},
+							{
+								text: 'Right',
+								value: 'right',
+							},
+						],
+					},
+				},
+				schema: {
+					default_value: 'left',
+				},
 			},
 			{
 				field: 'labelWidth',
@@ -204,172 +132,164 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'alignment',
-				name: 'Alignment',
+				field: 'hideLabel',
+				name: 'Hide Label',
+				type: 'boolean',
+				meta: {
+					width: 'half',
+					interface: 'Boolean',
+				},
+				schema: {
+					default_value: false,
+				},
+			},
+			{
+				field: 'validationOptions',
+				type: 'alias',
+				meta: {
+					interface: 'presentation-divider',
+					options: {
+						title: 'Validation',
+					},
+					special: ['alias', 'no-data', 'group'],
+				},
+			},
+			{
+				field: 'required',
+				name: 'Required',
+				type: 'boolean',
+				meta: {
+					width: 'half',
+					interface: 'Boolean',
+				},
+			},
+			{
+				field: 'minDate',
+				name: 'Min Date',
+				type: 'date',
+				meta: {
+					interface: 'datetime',
+					width: 'half',
+				},
+			},
+			{
+				field: 'maxDate',
+				name: 'Max Date',
+				type: 'date',
+				meta: {
+					interface: 'datetime',
+					width: 'half',
+				},
+			},
+			validationsField,
+			{
+				field: 'generalOptions',
+				type: 'alias',
+				meta: {
+					interface: 'presentation-divider',
+					options: {
+						title: 'General',
+					},
+					special: ['alias', 'no-data', 'group'],
+				},
+			},
+			{
+				field: 'tooltip',
+				name: 'Tooltip',
 				type: 'string',
 				meta: {
-					interface: 'select-dropdown',
-					width: 'half',
+					interface: 'input',
+					width: 'full',
 					options: {
-						allowNone: true,
-						choices: [
-							{
-								text: 'Left',
-								value: 'left',
-							},
-							{
-								text: 'Right',
-								value: 'right',
-							},
-						],
+						trim: true,
+						placeholder: 'Enter tooltip to be displayed',
 					},
 				},
 			},
 			{
-				field: 'labelColor',
-				name: 'Label Color',
+				field: 'helpText',
+				name: 'Help Text',
 				type: 'string',
 				meta: {
-					interface: 'select-color',
-					width: 'half',
-				},
-			},
-			{
-				field: 'labelSize',
-				name: 'Label Size',
-				type: 'string',
-				meta: {
-					interface: 'select-dropdown',
-					width: 'half',
+					interface: 'input',
+					width: 'full',
 					options: {
-						allowOther: true,
-						allowNone: true,
-						choices: [
-							{
-								text: 'XS - 0.75rem',
-								value: '0.75rem',
-							},
-							{
-								text: 'SM - 0.875rem',
-								value: '0.875rem',
-							},
-							{
-								text: 'LG - 1.125rem',
-								value: '1.125rem',
-							},
-							{
-								text: 'XL - 1.25rem',
-								value: '1.25rem',
-							},
-							{
-								text: '2XL - 1.5rem',
-								value: '1.5rem',
-							},
-							{
-								text: '3XL - 1.875rem',
-								value: '1.875rem',
-							},
-						],
+						trim: true,
+						placeholder: 'Enter helpText to be displayed',
 					},
 				},
 			},
 			{
-				field: 'labelFontFamily',
-				name: 'Label Font Family',
+				field: 'prefixIcon',
+				name: 'Prefix Icon',
 				type: 'string',
 				meta: {
-					interface: 'select-dropdown',
 					width: 'half',
-					options: {
-						allowNone: true,
-						choices: [
-							{
-								text: 'Arial',
-								value: 'Arial',
-							},
-							{
-								text: 'Cambria',
-								value: 'Cambria',
-							},
-							{
-								text: 'Courier New',
-								value: 'Courier New',
-							},
-							{
-								text: 'Lato',
-								value: 'Lato',
-							},
-							{
-								text: 'Noto Sans',
-								value: 'Noto Sans',
-							},
-							{
-								text: 'Roboto',
-								value: 'Roboto',
-							},
-							{
-								text: 'Monaco',
-								value: 'Monaco',
-							},
-							{
-								text: 'Inter',
-								value: 'Inter',
-							},
-						],
-					},
+					interface: 'select-icon',
 				},
 			},
 			{
-				field: 'borderRadius',
-				name: 'Border Radius',
-				type: 'integer',
+				field: 'suffixIcon',
+				name: 'Suffix Icon',
+				type: 'string',
+				meta: {
+					width: 'half',
+					interface: 'select-icon',
+				},
+			},
+			{
+				field: 'prefix',
+				name: 'Prefix',
+				type: 'string',
 				meta: {
 					interface: 'input',
 					width: 'half',
 					options: {
 						trim: true,
-						placeholder: 'Enter border width size in px',
+						placeholder: 'Enter prefix to be displayed',
 					},
-				},
-				schema: {
-					default_value: 0,
 				},
 			},
 			{
-				field: 'shadow',
-				name: 'Box Shadow',
+				field: 'suffix',
+				name: 'Suffix',
 				type: 'string',
 				meta: {
-					interface: 'select-dropdown',
+					interface: 'input',
 					width: 'half',
 					options: {
-						allowNone: true,
-						choices: [
-							{
-								text: 'SM',
-								value: 'sm',
-							},
-							{
-								text: 'MD',
-								value: 'md',
-							},
-							{
-								text: 'LG',
-								value: 'lg',
-							},
-							{
-								text: 'XL',
-								value: 'xl',
-							},
-							{
-								text: '2XL',
-								value: '2xl',
-							},
-						],
+						trim: true,
+						placeholder: 'Enter suffix to be displayed',
 					},
 				},
-				schema: {
-					default_value: 'md',
+			},
+			{
+				field: 'disabled',
+				name: 'Read-only',
+				type: 'boolean',
+				meta: {
+					width: 'half',
+					interface: 'Boolean',
+				},
+			},
+			{
+				field: 'autoFocus',
+				name: 'Autofocus',
+				type: 'boolean',
+				meta: {
+					width: 'half',
+					interface: 'Boolean',
+				},
+			},
+			{
+				field: 'eventOptions',
+				type: 'alias',
+				meta: {
+					interface: 'presentation-divider',
+					options: {
+						title: 'Events',
+					},
+					special: ['alias', 'no-data', 'group'],
 				},
 			},
 			{
@@ -383,6 +303,111 @@ export default defineWidget({
 						language: 'javascript',
 						lineNumber: true,
 						template: 'console.log("javascript")',
+					},
+				},
+			},
+			{
+				field: 'styleOptions',
+				type: 'alias',
+				meta: {
+					interface: 'presentation-divider',
+					options: {
+						title: 'Styles',
+					},
+					special: ['alias', 'no-data'],
+				},
+			},
+			{
+				field: 'labelColor',
+				name: 'Label Color',
+				type: 'string',
+				meta: {
+					interface: 'select-color',
+					width: 'half',
+				},
+			},
+
+			{
+				field: 'labelFontStyle',
+				name: 'Label Style',
+				type: 'json',
+				meta: {
+					interface: 'select-multiple-dropdown',
+					width: 'half',
+					options: {
+						choices: [
+							{
+								text: 'BOLD',
+								value: 'bold',
+							},
+							{
+								text: 'ITALIC',
+								value: 'italic',
+							},
+							{
+								text: 'UNDERLINE',
+								value: 'underline',
+							},
+						],
+						placeholder: 'Select',
+						allowNone: true,
+					},
+				},
+			},
+			{
+				field: 'labelSize',
+				name: 'Label Size',
+				type: 'string',
+				meta: {
+					interface: 'select-dropdown',
+					width: 'half',
+					options: {
+						allowOther: true,
+						allowNone: true,
+						placeholder: 'Default',
+						choices: sizeChoices,
+					},
+				},
+			},
+			{
+				field: 'labelFontFamily',
+				name: 'Label Font Family',
+				type: 'string',
+				meta: {
+					interface: 'select-dropdown',
+					width: 'half',
+					options: {
+						allowNone: true,
+						choices: fontFamilyChoices,
+						placeholder: 'Default',
+					},
+				},
+			},
+			{
+				field: 'borderRadius',
+				name: 'Border Radius',
+				type: 'integer',
+				meta: {
+					interface: 'select-dropdown',
+					width: 'half',
+					options: {
+						allowOther: true,
+						allowNone: true,
+						choices: borderChoices,
+						placeholder: 'Default',
+					},
+				},
+			},
+			{
+				field: 'shadow',
+				name: 'Box Shadow',
+				type: 'string',
+				meta: {
+					interface: 'select-dropdown',
+					width: 'half',
+					options: {
+						allowNone: true,
+						choices: shadowChoices,
 					},
 				},
 			},
