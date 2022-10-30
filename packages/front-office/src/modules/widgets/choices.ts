@@ -173,4 +173,92 @@ const validationRuleChoices = [
 	},
 ];
 
-export { sizeChoices, fontFamilyChoices, shadowChoices, borderChoices, validationRuleChoices };
+const fontStyleChoices = [
+	{
+		text: 'BOLD',
+		value: 'bold',
+	},
+	{
+		text: 'ITALIC',
+		value: 'italic',
+	},
+	{
+		text: 'UNDERLINE',
+		value: 'underline',
+	},
+];
+
+const buttonVariantChoices = [
+	{
+		text: 'Primary',
+		value: 'primary',
+	},
+	{
+		text: 'Secondary',
+		value: 'secondary',
+	},
+	{
+		text: 'Success',
+		value: 'success',
+	},
+	{
+		text: 'Warning',
+		value: 'warning',
+	},
+	{
+		text: 'Danger',
+		value: 'danger',
+	},
+	{
+		text: 'Info',
+		value: 'info',
+	},
+	{
+		text: 'Light',
+		value: 'light',
+	},
+	{
+		text: 'Dark',
+		value: 'dark',
+	},
+];
+
+const buttonTypeChoices = [
+	{ text: 'Solid', value: 'solid' },
+	{ text: 'Outline', value: 'outline' },
+	{ text: 'Link', value: 'link' },
+	{ text: 'Ghost', value: 'ghost' },
+];
+
+const positionChoices = [
+	{ text: 'Left', value: 'left' },
+	{ text: 'Center', value: 'center' },
+	{ text: 'Right', value: 'right' },
+];
+const buttonSizeChoices = [
+	{
+		text: 'SM',
+		value: 'sm',
+	},
+	{
+		text: 'MD',
+		value: 'md',
+	},
+	{
+		text: 'LG',
+		value: 'lg',
+	},
+];
+
+export {
+	sizeChoices,
+	fontFamilyChoices,
+	shadowChoices,
+	borderChoices,
+	validationRuleChoices,
+	fontStyleChoices,
+	buttonVariantChoices,
+	buttonTypeChoices,
+	positionChoices,
+	buttonSizeChoices,
+};
