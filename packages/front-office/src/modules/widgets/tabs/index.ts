@@ -3,7 +3,7 @@ import { defineWidget } from '../../utils/define-extension';
 export default defineWidget({
 	id: 'tabs',
 	name: 'Tabs',
-	icon: 'table-chart',
+	icon: 'tab',
 	tabs: true,
 	options: ({ values }) => {
 		const tabs = values?.options?.tabs || [];

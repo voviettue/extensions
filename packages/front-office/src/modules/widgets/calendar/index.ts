@@ -150,7 +150,7 @@ export default defineWidget({
 							},
 							{
 								field: 'textColor',
-								name: 'Color',
+								name: 'Item Color',
 								type: 'string',
 								meta: {
 									interface: 'select-color',
@@ -159,7 +159,25 @@ export default defineWidget({
 							},
 							{
 								field: 'background',
-								name: 'Background',
+								name: 'Item Background',
+								type: 'string',
+								meta: {
+									interface: 'select-color',
+									width: 'half',
+								},
+							},
+							{
+								field: 'dateBackground',
+								name: 'Date Background',
+								type: 'string',
+								meta: {
+									interface: 'select-color',
+									width: 'half',
+								},
+							},
+							{
+								field: 'dateColor',
+								name: 'Date Background',
 								type: 'string',
 								meta: {
 									interface: 'select-color',
