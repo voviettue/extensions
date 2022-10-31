@@ -359,6 +359,7 @@ export default defineWidget({
 					interface: 'input-javascript',
 					options: {
 						minLine: 4,
+						context: { $value: '' },
 					},
 					note: 'Type "/" to see all of variables and function are supported.',
 				},
@@ -371,6 +372,7 @@ export default defineWidget({
 					interface: 'input-javascript',
 					options: {
 						minLine: 4,
+						context: { $item: object },
 					},
 					note: 'Type "/" to see all of variables and function are supported.',
 				},
