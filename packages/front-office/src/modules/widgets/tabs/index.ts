@@ -78,6 +78,18 @@ export default defineWidget({
 									default_value: false,
 								},
 							},
+							{
+								field: 'onClick',
+								name: 'On Click (Javascript)',
+								meta: {
+									width: 'full',
+									interface: 'input-javascript',
+									options: {
+										minLine: 4,
+									},
+									note: 'Type "/" to see all of variables and function are supported.',
+								},
+							},
 						],
 					},
 				},
@@ -121,8 +133,8 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'onTabSelected',
-				name: 'On Tab Click (Javascript)',
+				field: 'onChangeTab',
+				name: 'On Change Tab (Javascript)',
 				meta: {
 					width: 'full',
 					interface: 'input-javascript',
