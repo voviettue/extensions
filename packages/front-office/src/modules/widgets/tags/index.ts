@@ -1,4 +1,5 @@
 import { defineWidget } from '../../utils/define-extension';
+import { sizeChoices, fontFamilyChoices, shadowChoices, borderChoices } from '../choices';
 
 export default defineWidget({
 	id: 'tags',
@@ -201,36 +202,7 @@ export default defineWidget({
 								options: {
 									allowOther: true,
 									allowNone: true,
-									choices: [
-										{
-											text: 'Default',
-											value: null,
-										},
-										{
-											text: 'XS - 0.75rem',
-											value: '0.75rem',
-										},
-										{
-											text: 'SM - 0.875rem',
-											value: '0.875rem',
-										},
-										{
-											text: 'LG - 1.125rem',
-											value: '1.125rem',
-										},
-										{
-											text: 'XL - 1.25rem',
-											value: '1.25rem',
-										},
-										{
-											text: '2XL - 1.5rem',
-											value: '1.5rem',
-										},
-										{
-											text: '3XL - 1.875rem',
-											value: '1.875rem',
-										},
-									],
+									choices: sizeChoices,
 								},
 							},
 						},
@@ -251,44 +223,7 @@ export default defineWidget({
 								interface: 'select-dropdown',
 								width: 'half',
 								options: {
-									choices: [
-										{
-											text: 'Default',
-											value: null,
-										},
-										{
-											text: 'Arial',
-											value: 'Arial',
-										},
-										{
-											text: 'Cambria',
-											value: 'Cambria',
-										},
-										{
-											text: 'Courier New',
-											value: 'Courier New',
-										},
-										{
-											text: 'Lato',
-											value: 'Lato',
-										},
-										{
-											text: 'Noto Sans',
-											value: 'Noto Sans',
-										},
-										{
-											text: 'Roboto',
-											value: 'Roboto',
-										},
-										{
-											text: 'Monaco',
-											value: 'Monaco',
-										},
-										{
-											text: 'Inter',
-											value: 'Inter',
-										},
-									],
+									choices: fontFamilyChoices,
 								},
 							},
 						},
@@ -360,36 +295,7 @@ export default defineWidget({
 				options: {
 					allowOther: true,
 					allowNone: true,
-					choices: [
-						{
-							text: 'Default',
-							value: null,
-						},
-						{
-							text: 'XS - 0.75rem',
-							value: '0.75rem',
-						},
-						{
-							text: 'SM - 0.875rem',
-							value: '0.875rem',
-						},
-						{
-							text: 'LG - 1.125rem',
-							value: '1.125rem',
-						},
-						{
-							text: 'XL - 1.25rem',
-							value: '1.25rem',
-						},
-						{
-							text: '2XL - 1.5rem',
-							value: '1.5rem',
-						},
-						{
-							text: '3XL - 1.875rem',
-							value: '1.875rem',
-						},
-					],
+					choices: sizeChoices,
 				},
 			},
 		},
@@ -401,44 +307,7 @@ export default defineWidget({
 				interface: 'select-dropdown',
 				width: 'half',
 				options: {
-					choices: [
-						{
-							text: 'Default',
-							value: null,
-						},
-						{
-							text: 'Arial',
-							value: 'Arial',
-						},
-						{
-							text: 'Cambria',
-							value: 'Cambria',
-						},
-						{
-							text: 'Courier New',
-							value: 'Courier New',
-						},
-						{
-							text: 'Lato',
-							value: 'Lato',
-						},
-						{
-							text: 'Noto Sans',
-							value: 'Noto Sans',
-						},
-						{
-							text: 'Roboto',
-							value: 'Roboto',
-						},
-						{
-							text: 'Monaco',
-							value: 'Monaco',
-						},
-						{
-							text: 'Inter',
-							value: 'Inter',
-						},
-					],
+					choices: fontFamilyChoices,
 				},
 			},
 		},
@@ -447,11 +316,13 @@ export default defineWidget({
 			name: 'Border Radius',
 			type: 'integer',
 			meta: {
-				interface: 'input',
+				interface: 'select-dropdown',
 				width: 'half',
 				options: {
-					trim: true,
-					placeholder: 'Enter border width size in px',
+					allowOther: true,
+					allowNone: true,
+					choices: borderChoices,
+					placeholder: 'Default',
 				},
 			},
 		},
@@ -464,28 +335,7 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					allowNone: true,
-					choices: [
-						{
-							text: 'SM',
-							value: 'sm',
-						},
-						{
-							text: 'MD',
-							value: 'md',
-						},
-						{
-							text: 'LG',
-							value: 'lg',
-						},
-						{
-							text: 'XL',
-							value: 'xl',
-						},
-						{
-							text: '2XL',
-							value: '2xl',
-						},
-					],
+					choices: shadowChoices,
 				},
 			},
 			schema: {
