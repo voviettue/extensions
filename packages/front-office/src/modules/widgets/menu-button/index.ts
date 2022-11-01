@@ -27,11 +27,11 @@ export default defineWidget({
 				interface: 'list',
 				options: {
 					addLable: 'Create New',
-					template: '{{ label }} - {{ key }}',
+					template: '{{ label }}',
 					fields: [
 						{
 							field: 'label',
-							name: 'Column Name',
+							name: 'Button Label',
 							type: 'string',
 							meta: {
 								width: 'half',
@@ -47,10 +47,7 @@ export default defineWidget({
 							type: 'string',
 							meta: {
 								width: 'half',
-								interface: 'input',
-								options: {
-									trim: true,
-								},
+								interface: 'select-icon',
 							},
 						},
 						{
