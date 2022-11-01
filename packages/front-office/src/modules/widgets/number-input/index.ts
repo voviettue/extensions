@@ -43,8 +43,11 @@ export default defineWidget({
 						trim: true,
 						placeholder: 'Enter minimum value',
 						min: 0,
-						max: 3,
+						max: 38,
 					},
+				},
+				schema: {
+					default_value: 3,
 				},
 			},
 			{
@@ -277,30 +280,6 @@ export default defineWidget({
 						trim: true,
 						placeholder: 'Enter suffix to be displayed',
 					},
-				},
-			},
-			{
-				field: 'trim',
-				name: 'Trim',
-				type: 'boolean',
-				meta: {
-					width: 'half',
-					interface: 'Boolean',
-				},
-				schema: {
-					default_value: false,
-				},
-			},
-			{
-				field: 'masked',
-				name: 'Masked',
-				type: 'boolean',
-				meta: {
-					width: 'half',
-					interface: 'Boolean',
-				},
-				schema: {
-					default_value: false,
 				},
 			},
 			{
