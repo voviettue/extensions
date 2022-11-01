@@ -181,7 +181,63 @@ export default defineWidget({
 					width: 'half',
 				},
 			},
-			validationsField,
+			{
+				field: 'validations',
+				name: 'Rules',
+				type: 'json',
+				meta: {
+					interface: 'list',
+					width: 'full',
+					options: {
+						addLabel: 'Add Rule',
+						template: '{{ rule }}: {{ value }}',
+						fields: [
+							{
+								field: 'rule',
+								name: 'Rule',
+								meta: {
+									interface: 'select-dropdown',
+									width: 'half',
+									options: {
+										placeholder: 'Select a rule',
+										choices: [
+											{
+												value: 'date_before',
+												text: 'Date Before',
+											},
+											{
+												value: 'date_after',
+												text: 'Date After',
+											},
+										],
+									},
+								},
+							},
+							{
+								field: 'value',
+								name: 'Value',
+								type: 'date',
+								meta: {
+									interface: 'datetime',
+									width: 'half',
+								},
+							},
+							{
+								field: 'errorMessage',
+								name: 'Error Message',
+								meta: {
+									interface: 'input',
+									width: 'full',
+									options: {
+										trim: true,
+										placeholder: 'Override by default',
+									},
+								},
+							},
+						],
+					},
+				},
+			},
 			{
 				field: 'generalOptions',
 				type: 'alias',
@@ -326,7 +382,6 @@ export default defineWidget({
 					width: 'half',
 				},
 			},
-
 			{
 				field: 'labelFontStyle',
 				name: 'Label Style',
