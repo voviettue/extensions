@@ -191,6 +191,7 @@ function deleteColumn(value: any, index: number) {
 </script>
 <style lang="scss" scoped>
 .form {
+	margin-top: 2rem !important;
 	display: grid;
 	gap: var(--form-vertical-gap) var(--form-horizontal-gap);
 

@@ -18,6 +18,7 @@ import select from './select';
 import tabs from './tabs';
 import tags from './tags';
 import menuButton from './menu-button';
+import form from './form';
 
 export default [
 	text,
@@ -30,14 +31,15 @@ export default [
 	list,
 	keyValue,
 	link,
+	calendar,
+	tabs,
+	tags,
 	button,
 	iconButton,
-	calendar,
+	menuButton,
+	form,
 	textInput,
 	numberInput,
 	dateTimeInput,
 	select,
-	tabs,
-	tags,
-	menuButton,
 ];

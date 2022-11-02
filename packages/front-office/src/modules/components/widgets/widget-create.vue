@@ -166,11 +166,11 @@ async function handleChangeWidgets() {
 }
 
 .widget-item {
-	min-height: 100px;
+	min-height: 80px;
 	overflow: hidden;
 	text-align: center;
-	margin-right: 2rem;
-	margin-bottom: 2rem;
+	margin-right: 1.5rem;
+	margin-bottom: 1.5rem;
 }
 
 .preview {
@@ -179,8 +179,8 @@ async function handleChangeWidgets() {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 128px;
-	height: 100px;
+	width: 112px;
+	height: 80px;
 	margin-bottom: 8px;
 	border: var(--border-width) solid var(--border-subdued);
 	border-radius: var(--border-radius);

@@ -1,5 +1,13 @@
 export default [
 	{
+		field: 'data',
+		name: 'Data',
+		meta: {
+			interface: 'input-multiline',
+			width: 'full',
+		},
+	},
+	{
 		field: 'actionOptions',
 		type: 'alias',
 		meta: {
@@ -91,14 +99,6 @@ export default [
 				title: 'Options',
 			},
 			special: ['alias', 'no-data'],
-		},
-	},
-	{
-		field: 'data',
-		name: 'Data',
-		meta: {
-			interface: 'input-multiline',
-			width: 'full',
 		},
 	},
 	{
