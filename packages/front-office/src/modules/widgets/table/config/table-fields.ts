@@ -171,9 +171,6 @@ export default [
 			width: 'half',
 			interface: 'select-color',
 		},
-		schema: {
-			default_value: '#000000',
-		},
 	},
 	{
 		field: 'verticalLines',
