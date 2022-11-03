@@ -133,10 +133,10 @@ onMounted(() => {
 <style scope lang="scss">
 .widgets {
 	max-width: 100%;
-
-	.name {
+	h2 {
 		margin-bottom: 12px;
-
+	}
+	.name {
 		.instant-save {
 			margin-left: 4px;
 			color: var(--warning);
@@ -151,6 +151,7 @@ onMounted(() => {
 	display: grid;
 	grid-template-columns: repeat(6, minmax(0, 1fr));
 	gap: 10px;
+	padding: 4px;
 	.grid-full {
 		grid-column: span 6 / span 6;
 	}

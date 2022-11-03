@@ -4,7 +4,7 @@ import { shadowChoices, borderChoices, buttonVariantChoices, buttonTypeChoices }
 export default defineWidget({
 	id: 'form',
 	name: 'Form',
-	icon: 'settings_overscan',
+	icon: 'article',
 	group: true,
 	options: [
 		{

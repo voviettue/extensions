@@ -208,7 +208,7 @@ async function updateTab(tabKey) {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 110px;
+	width: 108px;
 	height: 80px;
 	margin-bottom: 8px;
 	border: var(--border-width) solid var(--border-subdued);

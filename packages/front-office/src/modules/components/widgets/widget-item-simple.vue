@@ -69,7 +69,7 @@ const config = computed(() => formFields.find((e) => e.id === props.widget.widge
 } */
 
 .widget-select {
-	margin: 0px 4px;
+	// margin: 0px 4px;
 }
 
 // .widget-select:deep(.widget-grid.group.full.nested) {
@@ -80,16 +80,16 @@ const config = computed(() => formFields.find((e) => e.id === props.widget.widge
 // 	}
 // }
 .widget {
-	height: 48px;
+	height: 42px;
 
 	:deep(.input) {
-		border: var(--border-width) solid var(--border-subdued) !important;
+		border: 1px solid var(--border-normal) !important;
 		padding: 8px;
 	}
 
 	:deep(.input:hover) {
 		background-color: var(--card-face-color) !important;
-		border: var(--border-width) solid var(--border-normal-alt) !important;
+		border: 1px solid var(--border-normal-alt) !important;
 	}
 
 	.label {
@@ -131,9 +131,8 @@ const config = computed(() => formFields.find((e) => e.id === props.widget.widge
 .group {
 	position: relative;
 	min-height: var(--input-height);
-	padding: var(--input-padding);
-	padding-top: 40px;
-	padding-bottom: 8px;
+	padding: 10px;
+	padding-top: 44px;
 	border-radius: var(--border-radius);
 
 	> * {
@@ -172,8 +171,8 @@ const config = computed(() => formFields.find((e) => e.id === props.widget.widge
 		display: flex;
 		align-items: center;
 		width: 100%;
-		margin-bottom: 8px;
-		padding-top: 8px;
+		margin-bottom: 10px;
+		padding-top: 10px;
 		color: var(--primary);
 		font-family: var(--family-monospace);
 

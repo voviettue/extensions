@@ -219,20 +219,20 @@ async function updateParentTab(widgets, el) {
 	// margin: 4px 0;
 
 	.widget-select {
-		margin: 0px 4px;
+		// margin: 0px 4px;
 	}
 }
 .widget {
-	height: 48px;
+	height: 42px;
 
 	:deep(.input) {
-		border: var(--border-width) solid var(--border-subdued) !important;
+		border: 1px solid var(--border-normal) !important;
 		padding: 8px;
 	}
 
 	:deep(.input:hover) {
 		background-color: var(--card-face-color) !important;
-		border: var(--border-width) solid var(--border-normal-alt) !important;
+		border: 1px solid var(--border-normal-alt) !important;
 	}
 
 	.label {
@@ -274,9 +274,8 @@ async function updateParentTab(widgets, el) {
 .group {
 	position: relative;
 	min-height: var(--input-height);
-	padding: var(--input-padding);
-	padding-top: 40px;
-	padding-bottom: 8px;
+	padding: 10px;
+	padding-top: 44px;
 	border-radius: var(--border-radius);
 
 	> * {
@@ -289,7 +288,7 @@ async function updateParentTab(widgets, el) {
 		top: 0;
 		left: -2px;
 		z-index: 1;
-		width: 4px;
+		width: 2px;
 		height: 100%;
 		background-color: var(--primary);
 		border-radius: 2px;
@@ -315,8 +314,8 @@ async function updateParentTab(widgets, el) {
 		display: flex;
 		align-items: center;
 		width: 100%;
-		margin-bottom: 8px;
-		padding-top: 8px;
+		margin-bottom: 10px;
+		padding-top: 10px;
 		color: var(--primary);
 		font-family: var(--family-monospace);
 
@@ -434,8 +433,6 @@ async function updateParentTab(widgets, el) {
 	display: grid;
 	grid-template-columns: repeat(6, minmax(0, 1fr));
 	gap: 10px;
-	padding-left: 8px;
-	padding-right: 8px;
 	.grid-full {
 		grid-column: span 6 / span 6;
 	}
