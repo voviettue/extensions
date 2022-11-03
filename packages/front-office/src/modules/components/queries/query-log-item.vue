@@ -32,9 +32,9 @@ const { locale } = useI18n();
 
 const logTheme = computed(() => {
 	return {
-		icon: props.log.comment?.data ? 'check' : 'close',
-		iconBackgroundColor: props.log.comment?.data ? 'var(--success)' : 'var(--danger)',
-		backgroundColor: props.log.comment?.data ? '' : 'var(--danger-25)',
+		icon: !props.log.comment?.error ? 'check' : 'close',
+		iconBackgroundColor: !props.log.comment?.error ? 'var(--success)' : 'var(--danger)',
+		backgroundColor: !props.log.comment?.error ? '' : 'var(--danger-25)',
 	};
 });
 
@@ -75,6 +75,7 @@ function formatDate(timestamp: string) {
 	align-items: center;
 }
 .log-item-detail {
+	overflow-wrap: break-word;
 	white-space: break-spaces;
 	margin: 0.625rem 0.75rem;
 	padding: 0 0.625rem;

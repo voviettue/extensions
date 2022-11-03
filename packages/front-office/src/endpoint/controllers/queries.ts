@@ -23,25 +23,19 @@ async function deleteLogs(req: any, res: any, ctx: ApiExtensionContext) {
 }
 
 async function execute(req: any, res: any, ctx: ApiExtensionContext) {
-	let data: any = null;
-	let error: any = null;
 	const queryId: number = req.params.id;
 	const queryService: QueryService = new QueryService(req.schema, req.accountability, ctx);
 
 	try {
-		data = await queryService.execute(queryId, req.body);
+		const data = await queryService.execute(queryId, req.body);
+		queryService.log.data = data;
+		return data;
 	} catch (e: any) {
-		error = e;
-		error.errMessage = e?.message;
+		queryService.log.error = e;
+		throw e;
+	} finally {
+		await queryService.createLog(queryService.log);
 	}
-
-	await queryService.createLog(queryId, data, error);
-
-	if (error) {
-		throw new BaseException(error?.message, error?.status, error?.code);
-	}
-
-	return data;
 }
 
 export default {

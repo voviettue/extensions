@@ -10,7 +10,7 @@ export default defineEndpoint({
 				const data = await queryController.execute(req, res, ctx);
 				return res.json(data);
 			} catch (error: any) {
-				return res.status(error.status).json({ status: error.status, message: error.message });
+				return res.status(error?.status).json({ status: error?.status, message: error?.message });
 			}
 		});
 
