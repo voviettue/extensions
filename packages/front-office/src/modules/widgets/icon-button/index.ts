@@ -1,4 +1,12 @@
 import { defineWidget } from '../../utils/define-extension';
+import {
+	borderChoices,
+	buttonSizeChoices,
+	buttonTypeChoices,
+	buttonVariantChoices,
+	positionChoices,
+	shadowChoices,
+} from '../choices';
 
 export default defineWidget({
 	id: 'icon-button',
@@ -16,6 +24,30 @@ export default defineWidget({
 			},
 		},
 		{
+			field: 'generalOptions',
+			type: 'alias',
+			meta: {
+				interface: 'presentation-divider',
+				options: {
+					title: 'General',
+				},
+				special: ['alias', 'no-data'],
+			},
+		},
+		{
+			field: 'tooltip',
+			name: 'Tooltip',
+			type: 'string',
+			meta: {
+				interface: 'input',
+				width: 'full',
+				options: {
+					trim: true,
+					placeholder: 'Enter tooltip to be displayed',
+				},
+			},
+		},
+		{
 			field: 'buttonSize',
 			name: 'Button Size',
 			type: 'string',
@@ -24,48 +56,11 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					allowNone: true,
-					choices: [
-						{
-							text: 'SM',
-							value: 'sm',
-						},
-						{
-							text: 'MD',
-							value: 'md',
-						},
-						{
-							text: 'LG',
-							value: 'lg',
-						},
-					],
+					choices: buttonSizeChoices,
 				},
 			},
 			schema: {
 				default_value: 'md',
-			},
-		},
-		{
-			field: 'disable',
-			name: 'Disable',
-			type: 'boolean',
-			meta: {
-				width: 'half',
-				interface: 'Boolean',
-			},
-			schema: {
-				default_value: false,
-			},
-		},
-		{
-			field: 'outline',
-			name: 'Outline',
-			type: 'boolean',
-			meta: {
-				width: 'half',
-				interface: 'Boolean',
-			},
-			schema: {
-				default_value: false,
 			},
 		},
 		{
@@ -76,20 +71,7 @@ export default defineWidget({
 				interface: 'select-dropdown',
 				width: 'half',
 				options: {
-					choices: [
-						{
-							text: 'Left',
-							value: 'left',
-						},
-						{
-							text: 'Center',
-							value: 'center',
-						},
-						{
-							text: 'Right',
-							value: 'right',
-						},
-					],
+					choices: positionChoices,
 				},
 			},
 			schema: {
@@ -105,40 +87,7 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					allowNone: true,
-					choices: [
-						{
-							text: 'Primary',
-							value: 'primary',
-						},
-						{
-							text: 'Secondary',
-							value: 'secondary',
-						},
-						{
-							text: 'Success',
-							value: 'success',
-						},
-						{
-							text: 'Warning',
-							value: 'warning',
-						},
-						{
-							text: 'Danger',
-							value: 'danger',
-						},
-						{
-							text: 'Info',
-							value: 'info',
-						},
-						{
-							text: 'Light',
-							value: 'light',
-						},
-						{
-							text: 'Dark',
-							value: 'dark',
-						},
-					],
+					choices: buttonVariantChoices,
 				},
 			},
 			schema: {
@@ -146,53 +95,44 @@ export default defineWidget({
 			},
 		},
 		{
-			field: 'borderRadius',
-			name: 'Border Radius',
-			type: 'integer',
-			meta: {
-				interface: 'input',
-				width: 'half',
-				options: {
-					trim: true,
-					placeholder: 'Enter border width size in px',
-				},
-			},
-			schema: {
-				default_value: 0,
-			},
-		},
-		{
-			field: 'shadow',
-			name: 'Box Shadow',
+			field: 'buttonType',
+			name: 'Button Type',
 			type: 'string',
 			meta: {
 				interface: 'select-dropdown',
 				width: 'half',
 				options: {
 					allowNone: true,
-					choices: [
-						{
-							text: 'SM',
-							value: 'sm',
-						},
-						{
-							text: 'MD',
-							value: 'md',
-						},
-						{
-							text: 'LG',
-							value: 'lg',
-						},
-						{
-							text: 'XL',
-							value: 'xl',
-						},
-						{
-							text: '2XL',
-							value: '2xl',
-						},
-					],
+					choices: buttonTypeChoices,
 				},
+			},
+			schema: {
+				default_value: 'solid',
+			},
+		},
+
+		{
+			field: 'disabled',
+			name: 'Disabled',
+			type: 'boolean',
+			meta: {
+				width: 'half',
+				interface: 'Boolean',
+			},
+			schema: {
+				default_value: false,
+			},
+		},
+
+		{
+			field: 'eventsOptions',
+			type: 'alias',
+			meta: {
+				interface: 'presentation-divider',
+				options: {
+					title: 'Events',
+				},
+				special: ['alias', 'no-data'],
 			},
 		},
 		{
@@ -205,6 +145,45 @@ export default defineWidget({
 					minLine: 4,
 				},
 				note: 'Type "/" to see all of variables and function are supported.',
+			},
+		},
+		{
+			field: 'stylesOptions',
+			type: 'alias',
+			meta: {
+				interface: 'presentation-divider',
+				options: {
+					title: 'Styles',
+				},
+				special: ['alias', 'no-data'],
+			},
+		},
+		{
+			field: 'borderRadius',
+			name: 'Border Radius',
+			type: 'integer',
+			meta: {
+				interface: 'select-dropdown',
+				width: 'half',
+				options: {
+					allowOther: true,
+					allowNone: true,
+					choices: borderChoices,
+					placeholder: 'Default',
+				},
+			},
+		},
+		{
+			field: 'shadow',
+			name: 'Box Shadow',
+			type: 'string',
+			meta: {
+				interface: 'select-dropdown',
+				width: 'half',
+				options: {
+					allowNone: true,
+					choices: shadowChoices,
+				},
 			},
 		},
 	],
