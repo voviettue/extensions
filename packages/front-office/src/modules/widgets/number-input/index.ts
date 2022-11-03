@@ -10,7 +10,7 @@ export default defineWidget({
 			{
 				field: 'defaultValue',
 				name: 'Default Value',
-				type: 'integer',
+				type: 'text',
 				meta: {
 					interface: 'input',
 					width: 'full',
