@@ -1,5 +1,4 @@
 import { defineWidget } from '../../utils/define-extension';
-import { validationsField } from '../fields';
 import { sizeChoices, fontFamilyChoices, shadowChoices, borderChoices } from '../choices';
 
 export default defineWidget({
@@ -7,14 +6,29 @@ export default defineWidget({
 	name: 'Datetime Input',
 	icon: 'edit_calendar',
 	options: ({ values }) => {
+		const validationRuleChoices = [
+			{
+				text: 'minute (hh:mm)',
+				value: 'hh:mm',
+			},
+			{
+				text: 'second (hh:mm:ss)',
+				value: 'hh:mm:ss',
+			},
+		];
+
 		const defaultOptions = [
 			{
 				field: 'defaultValue',
 				name: 'Default Value',
-				type: 'date',
+				type: 'dateTime',
 				meta: {
 					interface: 'datetime',
 					width: 'half',
+					options: {
+						use24: true,
+						includeSeconds: true,
+					},
 				},
 			},
 			{
@@ -26,16 +40,7 @@ export default defineWidget({
 					width: 'half',
 					options: {
 						allowNone: true,
-						choices: [
-							{
-								text: 'minute (hh:mm)',
-								value: 'hh:mm',
-							},
-							{
-								text: 'second (hh:mm:ss)',
-								value: 'hh:mm:ss',
-							},
-						],
+						choices: validationRuleChoices,
 					},
 				},
 			},
@@ -216,10 +221,14 @@ export default defineWidget({
 							{
 								field: 'value',
 								name: 'Value',
-								type: 'date',
+								type: 'dateTime',
 								meta: {
 									interface: 'datetime',
 									width: 'half',
+									options: {
+										use24: true,
+										includeSeconds: true,
+									},
 								},
 							},
 							{
@@ -471,6 +480,7 @@ export default defineWidget({
 		if (values?.options?.labelPosition === 'top') {
 			data = data.filter((item) => !['labelWidth', 'alignment'].includes(item.field));
 		}
+
 		return data;
 	},
 });
