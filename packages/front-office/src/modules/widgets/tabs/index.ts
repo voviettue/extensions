@@ -26,8 +26,9 @@ export default defineWidget({
 								meta: {
 									interface: 'input',
 									width: 'half',
+									required: true,
 									options: {
-										placeholder: 'Tab name',
+										placeholder: 'Tab key',
 									},
 								},
 							},

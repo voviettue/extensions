@@ -73,6 +73,13 @@ export default defineModule({
 								addWidget: NewWidgetComponent,
 							},
 						},
+						{
+							path: 'widget/:widgetId/:parentId',
+							name: 'page-add-children-widget',
+							components: {
+								addWidget: NewWidgetComponent,
+							},
+						},
 					],
 				},
 				{

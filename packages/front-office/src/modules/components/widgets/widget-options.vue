@@ -12,14 +12,21 @@
 					<v-list-item-content>View content</v-list-item-content>
 				</v-list-item>
 
+				<v-list-item v-if="isAdmin && widget?.page && widget.widget !== 'tabs'" clickable @click="createChildrenWidget">
+					<v-list-item-icon>
+						<v-icon name="add" />
+					</v-list-item-icon>
+					<v-list-item-content>Create widget</v-list-item-content>
+				</v-list-item>
+
 				<v-list-item v-if="isAdmin" clickable @click="updateVisiable(widget)">
 					<template v-if="widget.hidden === true">
 						<v-list-item-icon><v-icon name="visibility_off" /></v-list-item-icon>
-						<v-list-item-content>Make Widget Visible</v-list-item-content>
+						<v-list-item-content>Make Visible</v-list-item-content>
 					</template>
 					<template v-else>
 						<v-list-item-icon><v-icon name="visibility" /></v-list-item-icon>
-						<v-list-item-content>Make Widget Hidden</v-list-item-content>
+						<v-list-item-content>Make Hidden</v-list-item-content>
 					</template>
 				</v-list-item>
 
@@ -27,7 +34,7 @@
 					<v-list-item-icon>
 						<v-icon name="delete" />
 					</v-list-item-icon>
-					<v-list-item-content>Delete widget</v-list-item-content>
+					<v-list-item-content>Delete</v-list-item-content>
 				</v-list-item>
 			</v-list>
 		</v-menu>
@@ -38,7 +45,7 @@
 				</v-card-title>
 				<v-card-actions>
 					<v-button secondary @click="deleteDialog = false">Cancel</v-button>
-					<v-button :loading="deleting" kind="danger" @click="deleteWidget(widget)">Delete</v-button>
+					<v-button kind="danger" @click="deleteWidget(widget)">Delete</v-button>
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
@@ -47,8 +54,12 @@
 <script setup lang="ts">
 import { Ref, ref, computed } from 'vue';
 import { useStores } from '@directus/extensions-sdk';
+import { useRouter } from 'vue-router';
+
 const { useUserStore } = useStores();
 const { isAdmin } = useUserStore();
+const router = useRouter();
+
 const props = withDefaults(
 	defineProps<{
 		widget: Record<string, any>;
@@ -70,6 +81,16 @@ const props = withDefaults(
 		}),
 	}
 );
+
+function createChildrenWidget() {
+	if (props.widget.widget === 'tab') {
+		return router.push(
+			`/front-office/pages/${props.widget.page}/widget/+/${props.widget.parent}?tab=${props.widget.key}`
+		);
+	}
+
+	return router.push(`/front-office/pages/${props.widget.page}/widget/+/${props.widget.id}`);
+}
 
 const deleteDialog: Ref<boolean> = ref(false);
 const widgetName = computed(() => props.widget?.name || props.widget?.label);

@@ -2,7 +2,7 @@
 	<div>
 		<draggable
 			class="widget-grid group full nested"
-			:model-value="tabs"
+			:model-value="tabWidgets"
 			:force-fallback="true"
 			handle=".drag-handle"
 			:group="{ name: 'tabs' }"
@@ -103,6 +103,11 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const tabs: Ref<Record<string, any>[]> = ref(props.widget?.options?.tabs);
+const tabWidgets = computed(() => {
+	return tabs.value.map((e: any) => {
+		return { ...e, widget: 'tab', parent: props.widget.id, page: props.widget.page };
+	});
+});
 
 watch(
 	() => route.name,
@@ -118,7 +123,9 @@ async function updateVisiableTab(tab) {
 	const idx = tabs.value?.findIndex((e: any) => e.key === tab.key);
 	tabs.value[idx].hidden = !tab?.hidden;
 	try {
-		await api.patch(`/items/cms_widgets/${props.widget.id}`, { options: { tabs: tabs.value } });
+		await api.patch(`/items/cms_widgets/${props.widget.id}`, {
+			options: { ...props.widget.options, tabs: tabs.value },
+		});
 		emit('reload');
 	} catch {
 		//
@@ -134,7 +141,9 @@ async function deleteTab(tab) {
 			return api.delete(`/items/cms_widgets/${k.id}`);
 		});
 		await Promise.allSettled(apis);
-		await api.patch(`/items/cms_widgets/${props.widget.id}`, { options: { tabs: tabs.value } });
+		await api.patch(`/items/cms_widgets/${props.widget.id}`, {
+			options: { ...props.widget.options, tabs: tabs.value },
+		});
 		notify({ title: 'Items deleted' });
 		emit('reload');
 	} catch {
@@ -152,7 +161,9 @@ const getWidgetByIds = (ids: (string | number)[]) => {
 
 async function updateOrderTab(values: any) {
 	try {
-		const res = await api.patch(`/items/cms_widgets/${props.widget.id}`, { options: { tabs: values } });
+		const res = await api.patch(`/items/cms_widgets/${props.widget.id}`, {
+			options: { ...props.widget.options, tabs: values },
+		});
 		tabs.value = res?.data?.data?.options?.tabs;
 		emit('reload');
 	} catch {
@@ -181,7 +192,9 @@ async function updateParentTab(widgets, el) {
 			return api.patch(`/items/cms_widgets/${k.id}`, k);
 		});
 		await Promise.allSettled(apis);
-		await api.patch(`/items/cms_widgets/${props.widget.id}`, { options: { tabs: tabs.value } });
+		await api.patch(`/items/cms_widgets/${props.widget.id}`, {
+			options: { ...props.widget.options, tabs: tabs.value },
+		});
 		emit('reload');
 	} catch {
 		//
@@ -195,7 +208,7 @@ async function updateParentTab(widgets, el) {
 }
 
 .widget-select {
-	margin: 0px 4px;
+	// margin: 0px 4px;
 }
 
 .widget-select:deep(.widget-grid) {

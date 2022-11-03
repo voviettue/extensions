@@ -14,6 +14,7 @@
 			<slot name="header">
 				<div class="header full">
 					<v-icon class="drag-handle" name="drag_indicator" @click.stop />
+					<v-icon v-if="!!config?.icon" class="drag-handle" :name="config.icon" @click.stop />
 					<v-text-overflow class="name" :text="widget.name" />
 					<v-icon v-if="widget.hidden" v-tooltip="`Hidden widget`" name="visibility_off" class="hidden-icon" small />
 					<widget-options
@@ -44,6 +45,7 @@ import { computed, defineEmits } from 'vue';
 import WidgetOptions from './widget-options.vue';
 import WidgetItem from './widget-item.vue';
 import Draggable from 'vuedraggable';
+import formFields from '../../widgets';
 
 interface Props {
 	widget: Record<string, any>;
@@ -68,7 +70,11 @@ const props = withDefaults(defineProps<Props>(), {
 		page: null,
 	}),
 	nestedWidgets: () => null,
+	updateParent: () => null,
 });
+
+const config = computed(() => formFields.find((e) => e.id === props.widget.widget));
+
 const nestedWidgets = computed(() => {
 	return (
 		props.nestedWidgets ||
@@ -102,9 +108,11 @@ function getClass(el: Record<string, any>) {
 .drag-handle {
 	cursor: grab !important;
 }
-
+.widget-grid.group {
+	margin: 0 4px;
+}
 .widget-select {
-	margin: 0px 4px;
+	// margin: 0px 4px;
 }
 
 .widget-select:deep(.widget-grid) {

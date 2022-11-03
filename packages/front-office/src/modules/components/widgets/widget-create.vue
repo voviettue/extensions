@@ -68,6 +68,7 @@
 
 <script setup lang="ts">
 import { ref, Ref, computed, watch } from 'vue';
+import { useApi } from '@directus/extensions-sdk';
 import { useRouter, useRoute } from 'vue-router';
 import { formFields } from '../../constants/widget';
 import { useValidate } from '../../composables/use-validate';
@@ -81,6 +82,7 @@ import { useItem } from '../../composables/use-item';
 const { validateItem } = useValidate();
 const router = useRouter();
 const route = useRoute();
+const api = useApi();
 
 const modelValue: Ref<Record<string, any>> = ref({ options: {} });
 const isOpen = ref(true);
@@ -95,6 +97,9 @@ const initialValues = ref({
 });
 const page = route.params.id;
 const primaryKey = route.params.widgetId as string;
+const parentId = route.params.parentId as string;
+const tabKey = route.query?.tab as string;
+
 const { item, edits, getItem, save, validationErrors } = useItem('cms_widgets', primaryKey);
 
 if (primaryKey === '+') {
@@ -141,13 +146,37 @@ async function handleChangeWidgets() {
 		if (selectedWidget.value?.beforeSave) {
 			edits.value = selectedWidget.value.beforeSave(edits.value);
 		}
+		if (parentId) {
+			edits.value.parent = parentId;
+		}
+
 		await save();
+
+		if (tabKey) {
+			await updateTab(tabKey);
+		}
+
 		router.push(`/front-office/pages/${page}`);
 	} catch {
 		// do nothing
 	} finally {
 		isLoading.value = false;
 	}
+}
+
+async function updateTab(tabKey) {
+	const res = await api.get(`/items/cms_widgets/${item.value!.parent}`);
+	const tab = res.data.data;
+	const tabs = tab.options?.tabs.map((tab: any) => {
+		if (tab.key === tabKey) {
+			const widgets = tab.widgets ?? [];
+			widgets.push(item.value!.id);
+			tab.widgets = widgets;
+		}
+		return tab;
+	});
+
+	await api.patch(`/items/cms_widgets/${item.value!.parent}`, { options: { ...tab.options, tabs: tabs } });
 }
 </script>
 <style scoped lang="scss">
@@ -179,7 +208,7 @@ async function handleChangeWidgets() {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 112px;
+	width: 110px;
 	height: 80px;
 	margin-bottom: 8px;
 	border: var(--border-width) solid var(--border-subdued);
