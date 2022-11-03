@@ -1,4 +1,12 @@
 import { defineWidget } from '../../utils/define-extension';
+import {
+	buttonTypeChoices,
+	buttonSizeChoices,
+	buttonVariantChoices,
+	positionChoices,
+	shadowChoices,
+	borderChoices,
+} from '../choices';
 
 export default defineWidget({
 	id: 'menu-button',
@@ -10,7 +18,6 @@ export default defineWidget({
 			name: 'Label',
 			type: 'string',
 			meta: {
-				required: true,
 				interface: 'input',
 				width: 'full',
 				options: {
@@ -34,7 +41,6 @@ export default defineWidget({
 							name: 'Button Label',
 							type: 'string',
 							meta: {
-								width: 'half',
 								interface: 'input',
 								options: {
 									trim: true,
@@ -62,6 +68,15 @@ export default defineWidget({
 						{
 							field: 'disabled',
 							name: 'Disabled',
+							type: 'boolean',
+							meta: {
+								width: 'half',
+								interface: 'boolean',
+							},
+						},
+						{
+							field: 'divider',
+							name: 'Divider',
 							type: 'boolean',
 							meta: {
 								width: 'half',
@@ -134,20 +149,7 @@ export default defineWidget({
 				interface: 'select-dropdown',
 				width: 'half',
 				options: {
-					choices: [
-						{
-							text: 'Left',
-							value: 'left',
-						},
-						{
-							text: 'Center',
-							value: 'center',
-						},
-						{
-							text: 'Right',
-							value: 'right',
-						},
-					],
+					choices: positionChoices,
 				},
 			},
 			schema: {
@@ -163,20 +165,7 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					allowNone: true,
-					choices: [
-						{
-							text: 'SM',
-							value: 'sm',
-						},
-						{
-							text: 'MD',
-							value: 'md',
-						},
-						{
-							text: 'LG',
-							value: 'lg',
-						},
-					],
+					choices: buttonSizeChoices,
 				},
 			},
 			schema: {
@@ -192,40 +181,7 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					allowNone: true,
-					choices: [
-						{
-							text: 'Primary',
-							value: 'primary',
-						},
-						{
-							text: 'Secondary',
-							value: 'secondary',
-						},
-						{
-							text: 'Success',
-							value: 'success',
-						},
-						{
-							text: 'Warning',
-							value: 'warning',
-						},
-						{
-							text: 'Danger',
-							value: 'danger',
-						},
-						{
-							text: 'Info',
-							value: 'info',
-						},
-						{
-							text: 'Light',
-							value: 'light',
-						},
-						{
-							text: 'Dark',
-							value: 'dark',
-						},
-					],
+					choices: buttonVariantChoices,
 				},
 			},
 			schema: {
@@ -241,24 +197,7 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					allowNone: true,
-					choices: [
-						{
-							text: 'Solid',
-							value: 'solid',
-						},
-						{
-							text: 'Outline',
-							value: 'outline',
-						},
-						{
-							text: 'Link',
-							value: 'link',
-						},
-						{
-							text: 'Ghost',
-							value: 'ghost',
-						},
-					],
+					choices: buttonTypeChoices,
 				},
 			},
 			schema: {
@@ -266,20 +205,8 @@ export default defineWidget({
 			},
 		},
 		{
-			field: 'disable',
-			name: 'Disable',
-			type: 'boolean',
-			meta: {
-				width: 'half',
-				interface: 'Boolean',
-			},
-			schema: {
-				default_value: false,
-			},
-		},
-		{
-			field: 'outline',
-			name: 'Outline',
+			field: 'disabled',
+			name: 'Disabled',
 			type: 'boolean',
 			meta: {
 				width: 'half',
@@ -328,15 +255,14 @@ export default defineWidget({
 			name: 'Border Radius',
 			type: 'integer',
 			meta: {
-				interface: 'input',
+				interface: 'select-dropdown',
 				width: 'half',
 				options: {
-					trim: true,
-					placeholder: 'Enter border width size in px',
+					allowOther: true,
+					allowNone: true,
+					choices: borderChoices,
+					placeholder: 'Default',
 				},
-			},
-			schema: {
-				default_value: 0,
 			},
 		},
 		{
@@ -348,32 +274,11 @@ export default defineWidget({
 				width: 'half',
 				options: {
 					allowNone: true,
-					choices: [
-						{
-							text: 'SM',
-							value: 'sm',
-						},
-						{
-							text: 'MD',
-							value: 'md',
-						},
-						{
-							text: 'LG',
-							value: 'lg',
-						},
-						{
-							text: 'XL',
-							value: 'xl',
-						},
-						{
-							text: '2XL',
-							value: '2xl',
-						},
-					],
+					choices: shadowChoices,
 				},
 			},
 			schema: {
-				default_value: 'md',
+				default_value: 'sm',
 			},
 		},
 	],
