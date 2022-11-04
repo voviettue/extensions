@@ -10,6 +10,10 @@
 			</v-button>
 		</template>
 
+		<template #sidebar>
+			<sidebar-detail icon="info" :title="t('information')" close></sidebar-detail>
+		</template>
+
 		<template #actions>
 			<v-button rounded icon :loading="saving" @click="saveHandler">
 				<v-icon name="check" />
@@ -65,10 +69,12 @@ import { useFrontOfficeStore } from '../stores/front-office';
 import { formFields, menuFields, pageFields, optionsFields } from '../constants/setting';
 import { useItem } from '../composables/use-item';
 import { useValidate } from '../composables/use-validate';
+import { useI18n } from 'vue-i18n';
 
 const collection = 'cms_settings';
 const { validateItem } = useValidate();
 const frontOfficeStore = useFrontOfficeStore();
+const { t } = useI18n();
 frontOfficeStore.hydrate();
 
 const { item, edits, save, loading, saving, validationErrors, getItem } = useItem(collection, '');

@@ -12,7 +12,7 @@
 					<v-list-item-content>View content</v-list-item-content>
 				</v-list-item>
 
-				<v-list-item v-if="isAdmin && widget?.page && widget.widget !== 'tabs'" clickable @click="createChildrenWidget">
+				<v-list-item v-if="isAdmin && allowCreateChild" clickable @click="createChildrenWidget">
 					<v-list-item-icon>
 						<v-icon name="add" />
 					</v-list-item-icon>
@@ -81,6 +81,8 @@ const props = withDefaults(
 		}),
 	}
 );
+
+const allowCreateChild = ['container', 'list', 'tab', 'form', 'modal'].includes(props.widget?.widget);
 
 function createChildrenWidget() {
 	if (props.widget.widget === 'tab') {
