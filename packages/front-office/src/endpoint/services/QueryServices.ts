@@ -4,7 +4,7 @@ import { SchemaOverview, Accountability, ApiExtensionContext } from '@directus/s
 import { BaseException } from '@directus/shared/exceptions';
 import isJson from '../utils/is-json';
 import renderTemplate from '../utils/render-template';
-import { inspect } from 'util';
+import parseResponse from '../utils/parseResponse';
 
 export class QueryService {
 	schema: SchemaOverview;
@@ -181,7 +181,7 @@ export class QueryService {
 		} catch (e: any) {
 			const message =
 				(e?.response?.data?.errors && e?.response?.data?.errors[0]?.message) || e?.response?.data?.message || '';
-			this.log.response = inspect(e?.response);
+			this.log.response = parseResponse(e?.response);
 			const statusCode = e?.response?.status;
 			throw new BaseException(message, statusCode, e?.code);
 		}
