@@ -329,8 +329,8 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'disabled',
-				name: 'Read-only',
+				field: 'readonly',
+				name: 'Readonly',
 				type: 'boolean',
 				meta: {
 					width: 'half',
