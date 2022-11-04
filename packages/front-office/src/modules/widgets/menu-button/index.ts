@@ -217,29 +217,6 @@ export default defineWidget({
 			},
 		},
 		{
-			field: 'eventsDivider',
-			name: 'Events',
-			type: 'alias',
-			meta: {
-				width: 'full',
-				options: { title: 'Events' },
-				interface: 'presentation-divider',
-				special: ['alias', 'no-data', 'group'],
-			},
-		},
-		{
-			field: 'onClick',
-			name: 'On Click (Javascript)',
-			meta: {
-				width: 'full',
-				interface: 'input-javascript',
-				options: {
-					minLine: 4,
-				},
-				note: 'Type "/" to see all of variables and function are supported.',
-			},
-		},
-		{
 			field: 'stylesDivider',
 			name: 'Styles',
 			type: 'alias',
@@ -276,9 +253,6 @@ export default defineWidget({
 					allowNone: true,
 					choices: shadowChoices,
 				},
-			},
-			schema: {
-				default_value: 'sm',
 			},
 		},
 	],
