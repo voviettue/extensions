@@ -90,6 +90,34 @@ export default defineWidget({
 			},
 		},
 		{
+			field: 'submitBorderRadius',
+			name: 'Border Radius',
+			type: 'integer',
+			meta: {
+				interface: 'select-dropdown',
+				width: 'half',
+				options: {
+					allowOther: true,
+					allowNone: true,
+					choices: borderChoices,
+					placeholder: 'Default',
+				},
+			},
+		},
+		{
+			field: 'submitShadow',
+			name: 'Box Shadow',
+			type: 'string',
+			meta: {
+				interface: 'select-dropdown',
+				width: 'half',
+				options: {
+					allowNone: true,
+					choices: shadowChoices,
+				},
+			},
+		},
+		{
 			field: 'onSubmit',
 			name: 'on Click (Javascript)',
 			type: 'text',
@@ -169,6 +197,34 @@ export default defineWidget({
 			},
 			schema: {
 				default_value: 'secondary',
+			},
+		},
+		{
+			field: 'resetBorderRadius',
+			name: 'Border Radius',
+			type: 'integer',
+			meta: {
+				interface: 'select-dropdown',
+				width: 'half',
+				options: {
+					allowOther: true,
+					allowNone: true,
+					choices: borderChoices,
+					placeholder: 'Default',
+				},
+			},
+		},
+		{
+			field: 'resetShadow',
+			name: 'Box Shadow',
+			type: 'string',
+			meta: {
+				interface: 'select-dropdown',
+				width: 'half',
+				options: {
+					allowNone: true,
+					choices: shadowChoices,
+				},
 			},
 		},
 		{

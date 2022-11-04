@@ -130,7 +130,6 @@ export default defineWidget({
 				default_value: 'solid',
 			},
 		},
-
 		{
 			field: 'disabled',
 			name: 'Disabled',
