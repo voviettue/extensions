@@ -16,7 +16,7 @@
 					<v-icon v-if="!!config?.icon" class="drag-handle" :name="config.icon" @click.stop />
 					<v-text-overflow class="name" :text="widget.name" />
 					<v-icon v-if="widget.hidden" v-tooltip="`Hidden widget`" name="visibility_off" class="hidden-icon" small />
-					<widget-options :widget="widget" />
+					<widget-options :widget="widget" :update-visiable="updateVisiable" :delete-widget="deleteWidget" />
 				</div>
 			</slot>
 		</template>
@@ -26,7 +26,6 @@
 		</template>
 	</draggable>
 </template>
-
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import WidgetOptions from './widget-options.vue';
@@ -35,12 +34,14 @@ import Draggable from 'vuedraggable';
 import formFields from '../../widgets';
 import { useFrontOfficeStore } from '../../stores/front-office';
 import { storeToRefs } from 'pinia';
-import { Widget } from '../../types';
+import { Widget, Tab } from '../../types';
 
 interface Props {
 	widget: Widget;
+	tab: Tab;
 }
 const props = defineProps<Props>();
+const emit = defineEmits(['update']);
 const store = useFrontOfficeStore();
 const { widgets } = storeToRefs(store);
 const items = ref([]);
@@ -49,14 +50,29 @@ const config = computed(() => formFields.find((e) => e.id === props.widget.widge
 watch(
 	[widgets],
 	() => {
-		items.value = widgets.value
-			.filter((item: any) => props.widget?.id === item.parent)
-			.sort((a: any, b: any) => (a.sort ?? 1000) - (b.sort ?? 1000));
+		items.value = widgets.value.filter((item: any) => props.tab.widgets?.includes(item.id));
 	},
 	{ immediate: true }
 );
 
 async function onSort(values) {
-	store.sortWidgets(values, props.widget.id);
+	const updateItems = values.filter((e: any, index) => {
+		if (e.parent === props.widget.id && e.sort === index) {
+			return false;
+		}
+		e.parent = props.widget.id;
+		e.sort = index;
+		return true;
+	});
+
+	for (const item of updateItems) {
+		store.updateWidget(item.id, {
+			parent: item.parent,
+			sort: item.sort,
+		});
+	}
+
+	const widgets = values.map((e: any) => e.id);
+	emit('update', { ...props.tab, widgets });
 }
 </script>

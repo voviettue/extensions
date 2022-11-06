@@ -3,7 +3,7 @@ import { validationsField } from '../fields';
 import { sizeChoices, fontFamilyChoices, shadowChoices, borderChoices } from '../choices';
 
 export default defineWidget({
-	id: 'textarea-input',
+	id: 'textarea',
 	name: 'Textarea Input',
 	icon: 'article',
 	options: ({ values }) => {

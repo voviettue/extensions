@@ -5,14 +5,7 @@
 				<v-icon name="more_vert" clickable @click.prevent="toggle" />
 			</template>
 			<v-list>
-				<v-list-item v-if="widget.id" :clickable="false" :to="`/front-office/pages/${widget.page}/widget/${widget.id}`">
-					<v-list-item-icon>
-						<v-icon name="box" />
-					</v-list-item-icon>
-					<v-list-item-content>View content</v-list-item-content>
-				</v-list-item>
-
-				<v-list-item v-if="isAdmin && allowCreateChild" clickable @click="createChildrenWidget">
+				<v-list-item v-if="isAdmin" clickable @click="createWidget">
 					<v-list-item-icon>
 						<v-icon name="add" />
 					</v-list-item-icon>
@@ -20,12 +13,16 @@
 				</v-list-item>
 
 				<v-list-item v-if="isAdmin" clickable @click="toggleHidden">
-					<template v-if="widget.hidden === true">
-						<v-list-item-icon><v-icon name="visibility_off" /></v-list-item-icon>
+					<template v-if="tab.hidden === true">
+						<v-list-item-icon>
+							<v-icon name="visibility_off" />
+						</v-list-item-icon>
 						<v-list-item-content>Make Visible</v-list-item-content>
 					</template>
 					<template v-else>
-						<v-list-item-icon><v-icon name="visibility" /></v-list-item-icon>
+						<v-list-item-icon>
+							<v-icon name="visibility" />
+						</v-list-item-icon>
 						<v-list-item-content>Make Hidden</v-list-item-content>
 					</template>
 				</v-list-item>
@@ -41,7 +38,7 @@
 		<v-dialog v-model="deleteDialog" @esc="deleteDialog = false">
 			<v-card>
 				<v-card-title>
-					{{ `Are you sure you want to delete this widget "${widget.name}"? This action can not be undone.` }}
+					{{ `Are you sure you want to delete this tab "${tab.label}"? This action can not be undone.` }}
 				</v-card-title>
 				<v-card-actions>
 					<v-button secondary @click="deleteDialog = false">Cancel</v-button>
@@ -52,42 +49,37 @@
 	</div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useFrontOfficeStore } from '../../stores/front-office';
+import { Ref, ref } from 'vue';
 import { useStores } from '@directus/extensions-sdk';
 import { useRouter } from 'vue-router';
-import { Widget } from '../../types';
+import { Widget, Tab } from '../../types';
 import { useNotification } from '../../composables/use-notification';
 
 interface Props {
 	widget: Widget;
+	tab: Tab;
 }
 
 const props = defineProps<Props>();
+const emit = defineEmits(['update', 'delete']);
 const { useUserStore } = useStores();
-const store = useFrontOfficeStore();
-const router = useRouter();
 const { isAdmin } = useUserStore();
 const { notify } = useNotification();
+const router = useRouter();
+const deleteDialog: Ref<boolean> = ref(false);
 
-const deleteDialog = ref(false);
-const allowCreateChild = ['container', 'list', 'tab', 'form', 'modal'].includes(props.widget?.widget);
-
-async function toggleHidden() {
-	await store.updateWidget(props.widget.id, { hidden: !props.widget.hidden });
-	notify({ title: 'Item updated' });
-	await store.hydrateWidgets(props.widget.page);
+function createWidget() {
+	return router.push(`/front-office/pages/${props.widget.page}/widget/+/${props.widget.id}?tab=${props.tab.key}`);
 }
 
-async function deleteHandler() {
-	const page = props.widget.page;
-	await store.deleteWidget(props.widget.id);
-	notify({ title: 'Item deleted' });
-	await store.hydrateWidgets(page);
+function toggleHidden() {
+	const hidden = props.tab.hidden ?? false;
+	emit('update', { ...props.tab, hidden: !hidden });
+	notify({ title: 'Item updated!' });
 }
 
-function createChildrenWidget() {
-	return router.push(`/front-office/pages/${props.widget.page}/widget/+/${props.widget.id}`);
+function deleteHandler() {
+	emit('delete', props.tab);
 }
 </script>
 
