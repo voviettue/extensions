@@ -16,7 +16,7 @@
 					<v-icon v-if="!!config?.icon" class="drag-handle" :name="config.icon" @click.stop />
 					<v-text-overflow class="name" :text="widget.name" />
 					<v-icon v-if="widget.hidden" v-tooltip="`Hidden widget`" name="visibility_off" class="hidden-icon" small />
-					<widget-options :widget="widget" :update-visiable="updateVisiable" :delete-widget="deleteWidget" />
+					<widget-options :widget="widget" />
 				</div>
 			</slot>
 		</template>
@@ -56,22 +56,7 @@ watch(
 );
 
 async function onSort(values) {
-	const updateItems = values.filter((e: any, index) => {
-		if (e.parent === props.widget.id && e.sort === index) {
-			return false;
-		}
-		e.parent = props.widget.id;
-		e.sort = index;
-		return true;
-	});
-
-	for (const item of updateItems) {
-		store.updateWidget(item.id, {
-			parent: item.parent,
-			sort: item.sort,
-		});
-	}
-
+	store.sortWidgets(values, props.widget.id);
 	const widgets = values.map((e: any) => e.id);
 	emit('update', { ...props.tab, widgets });
 }

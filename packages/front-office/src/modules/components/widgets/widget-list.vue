@@ -81,11 +81,12 @@ async function onSort(values) {
 	}
 
 	.draggable-list {
-		padding: 4px;
+		padding: 0;
+		margin: 0 -12px;
 	}
 
 	.new-widget {
-		margin-top: 20px;
+		margin-top: 12px;
 	}
 
 	.grid-col-full {
@@ -124,8 +125,12 @@ async function onSort(values) {
 		width: 100%;
 		display: grid;
 		grid-template-columns: repeat(6, minmax(0, 1fr));
-		gap: 10px;
+		gap: 8px 12px;
 		padding: 12px;
+	}
+
+	.widget-select {
+		margin: 2px 0px;
 	}
 }
 </style>

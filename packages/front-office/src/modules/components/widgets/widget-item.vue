@@ -40,26 +40,27 @@ const config = computed(() => formFields.find((e) => e.id === props.widget.widge
 	.group {
 		position: relative;
 		min-height: var(--input-height);
-		padding: 10px;
-		padding-top: 44px !important;
+		padding-top: 48px !important;
 		border-radius: var(--border-radius);
+		border: 1px solid var(--primary-25);
+		border-left: 3px solid var(--primary-75);
 
 		> * {
 			position: relative;
 			z-index: 2;
 		}
 
-		&::before {
-			position: absolute;
-			top: 0;
-			left: -2px;
-			z-index: 1;
-			width: 2px;
-			height: 100%;
-			background-color: var(--primary);
-			border-radius: 2px;
-			content: '';
-		}
+		// &::before {
+		// 	position: absolute;
+		// 	top: 0;
+		// 	left: 0px;
+		// 	z-index: 1;
+		// 	width: 2px;
+		// 	height: 100%;
+		// 	background-color: var(--primary);
+		// 	border-radius: 2px;
+		// 	content: '';
+		// }
 
 		&::after {
 			position: absolute;
@@ -80,8 +81,8 @@ const config = computed(() => formFields.find((e) => e.id === props.widget.widge
 			display: flex;
 			align-items: center;
 			width: 100%;
-			margin-bottom: 10px;
-			padding-top: 10px;
+			margin-bottom: 12px;
+			padding-top: 12px;
 			color: var(--primary);
 			font-family: var(--family-monospace);
 
