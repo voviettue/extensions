@@ -52,6 +52,10 @@ export const useFrontOfficeStore = defineStore({
 			});
 			await Promise.allSettled(apis);
 		},
+		async createWidget(payload: Record<string, any>) {
+			const res = await this.api.post(`/items/cms_widgets`, payload);
+			return res?.data?.data;
+		},
 		async updateWidget(id: string | number, payload: Record<string, any>) {
 			await this.api.patch(`/items/cms_widgets/${id}`, payload);
 		},

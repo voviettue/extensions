@@ -30,6 +30,13 @@
 					</template>
 				</v-list-item>
 
+				<v-list-item v-if="isAdmin" clickable @click="duplicate">
+					<v-list-item-icon>
+						<v-icon name="content_copy" />
+					</v-list-item-icon>
+					<v-list-item-content>Duplicate</v-list-item-content>
+				</v-list-item>
+
 				<v-list-item v-if="isAdmin" clickable class="danger" @click="deleteDialog = true">
 					<v-list-item-icon>
 						<v-icon name="delete" />
@@ -58,6 +65,7 @@ import { useStores } from '@directus/extensions-sdk';
 import { useRouter } from 'vue-router';
 import { Widget } from '../../types';
 import { useNotification } from '../../composables/use-notification';
+import cloneDeep from 'lodash/cloneDeep';
 
 interface Props {
 	widget: Widget;
@@ -68,7 +76,7 @@ const { useUserStore } = useStores();
 const store = useFrontOfficeStore();
 const router = useRouter();
 const { isAdmin } = useUserStore();
-const { notify } = useNotification();
+const { notify, unexpectedError } = useNotification();
 
 const deleteDialog = ref(false);
 const allowCreateChild = ['container', 'list', 'tab', 'form', 'modal'].includes(props.widget?.widget);
@@ -80,10 +88,51 @@ async function toggleHidden() {
 }
 
 async function deleteHandler() {
-	const page = props.widget.page;
 	await store.deleteWidget(props.widget.id);
 	notify({ title: 'Item deleted' });
-	await store.hydrateWidgets(page);
+	await store.hydrateWidgets(props.widget.page);
+}
+
+async function duplicate() {
+	try {
+		await cloneWidget(props.widget, props.widget.parent);
+		await store.hydrateWidgets(props.widget.page);
+		notify({ title: 'Item copied' });
+	} catch (err) {
+		unexpectedError(err);
+	}
+}
+
+async function cloneWidget(widget, parent, index = 0) {
+	index++;
+	try {
+		const payload = cloneDeep(widget);
+		delete payload['id'];
+		payload.name += ' (Copy)';
+		payload.sort = payload.sort ?? null;
+		payload.parent = parent;
+		const key = `${payload.key}_${index}`;
+
+		const clonedWidget = await store.createWidget({ ...payload, key });
+		await cloneChildren(widget, clonedWidget.id, index);
+	} catch (err: any) {
+		const code = err?.response?.data?.errors?.[0]?.extensions?.code;
+		if (code === 'RECORD_NOT_UNIQUE' && index <= 10) {
+			return await cloneWidget(widget, parent, index);
+		}
+
+		throw Error('An occur error when trying to duplicate widget.');
+	}
+}
+
+async function cloneChildren(widget: Widget, parent, index) {
+	const childWidgets = store.widgets.filter((item: any) => {
+		return item.parent === widget.id;
+	});
+
+	for (const childWidget of childWidgets) {
+		await cloneWidget(childWidget, parent, index);
+	}
 }
 
 function createChildrenWidget() {
