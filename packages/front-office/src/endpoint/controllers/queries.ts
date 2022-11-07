@@ -29,6 +29,7 @@ async function execute(req: any, res: any, ctx: ApiExtensionContext) {
 	try {
 		const data = await queryService.execute(queryId, req.body);
 		queryService.log.data = data;
+		queryService.log.status = 200;
 		return data;
 	} catch (e: any) {
 		queryService.log.error = e;
