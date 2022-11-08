@@ -11,13 +11,14 @@ import { Field } from '@directus/shared/types';
 let currentData: any = null;
 
 export default defineWidget({
-	id: 'select',
-	name: 'Select',
+	id: 'multipleSelect',
+	name: 'Multiple Select',
 	icon: 'segment',
 	options: ({ values }) => {
 		currentData = values?.options?.data;
 		const bindData = useBindData(currentData);
 		const data = Array.isArray(parseJson(bindData, [])) ? parseJson(bindData, []) : [];
+
 		let dateFields: string[] = [];
 		data?.map((e: {}) => {
 			dateFields = union(dateFields, Object.keys(pickBy(e, (value: any) => !!parseDate(value))));
@@ -69,7 +70,7 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'textSource',
+				field: 'text',
 				name: 'Text',
 				type: 'string',
 				meta: {
@@ -86,7 +87,7 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'valueSource',
+				field: 'value',
 				name: 'Value',
 				type: 'string',
 				meta: {
@@ -103,7 +104,7 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'secondaryTextSource',
+				field: 'secondaryText',
 				name: 'Secondary Text',
 				type: 'string',
 				meta: {
@@ -525,9 +526,7 @@ export default defineWidget({
 			dataOptions = dataOptions.filter((item) => !['labelWidth', 'alignment'].includes(item.field));
 		}
 		if (!values?.options?.typeData) {
-			dataOptions = dataOptions.filter(
-				(item) => !['data', 'textSource', 'valueSource', 'secondaryTextSource'].includes(item.field)
-			);
+			dataOptions = dataOptions.filter((item) => !['data', 'text', 'value', 'secondaryText'].includes(item.field));
 		} else {
 			dataOptions = dataOptions.filter((item) => !['choices'].includes(item.field));
 		}

@@ -20,7 +20,7 @@ import tags from './tags';
 import menuButton from './menu-button';
 import form from './form';
 import textarea from './textarea';
-
+import multipleSelect from './multiple-select';
 export default [
 	text,
 	table,
@@ -44,4 +44,5 @@ export default [
 	dateTimeInput,
 	select,
 	textarea,
+	multipleSelect,
 ];
