@@ -20,6 +20,7 @@ import tags from './tags';
 import menuButton from './menu-button';
 import form from './form';
 import textarea from './textarea';
+import multipleSelect from './multiple-select';
 import modal from './modal';
 
 export default [
@@ -36,6 +37,7 @@ export default [
 	calendar,
 	tabs,
 	tags,
+	modal,
 	button,
 	iconButton,
 	menuButton,
@@ -45,5 +47,5 @@ export default [
 	dateTimeInput,
 	select,
 	textarea,
-	modal,
+	multipleSelect,
 ];

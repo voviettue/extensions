@@ -10,8 +10,8 @@ import parseDate from '../../utils/parse-date';
 let currentData: any = null;
 
 export default defineWidget({
-	id: 'select',
-	name: 'Select',
+	id: 'multiple-select',
+	name: 'Multiple Select',
 	icon: 'segment',
 	options: ({ values }) => {
 		currentData = values?.options?.data;
@@ -523,7 +523,7 @@ export default defineWidget({
 		if (values?.options?.labelPosition === 'top') {
 			dataOptions = dataOptions.filter((item) => !['labelWidth', 'alignment'].includes(item.field));
 		}
-		if (!values?.options?.dataFi) {
+		if (!values?.options?.dataField) {
 			dataOptions = dataOptions.filter(
 				(item) => !['data', 'textField', 'valueField', 'secondaryField'].includes(item.field)
 			);
