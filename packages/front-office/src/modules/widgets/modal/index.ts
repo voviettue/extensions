@@ -8,21 +8,24 @@ export default defineWidget({
 	group: true,
 	options: [
 		{
-			field: 'defaultValue',
-			name: 'Default Value',
-			type: 'string',
+			field: 'showOnLoad',
+			name: 'Show On Load',
+			type: 'boolean',
 			meta: {
-				interface: 'input-multiline',
-				width: 'full',
+				interface: 'boolean',
+				width: 'half',
+			},
+			schema: {
+				default_value: false,
 			},
 		},
 		{
-			field: 'titleOptions',
+			field: 'headerOptions',
 			type: 'alias',
 			meta: {
 				interface: 'presentation-divider',
 				options: {
-					title: 'Label',
+					title: 'Header',
 				},
 				special: ['alias', 'no-data', 'group'],
 			},
@@ -41,21 +44,6 @@ export default defineWidget({
 			},
 		},
 		{
-			field: 'showTitle',
-			name: 'Show Title',
-			type: 'boolean',
-			meta: {
-				interface: 'boolean',
-				width: 'half',
-				options: {
-					label: 'Show modal title',
-				},
-			},
-			schema: {
-				default_value: true,
-			},
-		},
-		{
 			field: 'icon',
 			name: 'Icon',
 			type: 'string',
@@ -65,14 +53,14 @@ export default defineWidget({
 			},
 		},
 		{
-			field: 'showIcon',
-			name: 'Show Icon',
+			field: 'hideHeader',
+			name: 'Hidden',
 			type: 'boolean',
 			meta: {
 				interface: 'boolean',
 				width: 'half',
 				options: {
-					label: 'Show icon on the left of title',
+					label: 'Hide header',
 				},
 			},
 			schema: {
@@ -367,14 +355,14 @@ export default defineWidget({
 				interface: 'input',
 				width: 'half',
 				options: {
-					placeholder: '24px',
+					placeholder: '1rem',
 				},
 				note: 'Spacing between the widgets.<br><a target="_blank" tabindex="-1" href="https://developer.mozilla.org/en-US/docs/Web/CSS/gap">Learn more</a>',
 			},
 		},
 		{
-			field: 'width',
-			name: 'Width',
+			field: 'modalWidth',
+			name: 'Modal Width',
 			type: 'string',
 			meta: {
 				width: 'half',
