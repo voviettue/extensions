@@ -20,6 +20,7 @@ import tags from './tags';
 import menuButton from './menu-button';
 import form from './form';
 import textarea from './textarea';
+import modal from './modal';
 
 export default [
 	text,
@@ -44,4 +45,5 @@ export default [
 	dateTimeInput,
 	select,
 	textarea,
+	modal,
 ];
