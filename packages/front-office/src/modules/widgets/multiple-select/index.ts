@@ -37,7 +37,7 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'dataType',
+				field: 'dataField',
 				name: 'Data Type',
 				type: 'string',
 				meta: {
@@ -102,7 +102,7 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'secondaryTextField',
+				field: 'secondaryField',
 				name: 'Secondary Text',
 				type: 'string',
 				meta: {
@@ -523,9 +523,9 @@ export default defineWidget({
 		if (values?.options?.labelPosition === 'top') {
 			dataOptions = dataOptions.filter((item) => !['labelWidth', 'alignment'].includes(item.field));
 		}
-		if (!values?.options?.dataType) {
+		if (!values?.options?.dataField) {
 			dataOptions = dataOptions.filter(
-				(item) => !['data', 'textField', 'valueField', 'secondaryTextField'].includes(item.field)
+				(item) => !['data', 'textField', 'valueField', 'secondaryField'].includes(item.field)
 			);
 		} else {
 			dataOptions = dataOptions.filter((item) => !['choices'].includes(item.field));
