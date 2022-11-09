@@ -6,19 +6,17 @@ import { useBindData } from '../../composables/use-bind-data';
 import pickBy from 'lodash/pickBy';
 import union from 'lodash/union';
 import parseDate from '../../utils/parse-date';
-import { Field } from '@directus/shared/types';
 
 let currentData: any = null;
 
 export default defineWidget({
-	id: 'multipleSelect',
+	id: 'multiple-select',
 	name: 'Multiple Select',
 	icon: 'segment',
 	options: ({ values }) => {
 		currentData = values?.options?.data;
 		const bindData = useBindData(currentData);
 		const data = Array.isArray(parseJson(bindData, [])) ? parseJson(bindData, []) : [];
-
 		let dateFields: string[] = [];
 		data?.map((e: {}) => {
 			dateFields = union(dateFields, Object.keys(pickBy(e, (value: any) => !!parseDate(value))));
@@ -39,21 +37,21 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'typeData',
-				name: 'Type Data',
+				field: 'dataType',
+				name: 'Data Type',
 				type: 'string',
 				meta: {
 					interface: 'select-radio',
 					width: 'full',
 					options: {
 						choices: [
-							{ text: 'Manual', value: 'manual' },
-							{ text: 'Data Source', value: 'dataSource' },
+							{ text: 'Choices', value: 'choices' },
+							{ text: 'Data', value: 'data' },
 						],
 					},
 				},
 				schema: {
-					default_value: 'manual',
+					default_value: 'choices',
 				},
 			},
 			{
@@ -70,7 +68,7 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'text',
+				field: 'textField',
 				name: 'Text',
 				type: 'string',
 				meta: {
@@ -87,7 +85,7 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'value',
+				field: 'valueField',
 				name: 'Value',
 				type: 'string',
 				meta: {
@@ -104,7 +102,7 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'secondaryText',
+				field: 'secondaryTextField',
 				name: 'Secondary Text',
 				type: 'string',
 				meta: {
@@ -525,8 +523,10 @@ export default defineWidget({
 		if (values?.options?.labelPosition === 'top') {
 			dataOptions = dataOptions.filter((item) => !['labelWidth', 'alignment'].includes(item.field));
 		}
-		if (!values?.options?.typeData) {
-			dataOptions = dataOptions.filter((item) => !['data', 'text', 'value', 'secondaryText'].includes(item.field));
+		if (!values?.options?.dataType) {
+			dataOptions = dataOptions.filter(
+				(item) => !['data', 'textField', 'valueField', 'secondaryTextField'].includes(item.field)
+			);
 		} else {
 			dataOptions = dataOptions.filter((item) => !['choices'].includes(item.field));
 		}
