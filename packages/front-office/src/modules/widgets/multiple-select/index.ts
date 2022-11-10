@@ -24,29 +24,16 @@ export default defineWidget({
 
 		const defaultOptions = [
 			{
-				field: 'defaultValue',
-				name: 'Default Value',
-				type: 'string',
-				meta: {
-					interface: 'input',
-					width: 'full',
-					options: {
-						trim: true,
-						placeholder: 'Enter default value to be displayed',
-					},
-				},
-			},
-			{
 				field: 'dataField',
-				name: 'Data Type',
+				name: 'Data Options',
 				type: 'string',
 				meta: {
 					interface: 'select-radio',
 					width: 'full',
 					options: {
 						choices: [
-							{ text: 'Choices', value: 'choices' },
-							{ text: 'Data', value: 'data' },
+							{ text: 'Manual', value: 'choices' },
+							{ text: 'Mapped', value: 'data' },
 						],
 					},
 				},
@@ -65,6 +52,30 @@ export default defineWidget({
 						language: 'javascript',
 						lineNumber: true,
 					},
+					hidden: true,
+					conditions: [
+						{
+							rule: {
+								dataField: {
+									_eq: 'data',
+								},
+							},
+							hidden: false,
+						},
+					],
+				},
+			},
+			{
+				field: 'defaultValue',
+				name: 'Default Value',
+				type: 'string',
+				meta: {
+					interface: 'input',
+					width: 'full',
+					options: {
+						trim: true,
+						placeholder: 'Enter default value to be displayed',
+					},
 				},
 			},
 			{
@@ -82,6 +93,17 @@ export default defineWidget({
 						allowOther: true,
 					},
 					width: 'half',
+					hidden: true,
+					conditions: [
+						{
+							rule: {
+								dataField: {
+									_eq: 'data',
+								},
+							},
+							hidden: false,
+						},
+					],
 				},
 			},
 			{
@@ -99,6 +121,17 @@ export default defineWidget({
 						allowOther: true,
 					},
 					width: 'half',
+					hidden: true,
+					conditions: [
+						{
+							rule: {
+								dataField: {
+									_eq: 'data',
+								},
+							},
+							hidden: false,
+						},
+					],
 				},
 			},
 			{
@@ -115,9 +148,21 @@ export default defineWidget({
 						allowNone: true,
 						allowOther: true,
 					},
-					width: 'half',
+					width: 'full',
+					hidden: true,
+					conditions: [
+						{
+							rule: {
+								dataField: {
+									_eq: 'data',
+								},
+							},
+							hidden: false,
+						},
+					],
 				},
 			},
+
 			{
 				field: 'choices',
 				name: 'Choices',
@@ -166,6 +211,17 @@ export default defineWidget({
 							},
 						],
 					},
+					hidden: true,
+					conditions: [
+						{
+							rule: {
+								dataField: {
+									_eq: 'choices',
+								},
+							},
+							hidden: false,
+						},
+					],
 				},
 			},
 			{
@@ -275,6 +331,17 @@ export default defineWidget({
 							},
 						],
 					},
+					hidden: true,
+					conditions: [
+						{
+							rule: {
+								labelPosition: {
+									_eq: 'left',
+								},
+							},
+							hidden: false,
+						},
+					],
 				},
 				schema: {
 					default_value: 'left',
@@ -292,6 +359,17 @@ export default defineWidget({
 						min: 1,
 						max: 5,
 					},
+					hidden: true,
+					conditions: [
+						{
+							rule: {
+								labelPosition: {
+									_eq: 'left',
+								},
+							},
+							hidden: false,
+						},
+					],
 				},
 				schema: {
 					default_value: 2,
@@ -519,17 +597,6 @@ export default defineWidget({
 				},
 			},
 		];
-		let dataOptions = [...defaultOptions];
-		if (values?.options?.labelPosition === 'top') {
-			dataOptions = dataOptions.filter((item) => !['labelWidth', 'alignment'].includes(item.field));
-		}
-		if (!values?.options?.dataField) {
-			dataOptions = dataOptions.filter(
-				(item) => !['data', 'textField', 'valueField', 'secondaryField'].includes(item.field)
-			);
-		} else {
-			dataOptions = dataOptions.filter((item) => !['choices'].includes(item.field));
-		}
-		return dataOptions;
+		return defaultOptions;
 	},
 });
