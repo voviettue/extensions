@@ -55,3 +55,13 @@ const useComponent = computed(() => {
 	);
 });
 </script>
+<style lang="scss" scoped>
+.extension-options {
+	--form-vertical-gap: 2rem;
+	--form-horizontal-gap: 32px;
+
+	:deep(.add-margin-top) {
+		margin-top: 1rem !important;
+	}
+}
+</style>
