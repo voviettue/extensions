@@ -25,7 +25,9 @@ export interface WidgetConfig {
 	group?: boolean;
 	tabs?: boolean;
 	options: ExtensionOptions;
+	child_of?: string;
 	beforeSave?: (values: Record<string, any>) => Record<string, any>;
+	saved?: (widget: Record<string, any>) => void;
 }
 
 export interface QueryConfig {

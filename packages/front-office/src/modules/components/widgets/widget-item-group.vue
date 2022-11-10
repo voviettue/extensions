@@ -5,7 +5,7 @@
 		:class="[`grid-col-${widget.width}`]"
 		item-key="key"
 		handle=".drag-handle"
-		group="widgets"
+		:group="group"
 		:animation="200"
 		@update:model-value="onSort"
 	>
@@ -14,7 +14,12 @@
 				<div class="header full">
 					<v-icon class="drag-handle" name="drag_indicator" @click.stop />
 					<v-icon v-if="!!config?.icon" class="drag-handle" :name="config.icon" @click.stop />
-					<v-text-overflow class="name" :text="widget.name" />
+					<v-text-overflow
+						class="name"
+						style="cursor: pointer"
+						:text="widget.name"
+						@click="$router.push({ path: `/front-office/pages/${widget.page}/widget/${widget.id}` })"
+					/>
 					<v-icon v-if="widget.hidden" v-tooltip="`Hidden widget`" name="visibility_off" class="hidden-icon" small />
 					<widget-options :widget="widget" />
 				</div>
@@ -33,15 +38,20 @@ import WidgetOptions from './widget-options.vue';
 import WidgetItem from './widget-item.vue';
 import Draggable from 'vuedraggable';
 import formFields from '../../widgets';
-import { useFrontOfficeStore } from '../../stores/front-office';
+import { useWidgetStore } from '../../stores/widget';
 import { storeToRefs } from 'pinia';
 import { Widget } from '../../types';
 
 interface Props {
 	widget: Widget;
+	group: string;
 }
-const props = defineProps<Props>();
-const store = useFrontOfficeStore();
+
+const props = withDefaults(defineProps<Props>(), {
+	group: 'widgets',
+});
+
+const store = useWidgetStore();
 const { widgets } = storeToRefs(store);
 const items = ref([]);
 const config = computed(() => formFields.find((e) => e.id === props.widget.widget));
@@ -57,6 +67,6 @@ watch(
 );
 
 async function onSort(values) {
-	store.sortWidgets(values, props.widget.id);
+	store.sort(values, props.widget.id);
 }
 </script>

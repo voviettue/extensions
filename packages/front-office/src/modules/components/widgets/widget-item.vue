@@ -1,7 +1,7 @@
 <template>
-	<div :key="widget.key" class="widget-select" :class="[`grid-col-${widget.width}`]">
+	<div class="widget-select" :class="[`grid-col-${widget.width}`]">
 		<!-- if widget is tabs  -->
-		<widget-item-tabs v-if="config?.tabs" :widget="widget"></widget-item-tabs>
+		<widget-item-group v-if="widget.widget === 'tabs'" group="tabs" :widget="widget"></widget-item-group>
 
 		<!-- if widget is container  -->
 		<widget-item-group v-else-if="config?.group" :widget="widget"></widget-item-group>
@@ -17,7 +17,6 @@ import { Widget } from '../../types';
 import formFields from '../../widgets';
 import WidgetItemSimple from './widget-item-simple.vue';
 import WidgetItemGroup from './widget-item-group.vue';
-import WidgetItemTabs from './widget-item-tabs.vue';
 
 interface Props {
 	widget: Widget;
@@ -43,24 +42,11 @@ const config = computed(() => formFields.find((e) => e.id === props.widget.widge
 		padding-top: 48px !important;
 		border-radius: var(--border-radius);
 		border: 1px solid var(--primary-25);
-		border-left: 3px solid var(--primary-75);
 
 		> * {
 			position: relative;
 			z-index: 2;
 		}
-
-		// &::before {
-		// 	position: absolute;
-		// 	top: 0;
-		// 	left: 0px;
-		// 	z-index: 1;
-		// 	width: 2px;
-		// 	height: 100%;
-		// 	background-color: var(--primary);
-		// 	border-radius: 2px;
-		// 	content: '';
-		// }
 
 		&::after {
 			position: absolute;

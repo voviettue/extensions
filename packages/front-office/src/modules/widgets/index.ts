@@ -16,6 +16,7 @@ import numberInput from './number-input';
 import dateTimeInput from './datetime-input';
 import select from './select';
 import tabs from './tabs';
+import tab from './tab';
 import tags from './tags';
 import menuButton from './menu-button';
 import form from './form';
@@ -36,6 +37,7 @@ export default [
 	link,
 	calendar,
 	tabs,
+	tab,
 	tags,
 	modal,
 	button,

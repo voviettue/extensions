@@ -9,7 +9,7 @@
 		<div class="new-widget-container">
 			<div class="list-widget">
 				<button
-					v-for="widgetConfig of widgetConfigList"
+					v-for="widgetConfig of widgetConfigs"
 					:key="widgetConfig.id"
 					class="widget-item"
 					:class="{
@@ -68,7 +68,6 @@
 
 <script setup lang="ts">
 import { ref, Ref, computed, watch } from 'vue';
-import { useApi } from '@directus/extensions-sdk';
 import { useRouter, useRoute } from 'vue-router';
 import { formFields } from '../../constants/widget';
 import { useValidate } from '../../composables/use-validate';
@@ -82,7 +81,6 @@ import { useItem } from '../../composables/use-item';
 const { validateItem } = useValidate();
 const router = useRouter();
 const route = useRoute();
-const api = useApi();
 
 const modelValue: Ref<Record<string, any>> = ref({ options: {} });
 const isOpen = ref(true);
@@ -98,11 +96,11 @@ const initialValues = ref({
 const page = route.params.id;
 const primaryKey = route.params.widgetId as string;
 const parentId = route.params.parentId as string;
-const tabKey = route.query?.tab as string;
-
 const { item, edits, getItem, save, validationErrors } = useItem('cms_widgets', primaryKey);
+const widgetConfigs: any = ref([]);
 
 if (primaryKey === '+') {
+	widgetConfigs.value = widgetConfigList.filter((e: any) => !e.child_of);
 	watch(
 		() => modelValue.value.name,
 		(val) => {
@@ -112,11 +110,12 @@ if (primaryKey === '+') {
 } else {
 	getItem().then(() => {
 		modelValue.value = { ...item.value };
+		widgetConfigs.value = widgetConfigList.filter((e: any) => e.id === item.value?.widget);
 	});
 }
 
-const selectedWidget = computed(() => {
-	return widgetConfigList.find((e) => e.id === modelValue.value?.widget);
+const selectedWidget: Ref<WidgetConfig | undefined> = computed(() => {
+	return widgetConfigs.value?.find((e) => e.id === modelValue.value?.widget);
 });
 
 const isDisable = computed(() => isEmpty(modelValue.value?.widget));
@@ -152,8 +151,8 @@ async function handleChangeWidgets() {
 
 		await save();
 
-		if (tabKey) {
-			await updateTab(tabKey);
+		if (selectedWidget.value?.saved) {
+			await selectedWidget.value.saved(item.value!);
 		}
 
 		router.push(`/front-office/pages/${page}`);
@@ -163,22 +162,8 @@ async function handleChangeWidgets() {
 		isLoading.value = false;
 	}
 }
-
-async function updateTab(tabKey) {
-	const res = await api.get(`/items/cms_widgets/${item.value!.parent}`);
-	const tab = res.data.data;
-	const tabs = tab.options?.tabs.map((tab: any) => {
-		if (tab.key === tabKey) {
-			const widgets = tab.widgets ?? [];
-			widgets.push(item.value!.id);
-			tab.widgets = widgets;
-		}
-		return tab;
-	});
-
-	await api.patch(`/items/cms_widgets/${item.value!.parent}`, { options: { ...tab.options, tabs: tabs } });
-}
 </script>
+
 <style scoped lang="scss">
 .new-widget-container {
 	margin: 1.25rem 2rem;

@@ -1,5 +1,5 @@
 <template>
-	<div>
+	<div v-if="isAdmin">
 		<v-menu show-arrow placement="bottom-end">
 			<template #activator="{ toggle }">
 				<v-icon name="more_vert" clickable @click.prevent="toggle" />
@@ -12,32 +12,54 @@
 					<v-list-item-content>View content</v-list-item-content>
 				</v-list-item>
 
-				<v-list-item v-if="isAdmin && allowCreateChild" clickable @click="createChildrenWidget">
+				<v-list-item v-if="allowCreateTab" clickable @click="createTab">
+					<v-list-item-icon>
+						<v-icon name="add" />
+					</v-list-item-icon>
+					<v-list-item-content>Create Tab</v-list-item-content>
+				</v-list-item>
+
+				<v-list-item v-if="allowCreateWidget" clickable @click="createChildrenWidget">
 					<v-list-item-icon>
 						<v-icon name="add" />
 					</v-list-item-icon>
 					<v-list-item-content>Create widget</v-list-item-content>
 				</v-list-item>
 
-				<v-list-item v-if="isAdmin" clickable @click="toggleHidden">
+				<v-list-item clickable @click="toggleHidden">
 					<template v-if="widget.hidden === true">
-						<v-list-item-icon><v-icon name="visibility_off" /></v-list-item-icon>
+						<v-list-item-icon>
+							<v-icon name="visibility_off" />
+						</v-list-item-icon>
 						<v-list-item-content>Make Visible</v-list-item-content>
 					</template>
 					<template v-else>
-						<v-list-item-icon><v-icon name="visibility" /></v-list-item-icon>
+						<v-list-item-icon>
+							<v-icon name="visibility" />
+						</v-list-item-icon>
 						<v-list-item-content>Make Hidden</v-list-item-content>
 					</template>
 				</v-list-item>
 
-				<v-list-item v-if="isAdmin" clickable @click="duplicate">
+				<v-divider />
+
+				<v-list-item clickable @click="duplicate">
 					<v-list-item-icon>
 						<v-icon name="content_copy" />
 					</v-list-item-icon>
 					<v-list-item-content>Duplicate</v-list-item-content>
 				</v-list-item>
 
-				<v-list-item v-if="isAdmin" clickable class="danger" @click="deleteDialog = true">
+				<v-list-item v-if="allowCopy" clickable @click="copy">
+					<v-list-item-icon>
+						<v-icon name="content_copy" />
+					</v-list-item-icon>
+					<v-list-item-content>Copy</v-list-item-content>
+				</v-list-item>
+
+				<v-divider />
+
+				<v-list-item clickable class="danger" @click="deleteDialog = true">
 					<v-list-item-icon>
 						<v-icon name="delete" />
 					</v-list-item-icon>
@@ -60,12 +82,13 @@
 </template>
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useFrontOfficeStore } from '../../stores/front-office';
 import { useStores } from '@directus/extensions-sdk';
 import { useRouter } from 'vue-router';
 import { Widget } from '../../types';
 import { useNotification } from '../../composables/use-notification';
 import cloneDeep from 'lodash/cloneDeep';
+import { useWidgetStore } from '../../stores/widget';
+import { storeToRefs } from 'pinia';
 
 interface Props {
 	widget: Widget;
@@ -73,70 +96,63 @@ interface Props {
 
 const props = defineProps<Props>();
 const { useUserStore } = useStores();
-const store = useFrontOfficeStore();
+const store = useWidgetStore();
 const router = useRouter();
 const { isAdmin } = useUserStore();
+const { copyId } = storeToRefs(store);
 const { notify, unexpectedError } = useNotification();
 
 const deleteDialog = ref(false);
-const allowCreateChild = ['container', 'list', 'tab', 'form', 'modal'].includes(props.widget?.widget);
+const allowCreateTab = props.widget?.widget === 'tabs';
+const allowCopy = props.widget?.widget !== 'tab';
+const allowCreateWidget = ['container', 'list', 'tab', 'form', 'modal'].includes(props.widget?.widget);
 
 async function toggleHidden() {
-	await store.updateWidget(props.widget.id, { hidden: !props.widget.hidden });
+	await store.update(props.widget.id, { hidden: !props.widget.hidden });
 	notify({ title: 'Item updated' });
-	await store.hydrateWidgets(props.widget.page);
+	await store.hydrate(props.widget.page);
 }
 
 async function deleteHandler() {
-	await store.deleteWidget(props.widget.id);
+	await store.delete(props.widget.id);
 	notify({ title: 'Item deleted' });
-	await store.hydrateWidgets(props.widget.page);
+	await store.hydrate(props.widget.page);
 }
 
 async function duplicate() {
 	try {
-		await cloneWidget(props.widget, props.widget.parent);
-		await store.hydrateWidgets(props.widget.page);
-		notify({ title: 'Item copied' });
+		await store.duplicate(props.widget);
+		await store.hydrate(props.widget.page);
+		notify({ title: 'Item duplicated' });
 	} catch (err) {
 		unexpectedError(err);
 	}
 }
 
-async function cloneWidget(widget, parent, index = 0) {
-	index++;
-	try {
-		const payload = cloneDeep(widget);
-		delete payload['id'];
-		payload.name += ' (Copy)';
-		payload.sort = payload.sort ?? null;
-		payload.parent = parent;
-		const key = `${payload.key}_${index}`;
-
-		const clonedWidget = await store.createWidget({ ...payload, key });
-		await cloneChildren(widget, clonedWidget.id, index);
-	} catch (err: any) {
-		const code = err?.response?.data?.errors?.[0]?.extensions?.code;
-		if (code === 'RECORD_NOT_UNIQUE' && index <= 10) {
-			return await cloneWidget(widget, parent, index);
-		}
-
-		throw Error('An occur error when trying to duplicate widget.');
-	}
-}
-
-async function cloneChildren(widget: Widget, parent, index) {
-	const childWidgets = store.widgets.filter((item: any) => {
-		return item.parent === widget.id;
-	});
-
-	for (const childWidget of childWidgets) {
-		await cloneWidget(childWidget, parent, index);
-	}
+function copy() {
+	copyId.value = props.widget.id;
+	notify({ title: 'Item copied' });
 }
 
 function createChildrenWidget() {
 	return router.push(`/front-office/pages/${props.widget.page}/widget/+/${props.widget.id}`);
+}
+
+async function createTab() {
+	const payload = {
+		name: 'New Tab',
+		width: 'full',
+		widget: 'tab',
+		options: {
+			label: 'New Tab',
+		},
+		parent: props.widget.id,
+		page: props.widget.page,
+	};
+	const tab = await store.create(payload);
+	await store.update(tab.id, { key: `${props.widget.key}_tab_${tab.id}` });
+	notify({ title: 'Item created' });
+	store.hydrate(props.widget.page);
 }
 </script>
 

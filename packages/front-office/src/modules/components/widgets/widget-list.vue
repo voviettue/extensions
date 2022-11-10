@@ -21,7 +21,15 @@
 				</template>
 			</draggable>
 		</v-list>
-		<div class="new-widget">
+
+		<div class="widget-actions">
+			<v-chip v-if="copyId">
+				<span>You have a copied widget.&nbsp;</span>
+				<a class="btn-paste" href="#" @click="paste">Click here</a>
+				<span>&nbsp;to paste or&nbsp;</span>
+				<a class="btn-cancel" href="#" @click="copyId = null">Cancel</a>
+			</v-chip>
+
 			<v-button :to="`/front-office/pages/${page}/widget/+`">Create Widget</v-button>
 		</div>
 
@@ -34,34 +42,42 @@ import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import Draggable from 'vuedraggable';
 import WidgetItem from './widget-item.vue';
-import { useFrontOfficeStore } from '../../stores/front-office';
+import { useWidgetStore } from '../../stores/widget';
+import { useNotification } from '../../composables/use-notification';
 import { storeToRefs } from 'pinia';
 
 const route = useRoute();
 const items = ref([]);
-const store = useFrontOfficeStore();
-const { widgets } = storeToRefs(store);
-const page = route.params.id;
+const store = useWidgetStore();
+const { notify } = useNotification();
+const { widgets, copyId } = storeToRefs(store);
+const page = route.params.id as string;
 
-store.hydrateWidgets(page);
+store.hydrate(page);
 
 watch(
-	() => widgets.value,
+	[widgets],
 	() => {
 		items.value = widgets.value.filter((item: any) => !item.parent);
-	}
+	},
+	{ immediate: true }
 );
 
 watch(
 	() => route.name,
 	() => {
-		store.hydrateWidgets(page);
+		store.hydrate(page);
 	},
 	{ deep: true }
 );
 
 async function onSort(values) {
-	store.sortWidgets(values, null);
+	store.sort(values, null);
+}
+
+async function paste() {
+	await store.paste(page);
+	notify({ title: 'Item pasted' });
 }
 </script>
 
@@ -83,10 +99,6 @@ async function onSort(values) {
 	.draggable-list {
 		padding: 0;
 		margin: 0 -12px;
-	}
-
-	.new-widget {
-		margin-top: 12px;
 	}
 
 	.grid-col-full {
@@ -131,6 +143,34 @@ async function onSort(values) {
 
 	.widget-select {
 		margin: 2px 0px;
+	}
+
+	.btn-duplicate {
+		// width: max-content;
+		// margin: 0 auto;
+		// margin-top: 8px;
+		color: var(--foreground-subdued);
+		transition: color var(--fast) var(--transition);
+
+		&:hover {
+			color: var(--foreground-normal);
+		}
+	}
+	.widget-actions {
+		display: grid;
+		margin-top: 12px;
+		gap: 24px;
+
+		.btn-paste {
+			color: var(--primary);
+
+			&:hover {
+				color: var(--primary-125);
+			}
+		}
+		.btn-cancel {
+			color: var(--foreground-normal-alt);
+		}
 	}
 }
 </style>

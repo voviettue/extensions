@@ -1,113 +1,33 @@
 import { defineWidget } from '../../utils/define-extension';
+import { useWidgetStore } from '../../stores/widget';
+import { storeToRefs } from 'pinia';
+
+let isCreate = true;
 
 export default defineWidget({
 	id: 'tabs',
 	name: 'Tabs',
 	icon: 'tab',
-	tabs: true,
+	group: true,
 	options: ({ values }) => {
-		const tabs = values?.options?.tabs || [];
+		const store = useWidgetStore();
+		const { widgets } = storeToRefs(store);
+		const children = widgets.value.filter((e: any) => e.parent === values?.id && e.widget === 'tab');
 
 		const options = [
 			{
-				field: 'tabs',
-				name: 'Tabs',
-				type: 'json',
-				meta: {
-					interface: 'list',
-					options: {
-						addLable: 'Add tab',
-						template: '{{ label }}',
-						fields: [
-							{
-								field: 'key',
-								type: 'string',
-								name: 'Key',
-								meta: {
-									interface: 'input',
-									width: 'half',
-									required: true,
-									options: {
-										placeholder: 'Tab key',
-									},
-								},
-							},
-							{
-								field: 'label',
-								type: 'string',
-								name: 'Label',
-								meta: {
-									interface: 'input',
-									width: 'half',
-									options: {
-										placeholder: 'Tab name',
-									},
-								},
-							},
-							{
-								field: 'widgets',
-								name: 'Widgets',
-								type: 'json',
-								meta: {
-									hidden: true,
-									interface: 'select-dropdown',
-									choices: [],
-									allowNone: true,
-								},
-								schema: {
-									default_value: [],
-								},
-							},
-							{
-								field: 'icon',
-								name: 'Icon',
-								type: 'string',
-								meta: {
-									width: 'half',
-									interface: 'select-icon',
-								},
-							},
-							{
-								field: 'hidden',
-								name: 'Hidden',
-								type: 'boolean',
-								meta: {
-									width: 'half',
-									interface: 'boolean',
-								},
-								schema: {
-									default_value: false,
-								},
-							},
-							{
-								field: 'onClick',
-								name: 'On Click (Javascript)',
-								meta: {
-									width: 'full',
-									interface: 'input-javascript',
-									options: {
-										minLine: 4,
-									},
-									note: 'Type "/" to see all of variables and function are supported.',
-								},
-							},
-						],
-					},
-				},
-			},
-			{
-				field: 'tabDefault',
+				field: 'defaultTab',
 				name: 'Default Tab',
 				type: 'string',
 				meta: {
 					width: 'haff',
 					interface: 'select-dropdown',
 					options: {
-						choices: tabs?.map((e: any) => ({
-							text: e.label,
-							value: e.key,
+						choices: children.map((e: any) => ({
+							text: e.name,
+							value: e.id,
 						})),
-						placeholder: 'Select tab',
+						placeholder: 'Select Tab',
 						allowNone: true,
 					},
 				},
@@ -147,5 +67,28 @@ export default defineWidget({
 			},
 		];
 		return options;
+	},
+	beforeSave: (values) => {
+		isCreate = true;
+		if (values?.id) isCreate = false;
+		return values;
+	},
+	saved: async (widget) => {
+		if (!isCreate) return;
+
+		const store = useWidgetStore();
+		for (const index of [1, 2]) {
+			const tab = await store.create({
+				name: `Tab ${index}`,
+				options: {
+					label: `Tab ${index}`,
+				},
+				widget: 'tab',
+				page: widget.page,
+				width: 'full',
+				parent: widget.id,
+			});
+			await store.update(tab.id, { key: `${widget.key}_tab_${tab.id}` });
+		}
 	},
 });
