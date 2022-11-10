@@ -25,9 +25,9 @@
 		<div class="widget-actions">
 			<v-chip v-if="copyId">
 				<span>You have a copied widget.&nbsp;</span>
-				<a class="btn-paste" href="#" @click="paste">Click here</a>
+				<a class="btn-paste" @click="paste">Click here</a>
 				<span>&nbsp;to paste or&nbsp;</span>
-				<a class="btn-cancel" href="#" @click="copyId = null">Cancel</a>
+				<a class="btn-cancel" @click="copyId = null">Cancel</a>
 			</v-chip>
 
 			<v-button :to="`/front-office/pages/${page}/widget/+`">Create Widget</v-button>
@@ -163,12 +163,14 @@ async function paste() {
 
 		.btn-paste {
 			color: var(--primary);
+			cursor: pointer;
 
 			&:hover {
 				color: var(--primary-125);
 			}
 		}
 		.btn-cancel {
+			cursor: pointer;
 			color: var(--foreground-normal-alt);
 		}
 	}

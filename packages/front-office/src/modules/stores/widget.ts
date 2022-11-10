@@ -3,40 +3,44 @@ import { useApi } from '@directus/extensions-sdk';
 import { Widget } from '../types';
 import cloneDeep from 'lodash/cloneDeep';
 
-const tryDuplicate = async (widget: Widget, parent: null | number, index = 0): Promise<Widget> => {
-	index++;
+const tryDuplicate = async (
+	widget: Widget,
+	page: number | string,
+	parent: null | number,
+	trying = 0
+): Promise<Widget> => {
+	trying++;
 	const store = useWidgetStore();
+	const widgets = await store.getByPage(widget.page);
+
 	try {
 		const payload = cloneDeep(widget);
 		delete payload['id'];
 		payload.name += ' (Copy)';
 		payload.sort = payload.sort ?? null;
 		payload.parent = parent;
-		const key = `${payload.key}_${index}`;
+		payload.page = page;
+		const key = `${payload.key}_${trying}`;
 
 		const clonedWidget: Widget = await store.create({ ...payload, key });
-		await duplicateChildren(widget, clonedWidget.id, index);
+		const children = widgets.filter((e: Widget) => e.parent === widget.id);
+		await duplicateChildren(children, page, clonedWidget.id, trying);
 
 		return clonedWidget;
 	} catch (err: any) {
 		const code = err?.response?.data?.errors?.[0]?.extensions?.code;
-		if (code === 'RECORD_NOT_UNIQUE' && index <= 10) {
-			return await tryDuplicate(widget, parent, index);
+		if (code === 'RECORD_NOT_UNIQUE' && trying <= 10) {
+			return await tryDuplicate(widget, page, parent, trying);
 		}
 
 		throw err;
 	}
 };
 
-const duplicateChildren = async (widget: Widget, parent: null | number, index: number) => {
-	const store = useWidgetStore();
-	const childWidgets = store.widgets.filter((item: any) => {
-		return item.parent === widget.id;
-	});
-
+const duplicateChildren = async (widgets: Widget[], page: number | string, parent: null | number, trying: number) => {
 	try {
-		for (const childWidget of childWidgets) {
-			await tryDuplicate(childWidget, parent, index);
+		for (const widget of widgets) {
+			await tryDuplicate(widget, page, parent, trying);
 		}
 	} catch {
 		// ignore error for children
@@ -64,6 +68,16 @@ export const useWidgetStore = defineStore({
 			const res = await this._api.get(`/items/cms_widgets/${id}`);
 			return res?.data?.data;
 		},
+		async getByPage(page: string | number) {
+			const params = { filter: { page } };
+			const res = await this._api.get(`/items/cms_widgets`, { params });
+			return res?.data?.data;
+		},
+		async getByParent(id: string | number) {
+			const params = { filter: { parent: id } };
+			const res = await this._api.get(`/items/cms_widgets`, { params });
+			return res?.data?.data;
+		},
 		async create(payload: Record<string, any>) {
 			const res = await this._api.post(`/items/cms_widgets`, payload);
 			return res?.data?.data;
@@ -75,16 +89,14 @@ export const useWidgetStore = defineStore({
 			await this._api.delete(`/items/cms_widgets/${id}`);
 		},
 		async duplicate(widget: Widget) {
-			await tryDuplicate(widget, widget.parent);
+			await tryDuplicate(widget, widget.page, widget.parent);
 		},
 		async paste(page: number | string) {
 			if (!this.copyId) return;
 
 			const widget = await this.get(this.copyId);
 			widget.sort = null;
-			widget.page = page;
-			widget.parent = null;
-			await this.duplicate(widget);
+			await tryDuplicate(widget, page, null);
 			await this.hydrate(page);
 			this.copyId = null;
 		},
