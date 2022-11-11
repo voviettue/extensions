@@ -3,7 +3,7 @@ import { defineWidget } from '../../utils/define-extension';
 export default defineWidget({
 	id: 'tab',
 	name: 'Tab',
-	icon: 'tab',
+	icon: 'tab_unselected',
 	group: true,
 	child_of: 'tabs',
 	options: [

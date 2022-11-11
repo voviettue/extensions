@@ -12,7 +12,7 @@ let currentData: any = null;
 export default defineWidget({
 	id: 'multiple-select',
 	name: 'Multiple Select',
-	icon: 'segment',
+	icon: 'checklist_rtl',
 	options: ({ values }) => {
 		currentData = values?.options?.data;
 		const bindData = useBindData(currentData);

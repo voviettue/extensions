@@ -5,7 +5,7 @@ import { sizeChoices, fontFamilyChoices, shadowChoices, borderChoices } from '..
 export default defineWidget({
 	id: 'textarea',
 	name: 'Textarea Input',
-	icon: 'article',
+	icon: 'format_align_justify',
 	options: ({ values }) => {
 		const defaultOptions = [
 			{

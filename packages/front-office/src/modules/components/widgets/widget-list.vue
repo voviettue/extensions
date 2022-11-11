@@ -23,7 +23,8 @@
 		</v-list>
 
 		<div class="widget-actions">
-			<v-chip v-if="copyId">
+			<v-chip v-if="copying">Copying...</v-chip>
+			<v-chip v-else-if="copyId">
 				<span>You have a copied widget.&nbsp;</span>
 				<a class="btn-paste" @click="paste">Click here</a>
 				<span>&nbsp;to paste or&nbsp;</span>
@@ -52,7 +53,7 @@ const store = useWidgetStore();
 const { notify } = useNotification();
 const { widgets, copyId } = storeToRefs(store);
 const page = route.params.id as string;
-
+const copying = ref(false);
 store.hydrate(page);
 
 watch(
@@ -76,7 +77,9 @@ async function onSort(values) {
 }
 
 async function paste() {
+	copying.value = true;
 	await store.paste(page);
+	copying.value = false;
 	notify({ title: 'Item pasted' });
 }
 </script>

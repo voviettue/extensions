@@ -45,7 +45,7 @@
 
 				<v-list-item clickable @click="duplicate">
 					<v-list-item-icon>
-						<v-icon name="content_copy" />
+						<v-icon name="library_add" />
 					</v-list-item-icon>
 					<v-list-item-content>Duplicate</v-list-item-content>
 				</v-list-item>
