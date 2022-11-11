@@ -6,6 +6,27 @@ export default defineWidget({
 	name: 'Number Input',
 	icon: 'numbers',
 	options: ({ values }) => {
+		const separatorChoices = [
+			{
+				text: ',',
+				value: ',',
+				example: '123,456,789.00',
+			},
+			{
+				text: '.',
+				value: '.',
+				example: '123.456.789,00',
+			},
+			{
+				text: 'Space',
+				value: ' ',
+				example: '123 456 789.00',
+			},
+		];
+		const separatorNote = values.options?.thousandsSeparator
+			? separatorChoices.find((e: any) => e.value === values.options?.thousandsSeparator)?.example
+			: '123456789.00';
+
 		const defaultOptions = [
 			{
 				field: 'defaultValue',
@@ -21,15 +42,18 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'showThousandsSeparator',
-				name: 'Show Thousands Separator',
-				type: 'boolean',
+				field: 'thousandsSeparator',
+				name: 'Thousands Separator',
+				type: 'string',
 				meta: {
+					interface: 'select-dropdown',
 					width: 'half',
-					interface: 'Boolean',
-				},
-				schema: {
-					default_value: false,
+					note: `Eg: ${separatorNote}`,
+					options: {
+						allowNone: true,
+						placeholder: 'Default',
+						choices: separatorChoices,
+					},
 				},
 			},
 			{
