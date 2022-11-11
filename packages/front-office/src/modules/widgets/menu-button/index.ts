@@ -38,7 +38,18 @@ export default defineWidget({
 					fields: [
 						{
 							field: 'label',
-							name: 'Button Label',
+							name: 'Label',
+							type: 'string',
+							meta: {
+								interface: 'input',
+								options: {
+									trim: true,
+								},
+							},
+						},
+						{
+							field: 'tooltip',
+							name: 'Tooltip',
 							type: 'string',
 							meta: {
 								interface: 'input',
