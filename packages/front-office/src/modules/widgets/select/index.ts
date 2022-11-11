@@ -3,9 +3,7 @@ import { validationsField } from '../fields';
 import { fontFamilyChoices, shadowChoices, borderChoices, sizeChoices, fontStyleChoices } from '../choices';
 import parseJson from '../../utils/parse-json';
 import { useBindData } from '../../composables/use-bind-data';
-import pickBy from 'lodash/pickBy';
 import union from 'lodash/union';
-import parseDate from '../../utils/parse-date';
 
 let currentData: any = null;
 
@@ -19,7 +17,15 @@ export default defineWidget({
 		const data = Array.isArray(parseJson(bindData, [])) ? parseJson(bindData, []) : [];
 		let dateFields: string[] = [];
 		data?.map((e: {}) => {
-			dateFields = union(dateFields, Object.keys(pickBy(e, (value: any) => !!parseDate(value))));
+			dateFields = union(
+				dateFields,
+				Object.entries(e).reduce((pre: string[], [k, v]: [string, any]) => {
+					if (typeof v === 'string' || typeof v === 'number') {
+						pre.push(k);
+					}
+					return pre;
+				}, [])
+			);
 		});
 
 		const defaultOptions = [
@@ -46,7 +52,7 @@ export default defineWidget({
 				name: 'Data source',
 				meta: {
 					interface: 'input-code',
-					required: true,
+					required: false,
 					placeholder: 'Enter code here...',
 					options: {
 						language: 'javascript',
@@ -61,6 +67,7 @@ export default defineWidget({
 								},
 							},
 							hidden: false,
+							required: true,
 						},
 					],
 				},
