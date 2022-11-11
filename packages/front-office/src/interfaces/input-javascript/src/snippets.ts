@@ -28,12 +28,12 @@ export const snippets: readonly Completion[] = [
 	}),
 	snippetCompletion('showModal("${key_of_widget}")', {
 		label: 'showModal',
-		detail: 'show modal by widget key',
+		detail: '',
 		type: 'keyword',
 	}),
-	snippetCompletion('closeModal("${key_of_widget"})', {
+	snippetCompletion('closeModal("${key_of_widget}")', {
 		label: 'closeModal',
-		detail: 'close modal by widget key',
+		detail: '',
 		type: 'keyword',
 	}),
 ];

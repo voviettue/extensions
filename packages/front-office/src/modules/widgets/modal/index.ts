@@ -20,6 +20,18 @@ export default defineWidget({
 			},
 		},
 		{
+			field: 'bodyScrollable',
+			name: 'Body Scrollable',
+			type: 'boolean',
+			meta: {
+				interface: 'boolean',
+				width: 'half',
+			},
+			schema: {
+				default_value: false,
+			},
+		},
+		{
 			field: 'headerOptions',
 			type: 'alias',
 			meta: {
@@ -342,7 +354,7 @@ export default defineWidget({
 				interface: 'input',
 				width: 'half',
 				options: {
-					placeholder: '20px',
+					placeholder: '1rem',
 				},
 				note: 'Spacing between its content and its border.<br><a target="_blank" tabindex="-1" href="https://developer.mozilla.org/en-US/docs/Web/CSS/padding">Learn more</a>',
 			},
