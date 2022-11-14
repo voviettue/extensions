@@ -173,7 +173,7 @@ async function execute() {
 		}
 
 		executing.value = true;
-		const responseExecute = await api.patch(`/front-office/queries/${route.params.id}/execute`);
+		const responseExecute = await api.post(`/front-office/queries/${route.params.id}/execute`);
 		modelValue.value.output = responseExecute?.data;
 
 		await api.patch(`/items/cms_queries/${route.params.id}`, { output: modelValue.value.output });
