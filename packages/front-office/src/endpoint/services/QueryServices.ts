@@ -59,15 +59,15 @@ export class QueryService {
 				this.params[param?.name] = param?.value ?? null;
 			}
 			this.params = { ...this.params, ...params };
-			// if (this.handlers?.[query.query]) {
-
-			// }
 			this.initLog(query);
 
 			const fn = this.handlers?.[query.query];
 			if (!fn) return query.output;
 
-			return await this[fn](query);
+			const data = await this[fn](query);
+			this.log.output = data;
+
+			return data;
 		} catch (e: any) {
 			throw new BaseException(e?.message, e?.status, e?.code);
 		}
@@ -175,9 +175,10 @@ export class QueryService {
 				timeout: query.timeout,
 			};
 			this.log.request = options;
-			const { data } = await axios(options);
+			const response = await axios(options);
 
-			return data;
+			this.log.response = { status: response?.status };
+			return response?.data;
 		} catch (e: any) {
 			const message =
 				(e?.response?.data?.errors && e?.response?.data?.errors[0]?.message) || e?.response?.data?.message || '';
