@@ -4,7 +4,7 @@ import { fontFamilyChoices, shadowChoices, borderChoices, sizeChoices, fontStyle
 import parseJson from '../../utils/parse-json';
 import { useBindData } from '../../composables/use-bind-data';
 import union from 'lodash/union';
-
+import { Field } from '@directus/shared/types';
 let currentData: any = null;
 
 export default defineWidget({
@@ -16,6 +16,18 @@ export default defineWidget({
 		const bindData = useBindData(currentData);
 		const data = Array.isArray(parseJson(bindData, [])) ? parseJson(bindData, []) : [];
 		let dateFields: string[] = [];
+		const object = data?.[0] ?? {};
+		const fields = Object.keys(object).map(
+			(key: string) =>
+				({
+					field: key,
+					name: key,
+					type: 'string',
+					collection: '',
+					meta: null,
+					schema: null,
+				} as Field)
+		);
 		data?.map((e: {}) => {
 			dateFields = union(
 				dateFields,
@@ -52,7 +64,7 @@ export default defineWidget({
 				name: 'Data source',
 				meta: {
 					interface: 'input-code',
-					required: true,
+					required: false,
 					placeholder: 'Enter code here...',
 					options: {
 						language: 'javascript',
@@ -67,6 +79,7 @@ export default defineWidget({
 								},
 							},
 							hidden: false,
+							required: true,
 						},
 					],
 				},
@@ -87,18 +100,12 @@ export default defineWidget({
 			{
 				field: 'textField',
 				name: 'Text',
-				type: 'string',
 				meta: {
-					interface: 'select-dropdown',
+					interface: 'input-display-template',
 					options: {
-						choices: dateFields?.map((field) => ({
-							text: field,
-							value: field,
-						})),
-						allowNone: true,
-						allowOther: true,
+						fields: fields,
 					},
-					width: 'half',
+					width: 'full',
 					hidden: true,
 					conditions: [
 						{
@@ -126,7 +133,7 @@ export default defineWidget({
 						allowNone: true,
 						allowOther: true,
 					},
-					width: 'half',
+					width: 'full',
 					hidden: true,
 					conditions: [
 						{
