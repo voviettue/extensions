@@ -111,14 +111,14 @@ export default defineWidget({
 			},
 		},
 		{
-			field: 'generalDivider',
-			name: 'General',
+			field: 'generalOptions',
 			type: 'alias',
 			meta: {
-				width: 'full',
-				options: { title: 'General' },
 				interface: 'presentation-divider',
-				special: ['alias', 'no-data', 'group'],
+				options: {
+					title: 'General',
+				},
+				special: ['alias', 'no-data'],
 			},
 		},
 		{
@@ -228,14 +228,14 @@ export default defineWidget({
 			},
 		},
 		{
-			field: 'stylesDivider',
-			name: 'Styles',
+			field: 'stylesOptions',
 			type: 'alias',
 			meta: {
-				width: 'full',
-				options: { title: 'Styles' },
 				interface: 'presentation-divider',
-				special: ['alias', 'no-data', 'group'],
+				options: {
+					title: 'Styles',
+				},
+				special: ['alias', 'no-data'],
 			},
 		},
 		{

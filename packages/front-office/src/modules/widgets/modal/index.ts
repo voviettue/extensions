@@ -51,7 +51,7 @@ export default defineWidget({
 				options: {
 					title: 'Header',
 				},
-				special: ['alias', 'no-data', 'group'],
+				special: ['alias', 'no-data'],
 			},
 		},
 		{
@@ -99,7 +99,7 @@ export default defineWidget({
 				options: {
 					title: 'Submit Button',
 				},
-				special: ['alias', 'no-data', 'group'],
+				special: ['alias', 'no-data'],
 			},
 		},
 		{
@@ -204,7 +204,7 @@ export default defineWidget({
 				options: {
 					title: 'Cancel Button',
 				},
-				special: ['alias', 'no-data', 'group'],
+				special: ['alias', 'no-data'],
 			},
 		},
 		{
@@ -309,7 +309,7 @@ export default defineWidget({
 				options: {
 					title: 'Styles',
 				},
-				special: ['alias', 'no-data', 'group'],
+				special: ['alias', 'no-data'],
 			},
 		},
 		{
