@@ -32,6 +32,18 @@ export default defineWidget({
 			},
 		},
 		{
+			field: 'verticallyCentered',
+			name: 'Vertically Centered',
+			type: 'boolean',
+			meta: {
+				interface: 'boolean',
+				width: 'half',
+			},
+			schema: {
+				default_value: false,
+			},
+		},
+		{
 			field: 'headerOptions',
 			type: 'alias',
 			meta: {
