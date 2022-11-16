@@ -238,16 +238,6 @@ export default defineWidget({
 				},
 			},
 			{
-				field: 'allowNone',
-				name: 'Allow None',
-				type: 'boolean',
-				meta: {
-					width: 'half',
-					interface: 'Boolean',
-				},
-			},
-
-			{
 				field: 'allowOther',
 				name: 'Allow Other',
 				type: 'boolean',
