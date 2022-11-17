@@ -398,7 +398,7 @@ export default defineWidget({
 					interface: 'Boolean',
 				},
 			},
-			validationsField,
+			validationsField('mulitpleSelect'),
 			{
 				field: 'generalOptions',
 				type: 'alias',
