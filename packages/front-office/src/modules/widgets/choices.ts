@@ -105,82 +105,74 @@ const borderChoices = [
 		value: '0.5rem',
 	},
 ];
-const validateWidget = {
-	textInput: ['alpha', 'length', 'required', 'email', 'ends_with', 'matches', 'starts_with', 'url', 'is', 'not'],
-	numberInput: ['required', 'min', 'max'],
-	select: ['required'],
-	mulitpleSelect: ['required'],
-	textarea: ['alpha', 'length', 'required', 'email', 'ends_with', 'matches', 'starts_with', 'url', 'is', 'not'],
-};
 
-const validationRuleChoices = (widget: string) => {
-	return [
-		{
-			value: 'is',
-			text: 'Is',
-		},
-		{
-			value: 'accepted',
-			text: 'Accepted',
-		},
-		{
-			value: 'email',
-			text: 'Email',
-		},
-		{
-			value: 'ends_with',
-			text: 'Ends With',
-		},
-		{
-			value: 'alpha',
-			text: 'Alpha',
-		},
-		{
-			value: 'date_before',
-			text: 'Date Before',
-		},
-		{
-			value: 'date_after',
-			text: 'Date After',
-		},
-		{
-			value: 'date_format',
-			text: 'Date Format',
-		},
-		{
-			value: 'length',
-			text: 'Length',
-		},
-		{
-			value: 'matches',
-			text: 'Matches',
-		},
-		{
-			value: 'max',
-			text: 'Max',
-		},
-		{
-			value: 'min',
-			text: 'Min',
-		},
-		{
-			value: 'not',
-			text: 'Not',
-		},
-		{
-			value: 'required',
-			text: 'Required',
-		},
-		{
-			value: 'starts_with',
-			text: 'Starts With',
-		},
-		{
-			value: 'url',
-			text: 'Url',
-		},
-	].filter((rule) => (validateWidget[widget] || []).includes(rule.value));
-};
+const validationRuleChoices = [
+	{
+		value: 'is',
+		text: 'Is',
+		type: 'string',
+	},
+	{
+		value: 'accepted',
+		text: 'Accepted',
+	},
+	{
+		value: 'email',
+		text: 'Email',
+	},
+	{
+		value: 'ends_with',
+		text: 'Ends With',
+	},
+	{
+		value: 'alpha',
+		text: 'Alpha',
+	},
+	{
+		value: 'date_before',
+		text: 'Date Before',
+	},
+	{
+		value: 'date_after',
+		text: 'Date After',
+	},
+	{
+		value: 'date_format',
+		text: 'Date Format',
+	},
+	{
+		value: 'length',
+		text: 'Length',
+	},
+	{
+		value: 'matches',
+		text: 'Matches',
+	},
+	{
+		value: 'max',
+		text: 'Max',
+	},
+	{
+		value: 'min',
+		text: 'Min',
+	},
+	{
+		value: 'not',
+		text: 'Not',
+	},
+	{
+		value: 'required',
+		text: 'Required',
+	},
+	{
+		value: 'starts_with',
+		text: 'Starts With',
+	},
+	{
+		value: 'url',
+		text: 'Url',
+	},
+];
 
 const fontStyleChoices = [
 	{

@@ -1,6 +1,7 @@
 import { defineWidget } from '../../utils/define-extension';
 import { validationsField } from '../fields';
 import { fontFamilyChoices, shadowChoices, borderChoices, sizeChoices, fontStyleChoices } from '../choices';
+
 export default defineWidget({
 	id: 'number-input',
 	name: 'Number Input',
@@ -211,7 +212,7 @@ export default defineWidget({
 					default_value: 1,
 				},
 			},
-			validationsField('numberInput'),
+			validationsField(['required', 'min', 'max']),
 			{
 				field: 'generalOptions',
 				type: 'alias',

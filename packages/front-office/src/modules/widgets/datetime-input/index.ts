@@ -1,4 +1,5 @@
 import { defineWidget } from '../../utils/define-extension';
+import { validationsField } from '../fields';
 import { sizeChoices, fontFamilyChoices, shadowChoices, borderChoices } from '../choices';
 
 export default defineWidget({
@@ -186,67 +187,7 @@ export default defineWidget({
 					width: 'half',
 				},
 			},
-			{
-				field: 'validations',
-				name: 'Rules',
-				type: 'json',
-				meta: {
-					interface: 'list',
-					width: 'full',
-					options: {
-						addLabel: 'Add Rule',
-						template: '{{ rule }}: {{ value }}',
-						fields: [
-							{
-								field: 'rule',
-								name: 'Rule',
-								meta: {
-									interface: 'select-dropdown',
-									width: 'half',
-									options: {
-										placeholder: 'Select a rule',
-										choices: [
-											{
-												value: 'date_before',
-												text: 'Date Before',
-											},
-											{
-												value: 'date_after',
-												text: 'Date After',
-											},
-										],
-									},
-								},
-							},
-							{
-								field: 'value',
-								name: 'Value',
-								type: 'dateTime',
-								meta: {
-									interface: 'datetime',
-									width: 'half',
-									options: {
-										use24: true,
-										includeSeconds: true,
-									},
-								},
-							},
-							{
-								field: 'errorMessage',
-								name: 'Error Message',
-								meta: {
-									interface: 'input',
-									width: 'full',
-									options: {
-										trim: true,
-										placeholder: 'Override by default',
-									},
-								},
-							},
-						],
-					},
-				},
-			},
+			validationsField(['date_before', 'date_after', 'required', 'not']),
 			{
 				field: 'generalOptions',
 				type: 'alias',

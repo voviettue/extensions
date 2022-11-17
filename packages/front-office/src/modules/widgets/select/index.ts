@@ -408,7 +408,7 @@ export default defineWidget({
 					interface: 'Boolean',
 				},
 			},
-			validationsField('select'),
+			validationsField(['required', 'is', 'not', 'email', 'ends_with', 'matches', 'starts_with', 'url']),
 			{
 				field: 'generalOptions',
 				type: 'alias',
