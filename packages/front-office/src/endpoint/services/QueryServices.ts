@@ -4,6 +4,7 @@ import { SchemaOverview, Accountability, ApiExtensionContext } from '@directus/s
 import { BaseException } from '@directus/shared/exceptions';
 import isJson from '../utils/is-json';
 import renderTemplate from '../utils/render-template';
+import parseResponse from '../utils/parseResponse';
 
 export class QueryService {
 	schema: SchemaOverview;
@@ -17,11 +18,13 @@ export class QueryService {
 		api: 'executeApi',
 	};
 	params: any;
+	log: any;
 
 	constructor(schema: SchemaOverview, accountability: Accountability, ctx: ApiExtensionContext) {
 		this.schema = schema;
 		this.accountability = accountability;
 		this.ctx = ctx;
+		this.log = {};
 
 		this.activityService = new ctx.services.ItemsService('directus_activity', {
 			schema: this.schema,
@@ -34,44 +37,51 @@ export class QueryService {
 		});
 	}
 
+	initLog(query: any) {
+		this.log = {
+			message: `[${query.name}] Execution started from user request`,
+			queryId: query.id,
+			name: query.name,
+			type: query.query,
+			accountability: this.accountability,
+			options: query.options,
+			params: this.params,
+		};
+	}
+
 	async execute(queryId: number, params: any = {}) {
 		try {
 			this.params = {};
 			const query: Query = await this.queryItemsService.readOne(queryId);
 			const queryParams: any[] = query.params ?? [];
+
 			for (const param of queryParams) {
 				this.params[param?.name] = param?.value ?? null;
 			}
 			this.params = { ...this.params, ...params };
-			// if (this.handlers?.[query.query]) {
+			this.initLog(query);
 
-			// }
 			const fn = this.handlers?.[query.query];
 			if (!fn) return query.output;
 
-			return await this[fn](query);
+			const data = await this[fn](query);
+			this.log.output = data;
+
+			return data;
 		} catch (e: any) {
 			throw new BaseException(e?.message, e?.status, e?.code);
 		}
 	}
 
-	async createLog(queryId: number, log: any, error: any) {
-		const query: Query = await this.queryItemsService.readOne(queryId, { fields: '*' });
-
+	async createLog(log: any) {
 		await this.activityService.createOne({
 			action: 'execute',
 			user: this.accountability!.user,
-			collection: query?.options?.collection || '',
+			collection: 'cms_queries',
 			ip: this.accountability!.ip,
 			user_agent: this.accountability!.userAgent,
-			item: query.id,
-			comment: {
-				message: `[${query.name}] Execution started from user request`,
-				data: log,
-				error: error,
-				type: query.query,
-				name: query.name,
-			},
+			item: log.queryId,
+			comment: log,
 		});
 	}
 
@@ -90,8 +100,11 @@ export class QueryService {
 			});
 
 			const primaryValue = renderTemplate(query.options.primaryValue, this.params);
+			const fields = query.options?.fields && query.options.fields.length ? query.options.fields : '*';
+			this.log.query = { primaryValue, fields };
+
 			const data = await itemsService.readOne(primaryValue, {
-				fields: query.options?.fields && query.options.fields.length ? query.options.fields : '*',
+				fields,
 			});
 
 			return data;
@@ -109,7 +122,7 @@ export class QueryService {
 				throw new InvalidPayloadException('invalid params');
 			}
 
-			const itemsService = new ItemsService(query.options.collection, {
+			const itemsService = new ItemsService(query.options?.collection, {
 				schema: this.schema,
 				accountability: this.accountability,
 			});
@@ -118,11 +131,15 @@ export class QueryService {
 				? JSON.parse(renderTemplate(JSON.stringify(query.options?.filter), this.params))
 				: null;
 			const limit = parseInt(renderTemplate(query.options?.perPage, this.params)) || 20;
-			const data = await itemsService.readByQuery({
+			const queryOptions = {
 				fields: query.options?.fields && query.options.fields.length ? query.options.fields : '*',
 				filter: filter,
 				limit: isNaN(limit) ? null : limit,
-			});
+			};
+
+			this.log.query = queryOptions;
+
+			const data = await itemsService.readByQuery(queryOptions);
 
 			return data;
 		} catch (e: any) {
@@ -149,7 +166,6 @@ export class QueryService {
 
 			const body = renderTemplate(query.options?.data, this.params) ?? null;
 			const url = renderTemplate(query.options.url, this.params) ?? null;
-
 			const options = {
 				method: query.options.method,
 				url: url,
@@ -158,13 +174,15 @@ export class QueryService {
 				headers: headers,
 				timeout: query.timeout,
 			};
+			this.log.request = options;
+			const response = await axios(options);
 
-			const { data } = await axios(options);
-
-			return data;
+			this.log.response = { status: response?.status };
+			return response?.data;
 		} catch (e: any) {
 			const message =
 				(e?.response?.data?.errors && e?.response?.data?.errors[0]?.message) || e?.response?.data?.message || '';
+			this.log.response = parseResponse(e?.response);
 			const statusCode = e?.response?.status;
 			throw new BaseException(message, statusCode, e?.code);
 		}

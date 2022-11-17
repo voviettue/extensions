@@ -1,12 +1,19 @@
 <template>
 	<div class="log-item">
-		<div class="log-item-info" @click="emit('click', log)">
-			<div>
-				<v-icon :name="logTheme.icon" />
-				<span>{{ formatDate(log.timestamp) }}</span>
+		<div class="log-item-title">
+			<div class="log-item-info" @click="emit('click', log)">
+				<div>
+					<v-icon class="header-icon" :name="logTheme.icon" />
+					<span>{{ formatDate(log.timestamp) }}</span>
+				</div>
+				<span>{{ log.comment.name }}</span>
 			</div>
-			<span>{{ log.comment.name }}</span>
+			<a class="content-copy" href="#" @click.prevent="copyContent" @mouseleave="isCoppied = false">
+				<v-icon v-if="!isCoppied" v-tooltip="'Copy'" name="content_copy" />
+				<v-icon v-if="isCoppied" v-tooltip="'Copied'" name="content_copy" />
+			</a>
 		</div>
+
 		<transition-expand v-show="selected">
 			<div class="log-item-detail">{{ log.comment }}</div>
 		</transition-expand>
@@ -15,7 +22,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 
 interface Props {
 	log: any;
@@ -27,45 +34,60 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const emit = defineEmits(['click']);
+const isCoppied = ref(false);
 
 const { locale } = useI18n();
 
 const logTheme = computed(() => {
 	return {
-		icon: props.log.comment?.data ? 'check' : 'close',
-		iconBackgroundColor: props.log.comment?.data ? 'var(--success)' : 'var(--danger)',
-		backgroundColor: props.log.comment?.data ? '' : 'var(--danger-25)',
+		icon: !props.log.comment?.error ? 'check' : 'close',
+		iconBackgroundColor: !props.log.comment?.error ? 'var(--success)' : 'var(--danger)',
+		backgroundColor: !props.log.comment?.error ? '' : 'var(--danger-25)',
 	};
 });
 
 function formatDate(timestamp: string) {
 	return new Date(timestamp).toLocaleTimeString(locale.value);
 }
+
+function copyContent() {
+	isCoppied.value = true;
+	navigator.clipboard.writeText(JSON.stringify(props.log.comment));
+}
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .log-item {
 	padding: 0.75rem 1.25rem;
 	border-bottom: 1px solid var(--border-normal);
 	background-color: v-bind('logTheme.backgroundColor');
 }
+
+.log-item-title {
+	display: flex;
+}
+
 .log-item-info {
+	width: 100%;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
+	.header-icon {
+		margin-right: 0.5rem;
+		background-color: v-bind('logTheme.iconBackgroundColor');
+		border-radius: 50%;
+		color: var(--background-page);
+	}
+	> div {
+		display: flex;
+		align-items: center;
+	}
 }
-.log-item-info > div {
-	display: flex;
-	align-items: center;
+.content-copy {
+	&:hover {
+		color: black;
+	}
 }
-
-.log-item-info .v-icon {
-	margin-right: 0.5rem;
-	background-color: v-bind('logTheme.iconBackgroundColor');
-	border-radius: 50%;
-	color: var(--background-page);
-}
-
 .v-icon :deep(i) {
 	display: flex;
 	font-size: 1.25rem;
@@ -75,6 +97,7 @@ function formatDate(timestamp: string) {
 	align-items: center;
 }
 .log-item-detail {
+	overflow-wrap: break-word;
 	white-space: break-spaces;
 	margin: 0.625rem 0.75rem;
 	padding: 0 0.625rem;

@@ -4,173 +4,178 @@
 			Widgets
 			<span class="instant-save">Saves automatically</span>
 		</h2>
-		<v-info v-if="items.length === 0" icon="web" title="No Widgets"></v-info>
+		<v-info v-if="widgets.length === 0" icon="web" title="No Widgets"></v-info>
 
 		<v-list v-else class="draggable-list">
 			<draggable
-				:model-value="nestedList"
-				:force-fallback="true"
-				:group="{ name: 'widgets' }"
-				:animation="150"
-				class="root-drag-container-widget"
-				item-key="widget"
+				v-model="items"
+				group="widgets"
+				class="widget-grid"
+				item-key="key"
 				handle=".drag-handle"
-				:fallback-on-body="true"
-				:invert-swap="true"
+				:animation="200"
 				@update:model-value="onSort($event)"
 			>
 				<template #item="{ element }">
-					<WidgetItem
-						:update-visiable="updateVisiable"
-						:widget="element"
-						:list-widget="items"
-						:delete-widget="deleteWidget"
-						:class="getClass(element)"
-						@reload="getWidgetsItems"
-					/>
+					<WidgetItem :widget="element" />
 				</template>
 			</draggable>
 		</v-list>
-		<div class="new-widget">
-			<v-button :to="`/front-office/pages/${id}/widget/+`">Create Widget</v-button>
+
+		<div class="widget-actions">
+			<v-chip v-if="copying">Copying...</v-chip>
+			<v-chip v-else-if="copyId">
+				<span>You have a copied widget.&nbsp;</span>
+				<a class="btn-paste" @click="paste">Click here</a>
+				<span>&nbsp;to paste or&nbsp;</span>
+				<a class="btn-cancel" @click="copyId = null">Cancel</a>
+			</v-chip>
+
+			<v-button :to="`/front-office/pages/${page}/widget/+`">Create Widget</v-button>
 		</div>
 
 		<router-view name="addWidget"></router-view>
 	</div>
 </template>
+
 <script setup lang="ts">
-import { useApi } from '@directus/extensions-sdk';
-import { ref, onMounted, computed, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import Draggable from 'vuedraggable';
 import WidgetItem from './widget-item.vue';
+import { useWidgetStore } from '../../stores/widget';
 import { useNotification } from '../../composables/use-notification';
+import { storeToRefs } from 'pinia';
 
 const route = useRoute();
-const api = useApi();
-// const props = defineProps<{ widgets: Array<number | string> }>();
 const items = ref([]);
+const store = useWidgetStore();
 const { notify } = useNotification();
-const id = computed(() => {
-	return route.params.id;
-});
-const nestedList = computed(() => {
-	return items.value.filter((_: any) => !_.parent);
-});
+const { widgets, copyId } = storeToRefs(store);
+const page = route.params.id as string;
+const copying = ref(false);
+store.hydrate(page);
+
+watch(
+	[widgets],
+	() => {
+		items.value = widgets.value.filter((item: any) => !item.parent);
+	},
+	{ immediate: true }
+);
 
 watch(
 	() => route.name,
 	() => {
-		getWidgetsItems();
+		store.hydrate(page);
 	},
 	{ deep: true }
 );
 
-async function getWidgetsItems() {
-	try {
-		const params = { filter: { page: id.value } };
-		const res = await api.get(`/items/cms_widgets`, { params });
-		items.value = res.data.data?.sort((a, b) => (a.sort ?? 1000) - (b.sort ?? 1000));
-	} catch {
-		//
-	}
+async function onSort(values) {
+	store.sort(values, null);
 }
 
-async function updateVisiable(widget: any) {
-	try {
-		await api.patch(`/items/cms_widgets/${widget.id}`, { hidden: !widget.hidden });
-		getWidgetsItems();
-	} catch {
-		//
-	}
+async function paste() {
+	copying.value = true;
+	await store.paste(page);
+	copying.value = false;
+	notify({ title: 'Item pasted' });
 }
-async function deleteWidget(widget: any) {
-	try {
-		await api.delete(`/items/cms_widgets/${widget.id}`);
-		notify({ title: 'Item deleted' });
-		getWidgetsItems();
-	} catch {
-		//
-	}
-}
-async function onSort(val) {
-	items.value = val.map((item, index) => {
-		return {
-			...item,
-			sort: index,
-			parent: null,
-		};
-	});
-	const apis = items.value.map((k: any) => {
-		return api.patch(`/items/cms_widgets/${k.id}`, k);
-	});
-	await Promise.allSettled(apis);
-	getWidgetsItems();
-}
-function getClass(el: Record<string, any>) {
-	switch (el.width) {
-		case 'full':
-			return 'grid-full';
-		case 'half':
-			return 'grid-half';
-		case '1':
-			return 'grid-one';
-		case '2':
-			return 'grid-two';
-		case '3':
-			return 'grid-three';
-		case '4':
-			return 'grid-four';
-		case '5':
-			return 'grid-five';
-	}
-}
-onMounted(() => {
-	getWidgetsItems();
-});
 </script>
 
-<style scope lang="scss">
+<style lang="scss">
 .widgets {
 	max-width: 100%;
 
-	.name {
+	h2 {
 		margin-bottom: 12px;
+	}
 
+	.name {
 		.instant-save {
 			margin-left: 4px;
 			color: var(--warning);
 		}
 	}
-}
-.new-widget {
-	margin-top: 20px;
-}
-.root-drag-container-widget {
-	width: 100%;
-	display: grid;
-	grid-template-columns: repeat(6, minmax(0, 1fr));
-	gap: 10px;
-	.grid-full {
+
+	.draggable-list {
+		padding: 0;
+		margin: 0 -12px;
+	}
+
+	.grid-col-full {
 		grid-column: span 6 / span 6;
 	}
-	.grid-half {
+
+	.grid-col-half {
 		grid-column: span 3 / span 6;
 	}
-	.grid-one {
+
+	.grid-col-1 {
 		grid-column: span 1 / span 6;
 	}
-	.grid-two {
+
+	.grid-col-2 {
 		grid-column: span 2 / span 6;
 	}
-	.grid-three {
+
+	.grid-col-3 {
 		grid-column: span 3 / span 6;
 	}
-	.grid-four {
+
+	.grid-col-4 {
 		grid-column: span 4 / span 6;
 	}
-	.grid-five {
+
+	.grid-col-5 {
 		grid-column: span 5 / span 6;
+	}
+
+	.drag-handle {
+		cursor: grab !important;
+	}
+
+	.widget-grid {
+		width: 100%;
+		display: grid;
+		grid-template-columns: repeat(6, minmax(0, 1fr));
+		gap: 8px 12px;
+		padding: 12px;
+	}
+
+	.widget-select {
+		margin: 2px 0px;
+	}
+
+	.btn-duplicate {
+		// width: max-content;
+		// margin: 0 auto;
+		// margin-top: 8px;
+		color: var(--foreground-subdued);
+		transition: color var(--fast) var(--transition);
+
+		&:hover {
+			color: var(--foreground-normal);
+		}
+	}
+	.widget-actions {
+		display: grid;
+		margin-top: 12px;
+		gap: 24px;
+
+		.btn-paste {
+			color: var(--primary);
+			cursor: pointer;
+
+			&:hover {
+				color: var(--primary-125);
+			}
+		}
+		.btn-cancel {
+			cursor: pointer;
+			color: var(--foreground-normal-alt);
+		}
 	}
 }
 </style>

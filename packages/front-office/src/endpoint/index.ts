@@ -5,12 +5,12 @@ export default defineEndpoint({
 	id: 'front-office',
 	handler: async (router, ctx) => {
 		// QUERY ROUTE
-		router.patch('/queries/:id/execute', async (req: any, res: any) => {
+		router.post('/queries/:id/execute', async (req: any, res: any) => {
 			try {
 				const data = await queryController.execute(req, res, ctx);
 				return res.json(data);
 			} catch (error: any) {
-				return res.status(error.status).json({ status: error.status, message: error.message });
+				return res.status(error?.status).json({ status: error?.status, message: error?.message });
 			}
 		});
 

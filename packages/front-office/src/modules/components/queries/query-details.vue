@@ -98,7 +98,7 @@ const route = useRoute();
 const router = useRouter();
 const { useUserStore } = useStores();
 const { isAdmin } = useUserStore();
-const { notify } = useNotification();
+const { notify, unexpectedError } = useNotification();
 const frontOfficeStore = useFrontOfficeStore();
 
 const confirmExecute = ref(false);
@@ -166,22 +166,21 @@ const displayExecute = computed(() => {
 });
 
 async function execute() {
-	try {
-		if (hasEdits.value) {
-			confirmExecute.value = true;
-			return;
-		}
+	if (hasEdits.value) {
+		confirmExecute.value = true;
+		return;
+	}
 
+	try {
 		executing.value = true;
-		const responseExecute = await api.patch(`/front-office/queries/${route.params.id}/execute`);
+		const responseExecute = await api.post(`/front-office/queries/${route.params.id}/execute`);
 		modelValue.value.output = responseExecute?.data;
 
 		await api.patch(`/items/cms_queries/${route.params.id}`, { output: modelValue.value.output });
-
-		notify({ title: 'Item executed!' });
-	} catch {
-		//
+	} catch (err) {
+		unexpectedError(err);
 	} finally {
+		notify({ title: 'Item executed!' });
 		executing.value = false;
 	}
 

@@ -13,6 +13,16 @@ import iconButton from './icon-button';
 import calendar from './calendar';
 import textInput from './text-input';
 import numberInput from './number-input';
+import dateTimeInput from './datetime-input';
+import select from './select';
+import tabs from './tabs';
+import tab from './tab';
+import tags from './tags';
+import menuButton from './menu-button';
+import form from './form';
+import textarea from './textarea';
+import multipleSelect from './multiple-select';
+import modal from './modal';
 
 export default [
 	text,
@@ -25,9 +35,19 @@ export default [
 	list,
 	keyValue,
 	link,
+	calendar,
+	tabs,
+	tab,
+	tags,
+	modal,
 	button,
 	iconButton,
-	calendar,
+	menuButton,
+	form,
 	textInput,
 	numberInput,
+	dateTimeInput,
+	select,
+	textarea,
+	multipleSelect,
 ];

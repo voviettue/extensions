@@ -233,8 +233,8 @@ export default [
 						value: 'Lato',
 					},
 					{
-						text: 'Nato Sans',
-						value: 'Nato Sans',
+						text: 'Noto Sans',
+						value: 'Noto Sans',
 					},
 					{
 						text: 'Roboto',
@@ -243,6 +243,10 @@ export default [
 					{
 						text: 'Monaco',
 						value: 'Monaco',
+					},
+					{
+						text: 'Inter',
+						value: 'Inter',
 					},
 				],
 			},

@@ -10,6 +10,10 @@
 			</v-button>
 		</template>
 
+		<template #sidebar>
+			<sidebar-detail icon="info" :title="t('information')" close></sidebar-detail>
+		</template>
+
 		<template #actions>
 			<v-button v-tooltip.bottom="`Create New Menu`" rounded icon to="/front-office/menus/+" :disabled="!isAdmin">
 				<v-icon name="add" />
@@ -30,10 +34,12 @@
 import Navigation from '../components/navigation.vue';
 import MenuList from '../components/menus/menu-list.vue';
 import { useItem } from '../composables/use-item';
-
 import { useStores } from '@directus/extensions-sdk';
+import { useI18n } from 'vue-i18n';
+
 const { useUserStore } = useStores();
 const { isAdmin } = useUserStore();
+const { t } = useI18n();
 const collection = 'cms_settings';
 const { item, getItem } = useItem(collection, '');
 getItem();

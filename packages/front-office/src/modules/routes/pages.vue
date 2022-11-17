@@ -10,6 +10,10 @@
 			</v-button>
 		</template>
 
+		<template #sidebar>
+			<sidebar-detail icon="info" :title="t('information')" close></sidebar-detail>
+		</template>
+
 		<template #navigation>
 			<navigation></navigation>
 		</template>
@@ -24,19 +28,15 @@
 	</private-view>
 </template>
 
-<script>
+<script lang="ts" setup>
 import Navigation from '../components/navigation.vue';
 import PageList from '../components/pages/page-list.vue';
 import { useStores } from '@directus/extensions-sdk';
-export default {
-	components: { Navigation, PageList },
-	setup() {
-		//
-		const { useUserStore } = useStores();
-		const { isAdmin } = useUserStore();
-		return { isAdmin };
-	},
-};
+import { useI18n } from 'vue-i18n';
+
+const { useUserStore } = useStores();
+const { isAdmin } = useUserStore();
+const { t } = useI18n();
 </script>
 
 <style>

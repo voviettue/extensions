@@ -26,4 +26,14 @@ export const snippets: readonly Completion[] = [
 		detail: 'page with params',
 		type: 'keyword',
 	}),
+	snippetCompletion('showModal("${key_of_widget}")', {
+		label: 'showModal',
+		detail: '',
+		type: 'keyword',
+	}),
+	snippetCompletion('closeModal("${key_of_widget}")', {
+		label: 'closeModal',
+		detail: '',
+		type: 'keyword',
+	}),
 ];

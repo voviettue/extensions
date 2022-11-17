@@ -28,28 +28,15 @@
 	</private-view>
 </template>
 
-<script>
+<script lang="ts" setup>
 import Navigation from '../components/navigation.vue';
 import QueryList from '../components/queries/query-list.vue';
 import { useStores } from '@directus/extensions-sdk';
 import { useI18n } from 'vue-i18n';
 
-export default {
-	components: {
-		Navigation,
-		QueryList,
-	},
-	setup() {
-		const { useUserStore } = useStores();
-		const { isAdmin } = useUserStore();
-		const { t } = useI18n();
-
-		return {
-			t,
-			isAdmin,
-		};
-	},
-};
+const { useUserStore } = useStores();
+const { isAdmin } = useUserStore();
+const { t } = useI18n();
 </script>
 
 <style>

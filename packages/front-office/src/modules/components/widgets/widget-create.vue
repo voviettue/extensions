@@ -9,7 +9,7 @@
 		<div class="new-widget-container">
 			<div class="list-widget">
 				<button
-					v-for="widgetConfig of widgetConfigList"
+					v-for="widgetConfig of widgetConfigs"
 					:key="widgetConfig.id"
 					class="widget-item"
 					:class="{
@@ -95,9 +95,12 @@ const initialValues = ref({
 });
 const page = route.params.id;
 const primaryKey = route.params.widgetId as string;
+const parentId = route.params.parentId as string;
 const { item, edits, getItem, save, validationErrors } = useItem('cms_widgets', primaryKey);
+const widgetConfigs: any = ref([]);
 
 if (primaryKey === '+') {
+	widgetConfigs.value = widgetConfigList.filter((e: any) => !e.child_of);
 	watch(
 		() => modelValue.value.name,
 		(val) => {
@@ -107,11 +110,12 @@ if (primaryKey === '+') {
 } else {
 	getItem().then(() => {
 		modelValue.value = { ...item.value };
+		widgetConfigs.value = widgetConfigList.filter((e: any) => e.id === item.value?.widget);
 	});
 }
 
-const selectedWidget = computed(() => {
-	return widgetConfigList.find((e) => e.id === modelValue.value?.widget);
+const selectedWidget: Ref<WidgetConfig | undefined> = computed(() => {
+	return widgetConfigs.value?.find((e) => e.id === modelValue.value?.widget);
 });
 
 const isDisable = computed(() => isEmpty(modelValue.value?.widget));
@@ -141,7 +145,16 @@ async function handleChangeWidgets() {
 		if (selectedWidget.value?.beforeSave) {
 			edits.value = selectedWidget.value.beforeSave(edits.value);
 		}
+		if (parentId) {
+			edits.value.parent = parentId;
+		}
+
 		await save();
+
+		if (selectedWidget.value?.saved) {
+			await selectedWidget.value.saved(item.value!);
+		}
+
 		router.push(`/front-office/pages/${page}`);
 	} catch {
 		// do nothing
@@ -150,9 +163,15 @@ async function handleChangeWidgets() {
 	}
 }
 </script>
-<style scoped>
+
+<style scoped lang="scss">
 .new-widget-container {
 	margin: 1.25rem 2rem;
+
+	:deep(.v-divider) {
+		margin-top: 20px;
+		margin-bottom: 0;
+	}
 }
 .content {
 	padding: var(--content-padding);
@@ -161,11 +180,11 @@ async function handleChangeWidgets() {
 }
 
 .widget-item {
-	min-height: 100px;
+	min-height: 80px;
 	overflow: hidden;
 	text-align: center;
-	margin-right: 2rem;
-	margin-bottom: 2rem;
+	margin-right: 1.5rem;
+	margin-bottom: 1.5rem;
 }
 
 .preview {
@@ -174,8 +193,8 @@ async function handleChangeWidgets() {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 128px;
-	height: 100px;
+	width: 108px;
+	height: 80px;
 	margin-bottom: 8px;
 	border: var(--border-width) solid var(--border-subdued);
 	border-radius: var(--border-radius);

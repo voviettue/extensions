@@ -1,5 +1,13 @@
 export default [
 	{
+		field: 'data',
+		name: 'Data',
+		meta: {
+			interface: 'input-multiline',
+			width: 'full',
+		},
+	},
+	{
 		field: 'actionOptions',
 		type: 'alias',
 		meta: {
@@ -94,14 +102,6 @@ export default [
 		},
 	},
 	{
-		field: 'data',
-		name: 'Data',
-		meta: {
-			interface: 'input-multiline',
-			width: 'full',
-		},
-	},
-	{
 		field: 'onRowClick',
 		name: 'On Row Click (Javascript)',
 		meta: {
@@ -170,9 +170,6 @@ export default [
 		meta: {
 			width: 'half',
 			interface: 'select-color',
-		},
-		schema: {
-			default_value: '#000000',
 		},
 	},
 	{
