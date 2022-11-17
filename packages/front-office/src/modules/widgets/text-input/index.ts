@@ -142,7 +142,7 @@ export default defineWidget({
 					interface: 'Boolean',
 				},
 			},
-			validationsField,
+			validationsField('textInput'),
 			{
 				field: 'generalOptions',
 				type: 'alias',

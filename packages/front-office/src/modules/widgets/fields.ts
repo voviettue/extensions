@@ -1,6 +1,6 @@
 import { validationRuleChoices } from './choices';
 
-const validationsField = {
+const validationsField = (widget: string) => ({
 	field: 'validations',
 	name: 'Rules',
 	type: 'json',
@@ -19,7 +19,7 @@ const validationsField = {
 						width: 'half',
 						options: {
 							placeholder: 'Select a rule',
-							choices: validationRuleChoices,
+							choices: validationRuleChoices(widget),
 						},
 					},
 				},
@@ -50,6 +50,6 @@ const validationsField = {
 			],
 		},
 	},
-};
+});
 
 export { validationsField };

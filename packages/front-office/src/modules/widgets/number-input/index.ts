@@ -211,7 +211,7 @@ export default defineWidget({
 					default_value: 1,
 				},
 			},
-			validationsField,
+			validationsField('numberInput'),
 			{
 				field: 'generalOptions',
 				type: 'alias',
