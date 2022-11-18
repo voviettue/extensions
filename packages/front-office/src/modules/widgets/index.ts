@@ -47,7 +47,7 @@ export default [
 	textInput,
 	numberInput,
 	dateTimeInput,
-	select,
 	textarea,
+	select,
 	multipleSelect,
 ];

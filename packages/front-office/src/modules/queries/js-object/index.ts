@@ -3,7 +3,7 @@ import { defineQuery } from '../../utils/define-extension';
 export default defineQuery({
 	id: 'js-object',
 	name: 'JS Object',
-	icon: 'code',
+	icon: 'javascript_icon',
 	options: [
 		{
 			field: 'code',

@@ -154,6 +154,9 @@ async function handleCreateQuery() {
 	margin-right: 2rem;
 	margin-bottom: 2rem;
 }
+.query-item .name {
+	text-align: center;
+}
 
 .preview {
 	--v-icon-color: var(--background-page);

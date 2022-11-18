@@ -2,8 +2,8 @@ import { defineQuery } from '../../utils/define-extension';
 
 export default defineQuery({
 	id: 'api',
-	name: 'Api',
-	icon: 'http',
+	name: 'Blank API',
+	icon: 'api_icon',
 	options: ({ values }) => {
 		const options = [
 			{
