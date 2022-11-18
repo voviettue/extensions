@@ -2,8 +2,8 @@ import { defineQuery } from '../../utils/define-extension';
 
 export default defineQuery({
 	id: 'json',
-	name: 'Json',
-	icon: 'code',
+	name: 'JSON',
+	icon: 'data_object_icon',
 	options: [
 		{
 			field: 'json',

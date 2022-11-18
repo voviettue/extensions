@@ -4,8 +4,8 @@ let selectedCollection: any = '';
 
 export default defineQuery({
 	id: 'item',
-	name: 'Item',
-	icon: 'manage_search',
+	name: 'Get Item By ID',
+	icon: 'text_rotate_vertical',
 	options: ({ values }) => {
 		const collection = values?.options?.collection || '';
 

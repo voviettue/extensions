@@ -4,8 +4,8 @@ let selectedCollection: any = '';
 
 export default defineQuery({
 	id: 'items',
-	name: 'Items',
-	icon: 'manage_search',
+	name: 'Get Items',
+	icon: 'install_desktop',
 	options: ({ values }) => {
 		const collection = values?.options?.collection || '';
 
