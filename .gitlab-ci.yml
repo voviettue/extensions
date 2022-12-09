@@ -190,3 +190,30 @@ hipgnosis-publish-prod:
   variables:
     PACKAGE_NAME: "@giga-extensions/hipgnosis"
     RULES_CHANGES_PATH: "packages/hipgnosis/**/*"
+
+# @giga-extensions/ledger
+ledger-build:
+  extends: .build
+  variables:
+    PACKAGE_NAME: "@giga-extensions/ledger"
+    RULES_CHANGES_PATH: "packages/ledger/**/*"
+
+ledger-publish-dev:
+  extends: .publish-dev
+  needs: ["ledger-build"]
+  dependencies:
+    - ledger-build
+  variables:
+    PACKAGE_NAME: "@giga-extensions/ledger"
+    RULES_CHANGES_PATH: "packages/ledger/**/*"
+    PACKAGE_PATH: "packages/ledger"
+    CA_PACKAGE_NAME: "ledger"
+
+ledger-publish-prod:
+  extends: .publish-prod
+  needs: ["ledger-build"]
+  dependencies:
+    - ledger-build
+  variables:
+    PACKAGE_NAME: "@giga-extensions/ledger"
+    RULES_CHANGES_PATH: "packages/ledger/**/*"
