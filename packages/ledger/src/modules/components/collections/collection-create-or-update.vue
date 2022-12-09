@@ -5,9 +5,12 @@
 		</template>
 
 		<template #title-outer:prepend>
-			<v-button class="header-icon" rounded disabled icon secondary>
-				<v-icon name="article" />
-			</v-button>
+			<div class="position-relative">
+				<v-button class="header-icon" rounded disabled icon secondary>
+					<v-icon name="article" />
+				</v-button>
+				<connection />
+			</div>
 		</template>
 
 		<template #navigation>
@@ -72,6 +75,7 @@ import { useValidate } from '../../composables/use-validate';
 import { useCollection } from '@directus/shared/composables';
 import { useStores } from '@directus/extensions-sdk';
 import Navigation from '../navigation.vue';
+import Connection from '../connection.vue';
 import errorHandler from '../../utils/error-hander';
 import isJson from '../../utils/is-json';
 import fields from './fields';
@@ -161,3 +165,9 @@ if (!isNew.value) {
 	getItem();
 }
 </script>
+
+<style>
+.position-relative {
+	position: relative;
+}
+</style>

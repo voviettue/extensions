@@ -18,9 +18,12 @@
 			</template>
 
 			<template #title-outer:prepend>
-				<v-button class="header-icon" rounded disabled icon secondary>
-					<v-icon name="save" />
-				</v-button>
+				<div class="position-relative">
+					<v-button class="header-icon" rounded disabled icon secondary>
+						<v-icon :name="collectionConfig.icon" />
+					</v-button>
+					<connection />
+				</div>
 			</template>
 
 			<template #actions:prepend>
@@ -116,12 +119,14 @@ import SearchInput from '../components/search-input.vue';
 import { useStores } from '@directus/extensions-sdk';
 import debounce from 'lodash/debounce';
 import isEmpty from 'lodash/isEmpty';
+import Connection from '../components/connection.vue';
 import { collectionConfigList } from '../constants/index';
 
 export default {
 	components: {
 		Navigation,
 		SearchInput,
+		Connection,
 	},
 	setup() {
 		const { t } = useI18n();
@@ -252,5 +257,8 @@ export default {
 <style>
 .padding-box {
 	padding: var(--content-padding);
+}
+.position-relative {
+	position: relative;
 }
 </style>

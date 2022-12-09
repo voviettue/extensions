@@ -75,7 +75,7 @@ export default defineHook(({ action }, { services, database, getSchema, exceptio
 	const createQLDBDoc = async (item_id: string, event: any, collection: Collection) => {
 		try {
 			const data = await getPayload(item_id, event, collection);
-			const url = `${process.env.LEDGER_URL}/documents/${process.env.LEDGER_DEFAULT_COLLECTION}`;
+			const url = `${process.env.LEDGER_URL}/v1/documents/${process.env.LEDGER_DEFAULT_COLLECTION}`;
 
 			const response = await axios({ method: 'POST', url, data });
 			const docId = response?.data?.data;
@@ -91,7 +91,7 @@ export default defineHook(({ action }, { services, database, getSchema, exceptio
 			let doc;
 			if (doc_id) {
 				const data = await getPayload(item_id, event, collection);
-				const url = `${process.env.LEDGER_URL}/documents/${process.env.LEDGER_DEFAULT_COLLECTION}/${doc_id}`;
+				const url = `${process.env.LEDGER_URL}/v1/documents/${process.env.LEDGER_DEFAULT_COLLECTION}/${doc_id}`;
 
 				const response = await axios({ method: 'PATCH', url, data });
 				doc = response?.data?.data;
@@ -109,7 +109,7 @@ export default defineHook(({ action }, { services, database, getSchema, exceptio
 		try {
 			if (!doc_id) return;
 
-			const url = `${process.env.LEDGER_URL}/documents/${process.env.LEDGER_DEFAULT_COLLECTION}/${doc_id}`;
+			const url = `${process.env.LEDGER_URL}/v1/documents/${process.env.LEDGER_DEFAULT_COLLECTION}/${doc_id}`;
 
 			await axios({ method: 'DELETE', url });
 		} catch (e: any) {

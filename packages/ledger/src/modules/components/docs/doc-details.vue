@@ -5,9 +5,12 @@
 		</template>
 
 		<template #title-outer:prepend>
-			<v-button class="header-icon" rounded disabled icon secondary>
-				<v-icon name="star" />
-			</v-button>
+			<div class="position-relative">
+				<v-button class="header-icon" rounded disabled icon secondary>
+					<v-icon name="star" />
+				</v-button>
+				<connection />
+			</div>
 		</template>
 
 		<template #navigation>
@@ -43,6 +46,7 @@ import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useApi } from '@directus/extensions-sdk';
 import Navigation from '../navigation.vue';
+import Connection from '../connection.vue';
 import union from 'lodash/union';
 import startCase from 'lodash/startCase';
 import format from 'date-fns/format';
@@ -113,5 +117,8 @@ getItem();
 	border-radius: 0.25rem;
 	margin-right: 0.5rem;
 	padding: 2px 12px;
+}
+.position-relative {
+	position: relative;
 }
 </style>

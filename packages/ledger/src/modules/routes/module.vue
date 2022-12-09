@@ -8,7 +8,27 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
+import { useLedgerStore } from '../stores/ledger';
+import { storeToRefs } from 'pinia';
+
+const ledgerStore = useLedgerStore();
+const { connection } = storeToRefs(ledgerStore);
+let interval;
+
+onMounted(async () => {
+	try {
+		interval = window.setInterval(async () => {
+			await ledgerStore.healthCheck();
+		}, 5000);
+	} catch (e) {
+		//
+	}
+});
+
+onUnmounted(() => {
+	clearInterval(interval);
+});
 
 const loading = ref(false);
 </script>

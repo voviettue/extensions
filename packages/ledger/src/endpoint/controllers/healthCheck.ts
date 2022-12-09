@@ -2,23 +2,11 @@ import axios from 'axios';
 import { ApiExtensionContext } from '@directus/shared/types';
 import { BaseException } from '@directus/shared/exceptions';
 
-async function docs(req: any, res: any, ctx: ApiExtensionContext) {
-	const doc_id = req.params?.id;
+async function healthCheck(req: any, res: any, ctx: ApiExtensionContext) {
 	try {
-		const { InvalidPayloadException } = ctx.exceptions;
+		const url = `${process.env.LEDGER_URL}/healthcheck`;
 
-		if (!doc_id) {
-			throw new InvalidPayloadException('missing doc id');
-		}
-
-		const url = `${process.env.LEDGER_URL}/v1/documents-journal/${process.env.LEDGER_DEFAULT_COLLECTION}/${doc_id}`;
-
-		const options = {
-			method: 'GET',
-			url: url,
-		};
-
-		const { data } = await axios(options);
+		const { data } = await axios(`${process.env.LEDGER_URL}/healthcheck`);
 
 		return data;
 	} catch (e: any) {
@@ -31,5 +19,5 @@ async function docs(req: any, res: any, ctx: ApiExtensionContext) {
 }
 
 export default {
-	docs,
+	healthCheck,
 };
