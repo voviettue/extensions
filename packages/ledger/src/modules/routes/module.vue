@@ -20,7 +20,7 @@ onMounted(async () => {
 	try {
 		interval = window.setInterval(async () => {
 			await ledgerStore.healthCheck();
-		}, 5000);
+		}, 30000);
 	} catch (e) {
 		//
 	}
