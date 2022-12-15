@@ -1,7 +1,8 @@
 export default function errorHandler(err: any, collectionInfo: any): any[] {
 	const VALIDATION_TYPES = ['FAILED_VALIDATION', 'RECORD_NOT_UNIQUE', 'VALUE_TOO_LONG'];
-	if (err?.response?.data?.errors) {
-		return err.response.data.errors
+	const errors = err?.response?.data?.errors || (err?.response?.data && [err?.response?.data]) || [];
+	if (errors) {
+		return errors
 			.filter((err: any) => VALIDATION_TYPES.includes(err?.extensions?.code))
 			.map((err: any) => {
 				const { code, collection, field } = err.extensions;

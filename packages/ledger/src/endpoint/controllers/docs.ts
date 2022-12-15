@@ -6,12 +6,20 @@ async function docs(req: any, res: any, ctx: ApiExtensionContext) {
 	const doc_id = req.params?.id;
 	try {
 		const { InvalidPayloadException } = ctx.exceptions;
+		const { ItemsService } = ctx.services;
 
-		if (!doc_id) {
-			throw new InvalidPayloadException('missing doc id');
+		const itemsService = new ItemsService('cms_ledger_docs', {
+			schema: req.schema,
+			accountability: req.accountability,
+		});
+
+		const document = await itemsService.readOne(doc_id, { fields: '*' });
+
+		if (!document) {
+			throw new InvalidPayloadException('Item Not Found');
 		}
 
-		const url = `${process.env.LEDGER_URL}/v1/documents-journal/${process.env.LEDGER_DEFAULT_COLLECTION}/${doc_id}`;
+		const url = `${process.env.LEDGER_URL}/v1/documents-journal/${document.collection}/${document.doc_id}`;
 
 		const options = {
 			method: 'GET',

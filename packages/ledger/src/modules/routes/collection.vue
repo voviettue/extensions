@@ -202,7 +202,7 @@ export default {
 				const batchPrimaryKeys = selection.value;
 
 				try {
-					await api.delete(`/items/${collectionConfig.value.endpoint}`, {
+					await api.delete(`/ledger/collections`, {
 						data: batchPrimaryKeys,
 					});
 
@@ -223,7 +223,9 @@ export default {
 		}
 
 		onMounted(() => {
-			layoutQuery.value.sort = collection.value === 'cms_ledger_docs' ? ['created_at'] : null;
+			if (layoutQuery.value) {
+				layoutQuery.value.sort = collection.value === 'cms_ledger_docs' ? ['created_at'] : null;
+			}
 		});
 
 		return {

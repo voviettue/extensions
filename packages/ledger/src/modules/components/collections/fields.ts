@@ -37,6 +37,7 @@ export default defineCollection({
 						})),
 						allowOther: false,
 					},
+					readonly: !!values.id,
 				},
 			},
 			{
