@@ -21,6 +21,7 @@ export default defineHook(({ action }, { services, database, getSchema, exceptio
 		let collection = await ledgerCollectionService.readByQuery({
 			filter: {
 				collection: { _eq: event?.collection },
+				active: { _eq: 1 },
 			},
 		});
 
@@ -75,7 +76,7 @@ export default defineHook(({ action }, { services, database, getSchema, exceptio
 	const createQLDBDoc = async (item_id: string, event: any, collection: Collection) => {
 		try {
 			const data = await getPayload(item_id, event, collection);
-			const url = `${process.env.LEDGER_URL}/v1/documents/${process.env.LEDGER_DEFAULT_COLLECTION}`;
+			const url = `${process.env.LEDGER_URL}/v1/documents/${collection.collection}`;
 
 			const response = await axios({ method: 'POST', url, data });
 			const docId = response?.data?.data;
@@ -91,7 +92,7 @@ export default defineHook(({ action }, { services, database, getSchema, exceptio
 			let doc;
 			if (doc_id) {
 				const data = await getPayload(item_id, event, collection);
-				const url = `${process.env.LEDGER_URL}/v1/documents/${process.env.LEDGER_DEFAULT_COLLECTION}/${doc_id}`;
+				const url = `${process.env.LEDGER_URL}/v1/documents/${collection.collection}/${doc_id}`;
 
 				const response = await axios({ method: 'PATCH', url, data });
 				doc = response?.data?.data;
@@ -105,11 +106,11 @@ export default defineHook(({ action }, { services, database, getSchema, exceptio
 		}
 	};
 
-	const deleteQLDBDoc = async (doc_id: number) => {
+	const deleteQLDBDoc = async (doc_id: number, collection: Collection) => {
 		try {
 			if (!doc_id) return;
 
-			const url = `${process.env.LEDGER_URL}/v1/documents/${process.env.LEDGER_DEFAULT_COLLECTION}/${doc_id}`;
+			const url = `${process.env.LEDGER_URL}/v1/documents/${collection.collection}/${doc_id}`;
 
 			await axios({ method: 'DELETE', url });
 		} catch (e: any) {
@@ -144,7 +145,7 @@ export default defineHook(({ action }, { services, database, getSchema, exceptio
 					break;
 
 				case 'items.delete':
-					await deleteQLDBDoc(doc_id);
+					await deleteQLDBDoc(doc_id, collection);
 					break;
 				default:
 					break;

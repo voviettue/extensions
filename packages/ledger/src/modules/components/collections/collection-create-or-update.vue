@@ -18,7 +18,7 @@
 		</template>
 
 		<template #actions>
-			<v-dialog v-if="!isNew" v-model="confirmDelete" :disabled="!isAdmin" @esc="confirmDelete = false">
+			<v-dialog v-if="!isNew && !isDeleted" v-model="confirmDelete" :disabled="!isAdmin" @esc="confirmDelete = false">
 				<template #activator="{ on }">
 					<v-button
 						v-if="collectionInfo.meta && collectionInfo.meta.singleton === false"
@@ -35,19 +35,51 @@
 				</template>
 
 				<v-card>
-					<v-card-title>{{ t('delete_are_you_sure') }}</v-card-title>
+					<v-card-title>Are you sure you would like to proceed?</v-card-title>
 
 					<v-card-actions>
 						<v-button secondary @click="confirmDelete = false">
 							{{ t('cancel') }}
 						</v-button>
-						<v-button kind="danger" @click="deleteAndQuit">
+						<v-button kind="danger" :loading="deleting" @click="deleteAndQuit">
 							{{ t('delete_label') }}
 						</v-button>
 					</v-card-actions>
 				</v-card>
 			</v-dialog>
-			<v-button v-tooltip.bottom="isNew ? 'Create' : 'Update'" rounded icon @click="createOrUpdate">
+			<v-dialog
+				v-if="!isNew && isDeleted"
+				v-model="confirmUnDelete"
+				:disabled="!isAdmin"
+				@esc="confirmUnDelete = false"
+			>
+				<template #activator="{ on }">
+					<v-button
+						v-if="collectionInfo.meta && collectionInfo.meta.singleton === false"
+						v-tooltip.bottom="isAdmin ? 'Undelete' : t('not_allowed')"
+						rounded
+						icon
+						class="action-delete"
+						secondary
+						:disabled="modelValue === null || !isAdmin"
+						@click="on"
+					>
+						<v-icon name="replay" outline />
+					</v-button>
+				</template>
+
+				<v-card>
+					<v-card-title>Are you sure you would like to proceed?</v-card-title>
+
+					<v-card-actions>
+						<v-button secondary @click="confirmUnDelete = false">
+							{{ t('cancel') }}
+						</v-button>
+						<v-button kind="danger" :loading="undeleting" @click="unDelete">Undelete</v-button>
+					</v-card-actions>
+				</v-card>
+			</v-dialog>
+			<v-button v-tooltip.bottom="isNew ? 'Create' : 'Update'" rounded :loading="loading" icon @click="createOrUpdate">
 				<v-icon name="check" />
 			</v-button>
 		</template>
@@ -99,6 +131,10 @@ const initialValues = ref({
 });
 const validationErrors: Ref<Record<string, any>> = ref([]);
 const confirmDelete = ref(false);
+const confirmUnDelete = ref(false);
+const loading = ref(false);
+const undeleting = ref(false);
+const deleting = ref(false);
 
 const { info: collectionInfo } = useCollection(collection.value);
 
@@ -113,19 +149,20 @@ const defaultFields = computed(() => {
 });
 
 const isNew = computed(() => !primaryKey.value);
+const isDeleted = computed(() => !modelValue.value.active);
 
 async function createOrUpdate() {
 	try {
 		validationErrors.value = [];
 		const errors = validateItem(merge({}, modelValue.value), defaultFields.value) || [];
-
+		loading.value = true;
 		if (errors.length > 0) {
 			validationErrors.value = errors;
 			throw errors;
 		}
 
 		if (isNew.value) {
-			await api.post(`/items/cms_ledger_collections`, modelValue.value);
+			await api.post(`/ledger/collections`, modelValue.value);
 			notify({ title: 'Item created!' });
 		} else {
 			await api.patch(`/items/cms_ledger_collections/${primaryKey.value}`, modelValue.value);
@@ -134,7 +171,14 @@ async function createOrUpdate() {
 
 		router.push('/ledger/collections');
 	} catch (err: any) {
+		const message = err?.response?.data?.message;
+		if (message?.includes('QLDB')) {
+			notify({ title: message, type: 'error' });
+		}
+
 		validationErrors.value = errorHandler(err, collectionInfo.value);
+	} finally {
+		loading.value = false;
 	}
 }
 
@@ -153,11 +197,33 @@ async function getItem() {
 
 async function deleteAndQuit() {
 	try {
-		await api.delete(`/items/cms_ledger_collections/${primaryKey.value}`);
+		deleting.value = true;
+		await api.delete(`/ledger/collections/${primaryKey.value}`);
 		notify({ title: 'Item deleted!' });
 		router.push('/ledger/collections');
 	} catch (err: any) {
-		//
+		if (err?.response?.data?.message?.includes('QLDB')) {
+			notify({ title: err?.response?.data?.message, type: 'error' });
+		}
+	} finally {
+		deleting.value = false;
+		confirmDelete.value = false;
+	}
+}
+
+async function unDelete() {
+	try {
+		undeleting.value = true;
+		await api.post(`/ledger/collections/undelete-by-hash/${modelValue.value.hash}`);
+		notify({ title: 'Item undeleted!' });
+		router.push('/ledger/collections');
+	} catch (err: any) {
+		if (err?.response?.data?.message?.includes('QLDB')) {
+			notify({ title: err?.response?.data?.message, type: 'error' });
+		}
+	} finally {
+		undeleting.value = false;
+		confirmUnDelete.value = false;
 	}
 }
 

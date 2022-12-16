@@ -10,6 +10,8 @@ module.exports = {
 				table.increments('id');
 				table.string('collection').unique('collection', { indexName: 'cms_ledger_collections_key_unique' });
 				table.json('fields');
+				table.string('hash');
+				table.boolean('active').defaultTo(1);
 			});
 
 			await trx.schema.createTable('cms_ledger_docs', (table) => {
@@ -23,6 +25,30 @@ module.exports = {
 			await trx.insert(collections).into('directus_collections');
 
 			const fields = [
+				{
+					collection: 'cms_ledger_collections',
+					field: 'hash',
+					special: null,
+					interface: 'input',
+					options: null,
+					readonly: 0,
+					hidden: 1,
+					sort: null,
+					width: 'full',
+					required: 0,
+				},
+				{
+					collection: 'cms_ledger_collections',
+					field: 'active',
+					special: 'cast-boolean',
+					interface: 'boolean',
+					options: null,
+					readonly: 1,
+					hidden: 0,
+					sort: null,
+					width: 'full',
+					required: 0,
+				},
 				{
 					collection: 'cms_ledger_collections',
 					field: 'id',
